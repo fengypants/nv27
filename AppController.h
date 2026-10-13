@@ -199,6 +199,8 @@ void outletObjectAwoke(id sender);
 - (IBAction)setUserColorScheme:(id)sender;
 - (void)updateFieldAttributes;
 - (void)updateColorScheme;
+- (BOOL)appearanceIsDark;
+- (void)applyAppearancePreference;
 - (void)setBackgrndColor:(NSColor *)inColor;
 - (void)setForegrndColor:(NSColor *)inColor;
 - (NSColor *)backgrndColor;

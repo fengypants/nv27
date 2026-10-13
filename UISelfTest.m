@@ -146,13 +146,19 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 	SelfTestLog(@"search field frameInWindow=%@ notes header=%@", NSStringFromRect([field convertRect:[field bounds] toView:nil]),
 				NSStringFromRect([[notesTableView headerView] convertRect:[[notesTableView headerView] bounds] toView:nil]));
 	PrintSnapshotOfWindow(window, @"main");
-	for (NSString *symbolName in [NSArray arrayWithObjects:@"rocket", @"rocket.fill", @"note.text", nil])
-		SelfTestLog(@"SF Symbol %@ available=%d", symbolName, [NSImage imageWithSystemSymbolName:symbolName accessibilityDescription:nil] != nil);
 	//the "back to search" button that replaces the pencil while hovering over it
 	[(DualFieldCell*)[field cell] setShowsSnapbackButton:YES];
 	[field display];
 	PrintSnapshotOfWindow(window, @"main-snapback");
 	[(DualFieldCell*)[field cell] setShowsSnapbackButton:NO];
+	
+	//the same window in Dark Mode (the B/W scheme switches to its dark variant), then back to the system setting
+	[NSApp setAppearance:[NSAppearance appearanceNamed:NSAppearanceNameDarkAqua]];
+	[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1.0]];
+	[window display];
+	PrintSnapshotOfWindow(window, @"main-dark");
+	[NSApp setAppearance:nil];
+	[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.5]];
 	
 	[self showPreferencesWindow:nil];
 	[self performSelector:@selector(_selfTestSnapshotSettings) withObject:nil afterDelay:1.5];

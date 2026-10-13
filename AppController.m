@@ -70,6 +70,8 @@ NSInteger popped;
 BOOL splitViewAwoke;
 
 
+static void *AppearanceObservationContext = &AppearanceObservationContext;
+
 @implementation AppController
 
 @synthesize isEditing;
@@ -96,6 +98,10 @@ BOOL splitViewAwoke;
 #endif
         
         hasLaunched=NO;
+        
+        [self applyAppearancePreference];
+        //the B/W and Low Contrast color schemes have light and dark variants; switch when the appearance changes
+        [NSApp addObserver:self forKeyPath:@"effectiveAppearance" options:0 context:AppearanceObservationContext];
         
         if (![[NSUserDefaults standardUserDefaults] boolForKey:@"ShowDockIcon"]){
             //no Dock icon: run as an accessory app, reachable from the menu bar icon
@@ -2777,13 +2783,49 @@ terminateApp:
 }
 
 #pragma mark color scheme methods
+
+//the fixed colors of the B/W (0) and Low Contrast (1) schemes, in a light and a dark variant
+static NSColor *SchemeColor(NSInteger scheme, BOOL background, BOOL dark) {
+    CGFloat white;
+    if (scheme == 1)
+        white = dark ? (background ? 0.20 : 0.72) : (background ? 0.902 : 0.243);
+    else
+        white = dark ? (background ? 0.11 : 0.92) : (background ? 0.98 : 0.02);
+    return [[NSColor colorWithCalibratedWhite:white alpha:1.0] colorUsingColorSpaceName:NSCalibratedRGBColorSpace];
+}
+
+- (BOOL)appearanceIsDark {
+    NSAppearanceName name = [[NSApp effectiveAppearance] bestMatchFromAppearancesWithNames:
+                             [NSArray arrayWithObjects:NSAppearanceNameAqua, NSAppearanceNameDarkAqua, nil]];
+    return [name isEqualToString:NSAppearanceNameDarkAqua];
+}
+
+//Settings > General > Appearance: 0 follows the system, 1 is always light, 2 always dark
+- (void)applyAppearancePreference {
+    NSInteger choice = [[NSUserDefaults standardUserDefaults] integerForKey:@"AppAppearance"];
+    [NSApp setAppearance:choice == 1 ? [NSAppearance appearanceNamed:NSAppearanceNameAqua] :
+     choice == 2 ? [NSAppearance appearanceNamed:NSAppearanceNameDarkAqua] : nil];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    if (context == AppearanceObservationContext) {
+        //re-pick the light or dark variant of the built-in schemes (a user scheme keeps its own colors)
+        if (userScheme == 0) {
+            [self setBWColorScheme:self];
+        } else if (userScheme == 1) {
+            [self setLCColorScheme:self];
+        }
+    } else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
+}
     
     - (IBAction)setBWColorScheme:(id)sender{
         userScheme=0;
         [[NSUserDefaults standardUserDefaults] setInteger:userScheme forKey:@"ColorScheme"];
         
-        [self setForegrndColor:[[NSColor colorWithCalibratedWhite:0.02f alpha:1.0f]colorUsingColorSpaceName:NSCalibratedRGBColorSpace]];
-        [self setBackgrndColor:[[NSColor colorWithCalibratedWhite:0.98f alpha:1.0f]colorUsingColorSpaceName:NSCalibratedRGBColorSpace]];
+        [self setForegrndColor:SchemeColor(0, NO, [self appearanceIsDark])];
+        [self setBackgrndColor:SchemeColor(0, YES, [self appearanceIsDark])];
         NSMenu *mainM = [NSApp mainMenu];
         NSMenu *viewM = [[mainM itemWithTitle:@"View"] submenu];
         mainM = [[viewM itemWithTitle:@"Color Schemes"] submenu];
@@ -2802,9 +2844,8 @@ terminateApp:
         userScheme=1;
         [[NSUserDefaults standardUserDefaults] setInteger:userScheme forKey:@"ColorScheme"];
 
-        [self setForegrndColor:[NSColor colorWithCalibratedRed:0.2430 green:0.2430 blue:0.2430 alpha:1.0]];
-        
-        [self setBackgrndColor:[NSColor colorWithCalibratedRed:0.902 green:0.902 blue:0.902 alpha:1.0]];
+        [self setForegrndColor:SchemeColor(1, NO, [self appearanceIsDark])];
+        [self setBackgrndColor:SchemeColor(1, YES, [self appearanceIsDark])];
         NSMenu *mainM = [NSApp mainMenu];
         NSMenu *viewM = [[mainM itemWithTitle:@"View"] submenu];
         mainM = [[viewM itemWithTitle:@"Color Schemes"] submenu];
@@ -2902,10 +2943,8 @@ terminateApp:
             if (!userScheme) {
                 userScheme = [[NSUserDefaults standardUserDefaults] integerForKey:@"ColorScheme"];
             }
-            if (userScheme==0) {
-                theColor = [NSColor colorWithCalibratedRed:1.0f green:1.0f blue:1.0f alpha:1.0f];
-            }else if (userScheme==1) {
-                theColor = [NSColor colorWithCalibratedRed:0.874f green:0.874f blue:0.874f alpha:1.0f];
+            if (userScheme==0 || userScheme==1) {
+                theColor = SchemeColor(userScheme, YES, [self appearanceIsDark]);
             }else if (userScheme==2) {
                 NSData *theData = [[NSUserDefaults standardUserDefaults] dataForKey:@"BackgroundTextColor"];
                 if (theData){
@@ -2932,10 +2971,8 @@ terminateApp:
             if (!userScheme) {
                 userScheme = [[NSUserDefaults standardUserDefaults] integerForKey:@"ColorScheme"];
             }            
-            if (userScheme==0) {
-                theColor = [NSColor colorWithCalibratedRed:0.0f green:0.0f blue:0.0f alpha:1.0f];
-            }else if (userScheme==1) {
-                theColor = [NSColor colorWithCalibratedRed:0.142f green:0.142f blue:0.142f alpha:1.0f];
+            if (userScheme==0 || userScheme==1) {
+                theColor = SchemeColor(userScheme, NO, [self appearanceIsDark]);
             }else if (userScheme==2) {
                 
                 NSData *theData = [[NSUserDefaults standardUserDefaults] dataForKey:@"ForegroundTextColor"];
@@ -3255,13 +3292,8 @@ terminateApp:
 
 - (void)setUpStatusBarItem{
 
-    //a template SF Symbol, so the menu bar tints it like the system's own items: a rocket where this macOS
-    //version's SF Symbols has one, otherwise the note symbol
-    NSImage *statusIcon = nil;
-    for (NSString *symbolName in [NSArray arrayWithObjects:@"rocket", @"rocket.fill", @"note.text", nil]) {
-        if ((statusIcon = [NSImage imageWithSystemSymbolName:symbolName accessibilityDescription:@"nv27"]))
-            break;
-    }
+    //a template SF Symbol, so the menu bar tints it like the system's own items
+    NSImage *statusIcon = [NSImage imageWithSystemSymbolName:@"note.text" accessibilityDescription:@"nv27"];
     statusIcon = [statusIcon imageWithSymbolConfiguration:[NSImageSymbolConfiguration configurationWithPointSize:15.0 weight:NSFontWeightRegular]];
     [statusIcon setTemplate:YES];
     statusItem =[[NSStatusBar systemStatusBar] statusItemWithLength:NSSquareStatusItemLength];

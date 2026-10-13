@@ -293,7 +293,8 @@ static void _CopyItemWithSelectorFromMenu(NSMenu *destMenu, NSMenu *sourceMenu, 
         [self setSelectionHighlightStyle:isOneRow ? NSTableViewSelectionHighlightStyleRegular : NSTableViewSelectionHighlightStyleSourceList];
     }
 	NSLayoutManager *lm = [[NSLayoutManager alloc] init];
-	tableFontHeight = [lm defaultLineHeightForFont:font];
+	//whole points, so rows (and the grid lines between them) fall on pixel boundaries
+	tableFontHeight = ceil([lm defaultLineHeightForFont:font]);
 	float h[4] = {(tableFontHeight * 3.0 + 5.0f), (tableFontHeight * 2.0 + 6.0f), (tableFontHeight + 2.0f), tableFontHeight + 2.0f};
 	[self setRowHeight: horiz ? ([globalPrefs tableColumnsShowPreview] ? h[0] : 
 								 (ColumnIsSet(NoteLabelsColumn,[globalPrefs tableColumnsBitmap]) ? h[1] : h[2])) : h[3]];
@@ -1357,11 +1358,15 @@ enum { kNext_Tag = 'j', kPrev_Tag = 'k' };
 		return;
 	}
     
-    CGFloat newHt=[self rowsInRect:clipRect].length * ([self rowHeight] + [self intercellSpacing].height);
-    if (newHt<clipRect.size.height) {
-        clipRect.size.height=newHt;
+    //...but only by cutting it off at the bottom of the last row: counting the rows inside the clip rect came up
+    //short whenever only part of the list was redrawn, leaving some lines out
+    NSInteger rowCount=[self numberOfRows];
+    CGFloat lastRowBottom=rowCount > 0 ? NSMaxY([self rectOfRow:rowCount-1]) : 0.0;
+    if (NSMaxY(clipRect)>lastRowBottom) {
+        clipRect.size.height=MAX(0.0, lastRowBottom-NSMinY(clipRect));
     }
-    [super drawGridInClipRect:clipRect];
+    if (NSHeight(clipRect)>0.0)
+        [super drawGridInClipRect:clipRect];
 }
 
 + (BOOL)isCompatibleWithResponsiveScrolling{

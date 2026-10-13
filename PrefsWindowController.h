@@ -40,6 +40,7 @@
 	IBOutlet NSButton *highlightSearchTermsButton;
 	IBOutlet NSColorWell *searchHighlightColorWell, *foregroundColorWell, *backgroundColorWell;
     IBOutlet NSButton *togDockButton;
+    IBOutlet NSPopUpButton *appearancePopUp;
 	IBOutlet NSTextField *maxWidthField;
 	IBOutlet NSStepper *maxWidthStepper;
     IBOutlet NotationPrefsViewController *notationPrefsViewController;
@@ -83,6 +84,7 @@
 - (IBAction)changedAltRows:(id)sender;
 - (IBAction)changedAutoPairing:(id)sender;
 - (IBAction)toggleStatusItem:(id)sender;
+- (IBAction)changedAppearance:(id)sender;
 - (void)_selectDefaultExternalEditor;
 
 - (NSMenu*)directorySelectionMenu;

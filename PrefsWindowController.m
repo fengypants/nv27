@@ -450,6 +450,7 @@
     [maxWidthField setFormatter:widthFormatter];
     [maxWidthField setDoubleValue:[prefsController maxNoteBodyWidth]];
     [maxWidthStepper setDoubleValue:[prefsController maxNoteBodyWidth]];
+    [appearancePopUp selectItemAtIndex:MIN(MAX([[NSUserDefaults standardUserDefaults] integerForKey:@"AppAppearance"], 0), 2)];
     [altRowsButton setState:[prefsController alternatingRows]];
     [showGridButton setState:[prefsController showGrid]];
     [autoPairButton setState:[prefsController useAutoPairing]];
@@ -572,6 +573,12 @@ NSRect ScaleRectWithFactor(NSRect rect, float factor) {
     if (!showIt)
         [stdDefaults setBool:YES forKey:@"StatusBarItem"]; //the app controller adds the menu bar icon if it's missing
 	[[NSNotificationCenter defaultCenter]postNotificationName:@"AppShouldToggleDockIcon" object:[NSNumber numberWithBool:showIt]];
+}
+
+//Automatic (follow the system), Light or Dark
+- (IBAction)changedAppearance:(id)sender{
+    [[NSUserDefaults standardUserDefaults] setInteger:[sender indexOfSelectedItem] forKey:@"AppAppearance"];
+    [(AppController *)[NSApp delegate] applyAppearancePreference];
 }
 
 - (IBAction)toggleStatusItem:(id)sender{

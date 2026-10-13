@@ -37,6 +37,7 @@
                 <outlet property="tabKeyRadioMatrix" destination="271" id="294"/>
                 <outlet property="tableTextMenuButton" destination="158" id="249"/>
                 <outlet property="tableTextSizeField" destination="178" id="246"/>
+                <outlet property="appearancePopUp" destination="nv27-appearance-popup" id="nv27-appearance-outlet"/>
                 <outlet property="togDockButton" destination="nv27-dock-check" id="450"/>
                 <outlet property="window" destination="5" id="238"/>
             </connections>
@@ -55,7 +56,7 @@
             </view>
         </window>
         <customView id="155" userLabel="general view">
-            <rect key="frame" x="0.0" y="0" width="368" height="273"/>
+            <rect key="frame" x="0.0" y="0" width="368" height="305"/>
             <autoresizingMask key="autoresizingMask"/>
             <subviews>
                 <textField verticalHuggingPriority="750" id="323" propertyAccessControl="none">
@@ -138,6 +139,33 @@
                         <action selector="changedNoteDeletion:" target="-2" id="240"/>
                     </connections>
                 </button>
+                <textField verticalHuggingPriority="750" id="nv27-appearance-label">
+                    <rect key="frame" x="68" y="265" width="101" height="17"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
+                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" alignment="right" title="Appearance:" id="nv27-appearance-labelcell">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <popUpButton verticalHuggingPriority="750" id="nv27-appearance-popup">
+                    <rect key="frame" x="174" y="261" width="110" height="26"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
+                    <popUpButtonCell key="cell" type="push" title="Automatic" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="nv27-appearance-auto" id="nv27-appearance-popupcell">
+                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="menu"/>
+                        <menu key="menu" id="nv27-appearance-menu">
+                            <items>
+                                <menuItem title="Automatic" state="on" id="nv27-appearance-auto"/>
+                                <menuItem title="Light" id="nv27-appearance-light"/>
+                                <menuItem title="Dark" id="nv27-appearance-dark"/>
+                            </items>
+                        </menu>
+                    </popUpButtonCell>
+                    <connections>
+                        <action selector="changedAppearance:" target="-2" id="nv27-appearance-action"/>
+                    </connections>
+                </popUpButton>
                 <popUpButton verticalHuggingPriority="750" id="158" propertyAccessControl="none">
                     <rect key="frame" x="174" y="229" width="92" height="26"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
