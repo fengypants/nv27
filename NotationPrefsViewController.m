@@ -79,6 +79,7 @@
     [allowedTypesTable setDelegate:self];
 	
 	
+	[self removeStorageFormatFootnote];
 	[self removeSynchronizationTab];
 	[self removeEncryptionControls];
 	[self useStandardExtensionList];
@@ -282,6 +283,45 @@
 	if ([menuItem action] == @selector(makeClickedExtensionDefault:))
 		return [allowedExtensionsTable clickedRow] >= 0 && [allowedExtensionsTable isEnabled];
 	return YES;
+}
+
+//the storage format menu marked the file formats with "*" for a footnote comparing them with the single-database
+//format ("Using separate files allows Spotlight integration…"); notes are always files now, so drop both and close
+//the space the footnote took
+- (void)removeStorageFormatFootnote {
+	for (NSMenuItem *item in [storageFormatPopupButton itemArray]) {
+		NSString *title = [item title];
+		NSString *trimmed = [title stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"* \u00a0"]];
+		if ([trimmed length] && ![trimmed isEqualToString:title]) [item setTitle:trimmed];
+	}
+	[storageFormatPopupButton synchronizeTitleAndSelectedItem];
+	
+	NSView *container = [storageFormatPopupButton superview];
+	NSTextField *footnote = nil;
+	for (NSView *view in [container subviews]) {
+		if ([view isKindOfClass:[NSTextField class]] && [[[(NSTextField*)view stringValue] stringByTrimmingCharactersInSet:
+																[NSCharacterSet whitespaceAndNewlineCharacterSet]] hasPrefix:@"*"])
+			footnote = (NSTextField*)view;
+	}
+	if (!footnote || [container isFlipped]) return;
+	[footnote setHidden:YES];
+	
+	NSRect noteFrame = [footnote frame];
+	CGFloat aboveBottom = CGFLOAT_MAX, belowTop = -CGFLOAT_MAX;
+	NSMutableArray *above = [NSMutableArray array];
+	for (NSView *view in [container subviews]) {
+		if (view == footnote || [view isHidden]) continue;
+		if (NSMinY([view frame]) >= NSMaxY(noteFrame) - 1.0) {
+			[above addObject:view];
+			aboveBottom = MIN(aboveBottom, NSMinY([view frame]));
+		} else if (NSMaxY([view frame]) <= NSMinY(noteFrame) + 1.0) {
+			belowTop = MAX(belowTop, NSMaxY([view frame]));
+		}
+	}
+	CGFloat shift = aboveBottom - belowTop - 14.0;
+	if (![above count] || belowTop == -CGFLOAT_MAX || shift <= 0.0) return;
+	for (NSView *view in above)
+		[view setFrameOrigin:NSMakePoint(NSMinX([view frame]), NSMinY([view frame]) - shift)];
 }
 
 - (void)setSeparateFileControlsState:(BOOL)separateFileControlsState {
