@@ -2786,7 +2786,7 @@ static NSColor *SchemeColor(NSInteger scheme, BOOL background, BOOL dark) {
     if (scheme == 1)
         white = dark ? (background ? 0.20 : 0.72) : (background ? 0.902 : 0.243);
     else
-        white = dark ? (background ? 0.11 : 0.92) : (background ? 0.98 : 0.02);
+        white = dark ? (background ? 0.118 : 0.92) : (background ? 1.0 : 0.0); //like the system's text views
     return [[NSColor colorWithCalibratedWhite:white alpha:1.0] colorUsingColorSpaceName:NSCalibratedRGBColorSpace];
 }
 

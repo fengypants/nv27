@@ -149,7 +149,7 @@ static void sendCallbacksForGlobalPrefs(GlobalPrefs* self, SEL selector, id orig
 			[NSNumber numberWithBool:NO], StatusBarItem, 
 			[NSNumber numberWithBool:NO], KeepsMaxTextWidth,
 			[NSNumber numberWithFloat:660.0], NoteBodyMaxWidth,
-			[NSNumber numberWithInt:2], ColorScheme,
+			[NSNumber numberWithInt:0], ColorScheme, //B/W, which follows light and dark mode
             [NSNumber numberWithBool:YES],ShowDockIcon,
 			[NSNumber numberWithBool:NO], RTLKey,
             [NSNumber numberWithBool:YES], ShowWordCount,
