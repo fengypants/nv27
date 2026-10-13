@@ -5,6 +5,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+# publishing the app to the "latest-build" release needs write access to the repo contents
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: macos-latest
@@ -73,6 +77,23 @@ jobs:
         with:
           name: nvALT-arm64
           path: nvALT-arm64.zip
+
+      - name: Publish to the "latest-build" release
+        # one stable download link for the newest build of a push (pull requests only build)
+        if: matrix.configuration == 'ForBuilding' && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete latest-build --yes --cleanup-tag || true
+          gh release create latest-build nvALT-arm64.zip \
+            --prerelease \
+            --target "$GITHUB_SHA" \
+            --title "nvALT for Apple silicon (latest build)" \
+            --notes "Built from ${GITHUB_REF_NAME} at ${GITHUB_SHA::7}.
+
+          To install: download nvALT-arm64.zip, double-click it to unzip, and drag nvALT.app into Applications.
+          The first time, macOS will refuse to open it because it isn't signed with an Apple Developer ID:
+          click Done, then go to System Settings > Privacy & Security, scroll down and click Open Anyway."
 
       - name: Upload build log
         if: always()
