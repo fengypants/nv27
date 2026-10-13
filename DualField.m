@@ -439,8 +439,9 @@ static NSImage *TintedSymbolImage(NSString *name, NSColor *color, CGFloat pointS
 - (void)drawRect:(NSRect)rect {
 	NSRect tBounds = [self bounds];
 	
-	//bezel, background, text, clear and snapback buttons
-	[[self cell] drawWithFrame:tBounds inView:self];
+	//the standard text field drawing: the rounded bezel (which modern AppKit draws at the control level,
+	//not in the cell), background and text, plus the cell's clear and snapback buttons
+	[super drawRect:rect];
 	
 	//the leading icon: a magnifying glass while searching, a pencil when the field shows the selected note's title
 	if (![(DualFieldCell*)[self cell] snapbackButtonIsVisible]) {
