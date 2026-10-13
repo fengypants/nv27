@@ -171,10 +171,19 @@
 	NSView *content = [[tabView selectedTabViewItem] view];
 	if (!root || !content || [root isFlipped]) return;
 	
-	CGFloat contentTop = -CGFLOAT_MAX;
+	CGFloat contentTop = -CGFLOAT_MAX, contentBottom = CGFLOAT_MAX;
 	for (NSView *control in [content subviews]) {
-		if (![control isHidden])
-			contentTop = MAX(contentTop, NSMaxY([content convertRect:[control frame] toView:root]));
+		if (![control isHidden]) {
+			NSRect frame = [content convertRect:[control frame] toView:root];
+			contentTop = MAX(contentTop, NSMaxY(frame));
+			contentBottom = MIN(contentBottom, NSMinY(frame));
+		}
+	}
+	//likewise below: keep a standard 20pt margin under the lowest control
+	CGFloat bottomTrim = contentBottom - 20.0;
+	if (contentBottom != CGFLOAT_MAX && bottomTrim > 0.0) {
+		[tabView setFrameOrigin:NSMakePoint(NSMinX([tabView frame]), NSMinY([tabView frame]) - bottomTrim)];
+		contentTop -= bottomTrim;
 	}
 	for (NSView *sibling in [root subviews]) {
 		if (sibling != tabView && ![sibling isHidden])
