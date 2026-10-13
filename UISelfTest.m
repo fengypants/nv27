@@ -14,6 +14,39 @@
 #import "NotesTableView.h"
 #import "DualField.h"
 #import "NoteObject.h"
+#import <objc/runtime.h>
+
+static BOOL selfTestTracingFocus = NO;
+
+//while the click checks run, report where focus is moved to the search field from (with a backtrace), and where
+//the note selection is cleared from; that's what the focus bug looks like
+@interface NSWindow (UISelfTestTracing)
+@end
+@implementation NSWindow (UISelfTestTracing)
+- (BOOL)nv27_selfTestMakeFirstResponder:(NSResponder*)responder {
+	if (selfTestTracingFocus && [responder isKindOfClass:[DualField class]]) {
+		fprintf(stdout, "SELFTEST focus moved to the search field from:\n");
+		for (NSString *frame in [[NSThread callStackSymbols] subarrayWithRange:NSMakeRange(1, MIN((NSUInteger)18, [[NSThread callStackSymbols] count] - 1))])
+			fprintf(stdout, "SELFTEST   %s\n", [frame UTF8String]);
+		fflush(stdout);
+	}
+	return [self nv27_selfTestMakeFirstResponder:responder];
+}
+@end
+
+@interface NSTableView (UISelfTestTracing)
+@end
+@implementation NSTableView (UISelfTestTracing)
+- (void)nv27_selfTestDeselectAll:(id)sender {
+	if (selfTestTracingFocus && [self isKindOfClass:[NotesTableView class]] && [self numberOfSelectedRows]) {
+		fprintf(stdout, "SELFTEST notes list deselectAll from:\n");
+		for (NSString *frame in [[NSThread callStackSymbols] subarrayWithRange:NSMakeRange(1, MIN((NSUInteger)14, [[NSThread callStackSymbols] count] - 1))])
+			fprintf(stdout, "SELFTEST   %s\n", [frame UTF8String]);
+		fflush(stdout);
+	}
+	[self nv27_selfTestDeselectAll:sender];
+}
+@end
 
 static void SelfTestLog(NSString *format, ...) NS_FORMAT_FUNCTION(1,2);
 static void SelfTestLog(NSString *format, ...) {
@@ -44,6 +77,10 @@ static NSString *ResponderName(NSResponder *responder) {
 + (void)load {
 	if (!getenv("NV27_UI_SELFTEST"))
 		return;
+	method_exchangeImplementations(class_getInstanceMethod([NSWindow class], @selector(makeFirstResponder:)),
+								   class_getInstanceMethod([NSWindow class], @selector(nv27_selfTestMakeFirstResponder:)));
+	method_exchangeImplementations(class_getInstanceMethod([NSTableView class], @selector(deselectAll:)),
+								   class_getInstanceMethod([NSTableView class], @selector(nv27_selfTestDeselectAll:)));
 	[[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationDidFinishLaunchingNotification object:nil
 													   queue:nil usingBlock:^(NSNotification *note) {
 		[[NSApp delegate] performSelector:@selector(_selfTestPrepare) withObject:nil afterDelay:4.0];
@@ -120,7 +157,9 @@ static NSString *ResponderName(NSResponder *responder) {
 
 	NSPoint center = [self _selfTestPointInEditorAtFraction:NSMakePoint(0.5, 0.5)];
 	[window makeFirstResponder:notesTableView];
+	selfTestTracingFocus = YES;
 	[self _selfTestClickAtWindowPoint:center label:@"editor center, from notes list"];
+	selfTestTracingFocus = NO;
 	[window makeFirstResponder:field];
 	[self _selfTestClickAtWindowPoint:center label:@"editor center, from search field"];
 	[window makeFirstResponder:field];
