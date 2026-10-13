@@ -175,9 +175,9 @@ static NSBezierPath *SearchFieldShape(NSRect bounds) {
 	[super drawWithFrame:cellFrame inView:controlView];
 	
 	if (BUTTON_HIDDEN != clearButtonState) {
-		//the standard search-field clear button
+		//the standard search-field clear button: the same gray as the leading icon, darker while pressed
 		NSImage *clearImg = TintedSymbolImage(@"xmark.circle.fill", clearButtonState == BUTTON_NORMAL ?
-											  [NSColor tertiaryLabelColor] : [NSColor secondaryLabelColor], 12.0);
+											  [NSColor secondaryLabelColor] : [NSColor labelColor], 13.0);
 		[clearImg drawCenteredInRect:[self clearButtonRectForBounds:cellFrame]];
 	}
 	if (BUTTON_HIDDEN != snapbackButtonState) {
