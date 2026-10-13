@@ -1,8 +1,8 @@
 # nv27 (nvALT 2 for Apple silicon)
 
 > **This fork** is **nv27**, a modernized, Apple silicon–only build of nvALT for current macOS that runs
-> side by side with the original nvALT. **[Download the latest build](https://github.com/fengypants/nvalt/releases/download/latest-build/nv27-arm64.zip)**
-> ([install steps](https://github.com/fengypants/nvalt/releases/tag/latest-build)), or see
+> side by side with the original nvALT. **[Download the latest build](https://github.com/fengypants/nv27/releases/download/latest-build/nv27-arm64.zip)**
+> ([install steps](https://github.com/fengypants/nv27/releases/tag/latest-build)), or see
 > [Building on Apple silicon](#building-on-apple-silicon) below.
 
 A collaboration between Brett Terpstra (ttscoff) and David Halter (ElasticThreads) based on [DivineDominion's](github.com/divineDominion/nv) fork. nvALT adds a few features we'd been looking for (and let me get some coding practice).
