@@ -183,6 +183,7 @@ void outletObjectAwoke(id sender);
 - (void)releaseTagEditor:(NSNotification *)note;
 - (void)setDualFieldInToolbar;
 - (void)setDualFieldInView;
+- (void)updateSearchFieldWidth:(NSNotification*)aNotification;
 - (void)setDualFieldIsVisible:(BOOL)isVis;
 //- (void)hideDualFieldView;
 //- (void)showDualFieldView;

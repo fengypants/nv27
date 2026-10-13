@@ -137,7 +137,8 @@
 //drop the tab holding `view` from whichever tab view contains it (the compiled nib still has tabs for removed
 //features, and outlets to their controls, which is why those ivars remain declared)
 - (void)removeTabContainingView:(NSView*)view {
-	NSView *ancestor = [view superview];
+	//only the selected tab's view is inside the tab view, so find it from a control on the Storage tab
+	NSView *ancestor = [storageFormatPopupButton superview];
 	while (ancestor && ![ancestor isKindOfClass:[NSTabView class]])
 		ancestor = [ancestor superview];
 	NSTabView *tabView = (NSTabView*)ancestor;

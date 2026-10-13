@@ -2500,9 +2500,21 @@ terminateApp:
 	[window setToolbarStyle:NSWindowToolbarStylePreference];
 	[window setTitleVisibility:NSWindowTitleVisible];
 	[window setShowsToolbarButton:NO];
+	//the preference style centers items at their minimum size, so keep the field as wide as the window
+	[self updateSearchFieldWidth:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateSearchFieldWidth:)
+												 name:NSWindowDidResizeNotification object:window];
 	
 	[field setDelegate:self];
     [self setDualFieldIsVisible:[self dualFieldIsVisible]];
+}
+
+- (void)updateSearchFieldWidth:(NSNotification*)aNotification {
+	if (!dualFieldItem || [window toolbar] != toolbar) return;
+	CGFloat width = MAX(50.0, NSWidth([[window contentView] frame]) - 2 * 10.0);
+	CGFloat height = [dualFieldItem minSize].height;
+	[dualFieldItem setMinSize:NSMakeSize(width, height)];
+	[dualFieldItem setMaxSize:NSMakeSize(width, height)];
 }
 
 - (void)setDualFieldInView {

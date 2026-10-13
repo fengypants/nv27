@@ -172,6 +172,7 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 	for (NSString *pane in panes) {
 		for (NSToolbarItem *item in [[settingsWindow toolbar] items]) {
 			if ([[item itemIdentifier] isEqualToString:pane]) {
+				[[settingsWindow toolbar] setSelectedItemIdentifier:pane];
 				[prefsWindowController performSelector:@selector(switchViews:) withObject:item];
 				[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1.0]];
 				PrintSnapshotOfWindow(settingsWindow, [@"settings-" stringByAppendingString:[pane lowercaseString]]);
