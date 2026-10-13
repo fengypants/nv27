@@ -137,11 +137,15 @@
 //drop the tab holding `view` from whichever tab view contains it (the compiled nib still has tabs for removed
 //features, and outlets to their controls, which is why those ivars remain declared)
 - (void)removeTabContainingView:(NSView*)view {
-	//only the selected tab's view is inside the tab view, so find it from a control on the Storage tab
-	NSView *ancestor = [storageFormatPopupButton superview];
-	while (ancestor && ![ancestor isKindOfClass:[NSTabView class]])
-		ancestor = [ancestor superview];
-	NSTabView *tabView = (NSTabView*)ancestor;
+	//only the selected tab's view is inside the tab view, so look for it from a control on each tab
+	NSTabView *tabView = nil;
+	NSArray *controls = [NSArray arrayWithObjects:storageFormatPopupButton, enabledSyncButton, secureTextEntryButton, nil];
+	for (NSView *control in controls) {
+		NSView *ancestor = [control superview];
+		while (ancestor && ![ancestor isKindOfClass:[NSTabView class]])
+			ancestor = [ancestor superview];
+		if ((tabView = (NSTabView*)ancestor)) break;
+	}
 	
 	for (NSTabViewItem *item in [[[tabView tabViewItems] copy] autorelease]) {
 		if ([view isDescendantOf:[item view]]) {
@@ -150,8 +154,10 @@
 		}
 	}
 	//a single remaining tab needs no tab strip
-	if ([tabView numberOfTabViewItems] == 1)
+	if ([tabView numberOfTabViewItems] == 1) {
+		[tabView selectTabViewItemAtIndex:0];
 		[tabView setTabViewType:NSNoTabsNoBorder];
+	}
 }
 
 //Simplenote syncing, note encryption and Secure Text Entry were removed: drop the "Synchronization" and
