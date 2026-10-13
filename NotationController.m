@@ -153,10 +153,29 @@
 		
 		[self upgradeDatabaseIfNecessary];
 		
+		//nv27 only stores notes as separate files: write out the notes of a single-database folder (from nvALT or
+		//Notational Velocity) as plain text files; "Notes & Settings" stays as the index of those files
+		if ([notationPrefs notesStorageFormat] == SingleDatabaseFormat) {
+			NSUInteger noteCount = [allNotes count];
+			NSLog(@"converting %lu notes from a single database to plain text files", (unsigned long)noteCount);
+			[notationPrefs setNotesStorageFormat:PlainTextFormat];
+			if (noteCount > 0) {
+				[self performSelector:@selector(_announceConversionToFilesOfNoteCount:)
+						   withObject:[NSNumber numberWithUnsignedInteger:noteCount] afterDelay:0.0];
+			}
+		}
+		
 		[self updateTitlePrefixConnections];
     }
     
     return self;
+}
+
+- (void)_announceConversionToFilesOfNoteCount:(NSNumber*)noteCount {
+	NSString *folder = [[[NSFileManager defaultManager] pathWithFSRef:&noteDirectoryRef] stringByAbbreviatingWithTildeInPath];
+	NSRunAlertPanel([NSString stringWithFormat:NSLocalizedString(@"Your %@ notes are now stored as individual text files.", nil), noteCount],
+					[NSString stringWithFormat:NSLocalizedString(@"This folder used a single notes database, which nv27 doesn't use. Each note was saved as a plain text file in %@.", nil), folder ? folder : NSLocalizedString(@"your notes folder", nil)],
+					NSLocalizedString(@"OK", nil), nil, nil);
 }
 
 - (id)delegate {
@@ -753,12 +772,6 @@ bail:
 			[self relocateNotesDirectory];
 		else [NSApp terminate:nil];
 	}
-}
-
-- (void)trashRemainingNoteFilesInDirectory {
-	NSAssert([notationPrefs notesStorageFormat] == SingleDatabaseFormat, @"We shouldn't be removing files if the storage is not single-database");	
-	[allNotes makeObjectsPerformSelector:@selector(moveFileToTrash)];
-	[self notifyOfChangedTrash];
 }
 
 - (void)updateLinksToNote:(NoteObject*)aNoteObject fromOldName:(NSString*)oldname {

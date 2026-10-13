@@ -137,7 +137,6 @@ typedef struct _NoteCatalogEntry {
 - (void)noteDidNotWrite:(NoteObject*)note errorCode:(OSStatus)error;
 - (void)scheduleWriteForNote:(NoteObject*)note;
 - (void)closeAllResources;
-- (void)trashRemainingNoteFilesInDirectory;
 - (void)checkIfNotationIsTrashed;
 - (void)updateLinksToNote:(NoteObject*)aNoteObject fromOldName:(NSString*)oldname;
 - (void)updateTitlePrefixConnections;

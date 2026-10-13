@@ -20,10 +20,23 @@
 #import "BookmarksController.h"
 
 #define BORDER_TOP_OFFSET 3.0
-#define BORDER_LEFT_OFFSET 3.0
+#define BORDER_LEFT_OFFSET 5.0
 #define MAX_STATE_IMG_DIM 16.0
 #define CLEAR_BUTTON_IMG_DIM 16.0
-#define TEXT_LEFT_OFFSET (MAX_STATE_IMG_DIM + BORDER_LEFT_OFFSET)
+#define TEXT_LEFT_OFFSET (MAX_STATE_IMG_DIM + BORDER_LEFT_OFFSET + 1.0)
+
+//an SF Symbol drawn in the given color; the color resolves when drawn, so it follows Light/Dark Mode
+static NSImage *TintedSymbolImage(NSString *name, NSColor *color, CGFloat pointSize) {
+	NSImage *symbol = [[NSImage imageWithSystemSymbolName:name accessibilityDescription:nil]
+					   imageWithSymbolConfiguration:[NSImageSymbolConfiguration configurationWithPointSize:pointSize weight:NSFontWeightMedium]];
+	if (!symbol) return nil;
+	return [NSImage imageWithSize:[symbol size] flipped:NO drawingHandler:^BOOL(NSRect dstRect) {
+		[symbol drawInRect:dstRect];
+		[color set];
+		NSRectFillUsingOperation(dstRect, NSCompositingOperationSourceAtop);
+		return YES;
+	}];
+}
 
 @implementation DualFieldCell
 
@@ -33,9 +46,13 @@
 		[self setStringValue:@""];
 		[self setEditable:YES];
 		[self setSelectable:YES];
-		[self setBezeled:NO];
-		[self setBordered:NO];
-		[self setDrawsBackground:NO];
+		//a standard rounded text field bezel (drawn by AppKit, so it matches the system and Dark Mode),
+		//with the search/note icon and the clear button drawn inside it
+		[self setBezeled:YES];
+		[self setBezelStyle:NSTextFieldRoundedBezel];
+		[self setDrawsBackground:YES];
+		[self setBackgroundColor:[NSColor textBackgroundColor]];
+		[self setTextColor:[NSColor controlTextColor]];
 		[self setWraps:YES];
 		[self setPlaceholderString:NSLocalizedString(@"Search or Create", @"placeholder text in search/create field")];
 		
@@ -77,7 +94,7 @@
 }
 
 - (NSRect)snapbackButtonRectForBounds:(NSRect)rect {
-	return NSMakeRect(BORDER_LEFT_OFFSET, BORDER_TOP_OFFSET, MAX_STATE_IMG_DIM, MAX_STATE_IMG_DIM);	
+	return NSMakeRect(BORDER_LEFT_OFFSET, floor(NSMidY(rect) - MAX_STATE_IMG_DIM / 2.0), MAX_STATE_IMG_DIM, MAX_STATE_IMG_DIM);
 }
 
 - (NSRect)textAreaForBounds:(NSRect)rect {
@@ -159,12 +176,13 @@
 	[super drawWithFrame:cellFrame inView:controlView];
 	
 	if (BUTTON_HIDDEN != clearButtonState) {
-		NSImage *clearImg = [NSImage imageNamed:(clearButtonState == BUTTON_NORMAL ? @"Clear" : @"ClearPressed") ];
+		//the standard search-field clear button
+		NSImage *clearImg = TintedSymbolImage(@"xmark.circle.fill", clearButtonState == BUTTON_NORMAL ?
+											  [NSColor tertiaryLabelColor] : [NSColor secondaryLabelColor], 12.0);
 		[clearImg drawCenteredInRect:[self clearButtonRectForBounds:cellFrame]];
 	}
 	if (BUTTON_HIDDEN != snapbackButtonState) {
 		NSRect snRect = [self snapbackButtonRectForBounds:cellFrame];
-		NSEraseRect(centeredRectInRect(snRect, NSMakeSize(MAX_STATE_IMG_DIM, MAX_STATE_IMG_DIM)));
 		NSImage *snapImg = [NSImage imageNamed:
 							[(DualField *)controlView hasFollowedLinks] ? (snapbackButtonState == BUTTON_NORMAL ? @"LinkBack" : @"LinkBackPressed") :
 							(snapbackButtonState == BUTTON_NORMAL ? @"SnapBack" : @"SnapBackPressed") ];
@@ -196,12 +214,6 @@
 	//[self setDrawsBackground:NO];
 	DualFieldCell *myCell = [self cell];
 	//[myCell setWraps:YES];
-    [self setDrawsBackground:NO];
-    if(IsYosemiteOrLater){
-        [self setTextColor:[NSColor blackColor]];
-    }
-	[self setBordered:NO];
-	[self setBezeled:NO];
 	[self setFocusRingType:NSFocusRingTypeExterior];
 			
 	[myCell setAllowsUndo:NO];
@@ -425,69 +437,16 @@
 }
 
 - (void)drawRect:(NSRect)rect {
-//	[super drawRect:rect];
-	
-	NSWindow *window = [self window];
-	BOOL isActiveWin = [window isMainWindow];
-	
-	[NSGraphicsContext saveGraphicsState];
-	[[NSGraphicsContext currentContext] setShouldAntialias:NO];
-	
 	NSRect tBounds = [self bounds];
 	
-	[[NSColor whiteColor] set];
-	NSRectFill(NSInsetRect(tBounds, 5, 1));
+	//bezel, background, text, clear and snapback buttons
+	[[self cell] drawWithFrame:tBounds inView:self];
 	
-	NSImage *leftCap = [NSImage imageNamed: isActiveWin ? @"DFCapLeftRounded" : @"DFCapLeftRoundedInactive"];
-//	[leftCap setFlipped:YES];
-	NSRect leftImageRect = NSMakeRect(0, 0, [leftCap size].width, [leftCap size].height);
-	[leftCap drawInRect:leftImageRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0 respectFlipped:YES hints:nil];
-	
-	NSImage *rightCap = [NSImage imageNamed: isActiveWin ? @"DFCapRight" : @"DFCapRightInactive"];
-//	[rightCap setFlipped:YES];
-	NSRect rightImageRect = NSMakeRect(tBounds.size.width - [rightCap size].width, 0, [rightCap size].width, [rightCap size].height);
-	[rightCap drawInRect:rightImageRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0 respectFlipped:YES hints:nil];
-
-	[[NSColor colorWithDeviceWhite: isActiveWin ? 0.31f : 0.62f alpha:1.0f] set];
-	[NSBezierPath strokeLineFromPoint:NSMakePoint(tBounds.origin.x + [leftCap size].width, tBounds.origin.y + .5) 
-							  toPoint:NSMakePoint(tBounds.size.width - [rightCap size].width, tBounds.origin.y + .5)];
-	[[NSColor colorWithDeviceWhite: isActiveWin ? 0.882f : 0.886f alpha:1.0f] set];
-	[NSBezierPath strokeLineFromPoint:NSMakePoint(tBounds.origin.x + [leftCap size].width, tBounds.origin.y + 1.5) 
-							  toPoint:NSMakePoint(tBounds.size.width - [rightCap size].width, tBounds.origin.y + 1.5)];
-	
-	
-	[[NSColor colorWithDeviceWhite: isActiveWin ? 0.447f : 0.627f alpha:1.0f] set];
-	[NSBezierPath strokeLineFromPoint:NSMakePoint(tBounds.origin.x + [leftCap size].width, tBounds.origin.y + tBounds.size.height - 1.5) 
-							  toPoint:NSMakePoint(tBounds.size.width - [rightCap size].width, tBounds.origin.y + tBounds.size.height - 1.5)];
-	[[NSColor colorWithDeviceWhite: 1.0 alpha:0.39f] set];
-	[NSBezierPath strokeLineFromPoint:NSMakePoint(tBounds.origin.x + [leftCap size].width, tBounds.origin.y + tBounds.size.height ) 
-							  toPoint:NSMakePoint(tBounds.size.width - [rightCap size].width, tBounds.origin.y + tBounds.size.height )];
-	
-	NSImage *docIcon = [NSImage imageNamed: showsDocumentIcon ? @"Pencil" : @"Search" ];
-//	[docIcon setFlipped:YES];
-	NSRect docImageRect = NSMakeRect(BORDER_LEFT_OFFSET, BORDER_TOP_OFFSET, [docIcon size].width, [docIcon size].height);
-	[docIcon drawInRect:docImageRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0 respectFlipped:YES hints:nil];
-	
-	[NSGraphicsContext restoreGraphicsState];
-	
-	//drawWithFrame: would make sense to override, but this works, too
-	[[self cell] drawWithFrame:NSMakeRect(0, 0, NSWidth(tBounds), NSHeight(tBounds)) inView:self];
-	
-	if (IsLeopardOrLater&&!IsYosemiteOrLater) {
-		//ALERT: TEMPORARY WORK-AROUND FOR TIGER FOCUS RING BUILDUP: DO NOT DRAW FOCUS RING ON TIGER
-		if ([self currentEditor] && isActiveWin) {
-			//draw focus ring
-			[NSGraphicsContext saveGraphicsState];
-			NSSetFocusRingStyle(NSFocusRingOnly);
-			NSRect focusRect = NSInsetRect(tBounds, 0.0f, 0.5f);
-			focusRect.origin.y -= 0.5f;
-			//drawing could be sped up by a measurable amount if this were cached in a (partially transparent) image
-			[[NSBezierPath bezierPathWithRoundRectInRect:focusRect radius:1.0f] fill];
-			[NSGraphicsContext restoreGraphicsState];
-		}
-	}	
-	
-	
+	//the leading icon: a magnifying glass while searching, a pencil when the field shows the selected note's title
+	if (![(DualFieldCell*)[self cell] snapbackButtonIsVisible]) {
+		NSImage *icon = TintedSymbolImage(showsDocumentIcon ? @"pencil" : @"magnifyingglass", [NSColor secondaryLabelColor], 12.0);
+		[icon drawCenteredInRect:[(DualFieldCell*)[self cell] snapbackButtonRectForBounds:tBounds]];
+	}
 }
 
 //elasticwork

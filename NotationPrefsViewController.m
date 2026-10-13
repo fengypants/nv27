@@ -129,9 +129,9 @@
 		
 		[allowedTypesTable reloadData];
 		[allowedExtensionsTable reloadData];
-        if (!IsMavericksOrLater||([notationPrefs notesStorageFormat]==SingleDatabaseFormat)) {
-            [useFinderTaggingButton setHidden:YES];
-        }
+		//tags are stored as Finder tags by default; the button only converts from the older OpenMeta tags
+		[useFinderTaggingButton setHidden:[[GlobalPrefs defaultPrefs] useFinderTags]];
+
     }
 }
 
@@ -183,11 +183,10 @@
 		[subview setFrameOrigin:NSMakePoint(NSMinX([subview frame]), NSMinY([subview frame]) + offset)];
 	}
 	
-	//the single-database menu item was titled "Single Database (Allow Encryption)"
+	//notes are only stored as separate files, so the single-database choice is gone
 	NSMenuItem *databaseItem = [[storageFormatPopupButton menu] itemWithTag:SingleDatabaseFormat];
-	NSRange parenthetical = [[databaseItem title] rangeOfString:@" ("];
-	if (parenthetical.location != NSNotFound)
-		[databaseItem setTitle:[[databaseItem title] substringToIndex:parenthetical.location]];
+	if (databaseItem)
+		[[storageFormatPopupButton menu] removeItem:databaseItem];
 }
 
 - (void)setSeparateFileControlsState:(BOOL)separateFileControlsState {
@@ -282,38 +281,13 @@
 }
 
 - (IBAction)changedFileStorageFormat:(id)sender {
+	//notes are always stored as separate files (plain text, rich text or HTML); just switch the file format
 	notesStorageFormatInProgress = [storageFormatPopupButton selectedTag];
+	[notationPrefs setNotesStorageFormat:notesStorageFormatInProgress];
+	[self notesStorageFormatDidChange];
 	
-	//if we're changing to a database format from a non-database-format, ask to trash existing files
-    if ([notationPrefs shouldDisplaySheetForProposedFormat:notesStorageFormatInProgress]) {
-		
-		NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Individual files remain in the notes directory. Leave them alone or move them to the Trash?",nil) 
-										 defaultButton:NSLocalizedString(@"Keep Files", @"button title for not discarding note files") 
-									   alternateButton:NSLocalizedString(@"Cancel",nil) otherButton:NSLocalizedString(@"Move to Trash", @"button title for trashing notes")
-							 informativeTextWithFormat:NSLocalizedString(@"When notes are stored in a single database individual files become redundant.",nil)];
-		
-		[alert beginSheetModalForWindow:[view window] modalDelegate:notationPrefs 
-						 didEndSelector:@selector(noteFilesCleanupSheetDidEnd:returnCode:contextInfo:) contextInfo:self];
-		//will ultimately call -notesStorageFormatDidChange
-	} else {
-		//just call setNotesStorageFormat straight-out
-		[notationPrefs setNotesStorageFormat:notesStorageFormatInProgress];
-		[self notesStorageFormatDidChange];
-	}
-	
-	
-	if ([[storageFormatPopupButton objectValue] intValue]==0) {
-		[[NSUserDefaults standardUserDefaults] setObject:nil forKey:@"TextEditor"];
-		[[NSUserDefaults standardUserDefaults] synchronize];
-	}else {
-		[[NSUserDefaults standardUserDefaults] setObject:@"Default" forKey:@"TextEditor"];
-		[[NSUserDefaults standardUserDefaults] synchronize];
-//		if ( [[NSApp delegate] respondsToSelector: @selector(updateTextApp:)] ) {
-//			[[NSApp delegate] updateTextApp:self];
-//		}
-	}
-
-	
+	//notes are files, so they can always be opened in an external editor
+	[[NSUserDefaults standardUserDefaults] setObject:@"Default" forKey:@"TextEditor"];
 }
 
 - (IBAction)changedSecureTextEntry:(id)sender {
