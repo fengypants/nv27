@@ -70,8 +70,6 @@ NSInteger popped;
 BOOL splitViewAwoke;
 
 
-static void *AppearanceObservationContext = &AppearanceObservationContext;
-
 @implementation AppController
 
 @synthesize isEditing;
@@ -100,8 +98,6 @@ static void *AppearanceObservationContext = &AppearanceObservationContext;
         hasLaunched=NO;
         
         [self applyAppearancePreference];
-        //the B/W and Low Contrast color schemes have light and dark variants; switch when the appearance changes
-        [NSApp addObserver:self forKeyPath:@"effectiveAppearance" options:0 context:AppearanceObservationContext];
         
         if (![[NSUserDefaults standardUserDefaults] boolForKey:@"ShowDockIcon"]){
             //no Dock icon: run as an accessory app, reachable from the menu bar icon
@@ -2795,7 +2791,8 @@ static NSColor *SchemeColor(NSInteger scheme, BOOL background, BOOL dark) {
 }
 
 - (BOOL)appearanceIsDark {
-    NSAppearanceName name = [[NSApp effectiveAppearance] bestMatchFromAppearancesWithNames:
+    NSAppearance *appearance = window ? [window effectiveAppearance] : [NSApp effectiveAppearance];
+    NSAppearanceName name = [appearance bestMatchFromAppearancesWithNames:
                              [NSArray arrayWithObjects:NSAppearanceNameAqua, NSAppearanceNameDarkAqua, nil]];
     return [name isEqualToString:NSAppearanceNameDarkAqua];
 }
@@ -2807,16 +2804,18 @@ static NSColor *SchemeColor(NSInteger scheme, BOOL background, BOOL dark) {
      choice == 2 ? [NSAppearance appearanceNamed:NSAppearanceNameDarkAqua] : nil];
 }
 
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    if (context == AppearanceObservationContext) {
-        //re-pick the light or dark variant of the built-in schemes (a user scheme keeps its own colors)
-        if (userScheme == 0) {
-            [self setBWColorScheme:self];
-        } else if (userScheme == 1) {
-            [self setLCColorScheme:self];
-        }
-    } else {
-        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+//called by the notes list when its effective appearance changes (the system switched between light and dark, or
+//the Appearance setting changed): re-pick the light or dark variant of the built-in schemes; a user scheme keeps
+//its own colors
+- (void)appearanceDidChange {
+    static NSInteger lastDark = -1;
+    NSInteger dark = [self appearanceIsDark];
+    if (dark == lastDark) return;
+    lastDark = dark;
+    if (userScheme == 0) {
+        [self setBWColorScheme:self];
+    } else if (userScheme == 1) {
+        [self setLCColorScheme:self];
     }
 }
     

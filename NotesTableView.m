@@ -1352,6 +1352,11 @@ enum { kNext_Tag = 'j', kPrev_Tag = 'k' };
     }
 }
 
+- (void)viewDidChangeEffectiveAppearance {
+	[super viewDidChangeEffectiveAppearance];
+	[(AppController *)[NSApp delegate] appearanceDidChange];
+}
+
 - (void)drawGridInClipRect:(NSRect)clipRect {
 	//resize cliprect if the view is taller than the amount of actual rows with content
 	if (![self dataSource]) {

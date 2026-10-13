@@ -156,6 +156,9 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 	[NSApp setAppearance:[NSAppearance appearanceNamed:NSAppearanceNameDarkAqua]];
 	[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1.0]];
 	[window display];
+	SelfTestLog(@"dark mode: appearanceIsDark=%d tableBackground=%@ editorBackground=%@ field drawsBackground=%d background=%@ bezeled=%d",
+				[self appearanceIsDark], [notesTableView backgroundColor], [textView backgroundColor], [field drawsBackground],
+				[field backgroundColor], [field isBezeled]);
 	PrintSnapshotOfWindow(window, @"main-dark");
 	[NSApp setAppearance:nil];
 	[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.5]];

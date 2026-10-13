@@ -201,6 +201,7 @@ void outletObjectAwoke(id sender);
 - (void)updateColorScheme;
 - (BOOL)appearanceIsDark;
 - (void)applyAppearancePreference;
+- (void)appearanceDidChange;
 - (void)setBackgrndColor:(NSColor *)inColor;
 - (void)setForegrndColor:(NSColor *)inColor;
 - (NSColor *)backgrndColor;
