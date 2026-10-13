@@ -60,6 +60,8 @@ static NSString *HighlightSearchTermsKey = @"HighlightSearchTerms";
 static NSString *SearchTermHighlightColorKey = @"SearchTermHighlightColor";
 static NSString *ForegroundTextColorKey = @"ForegroundTextColor";
 static NSString *BackgroundTextColorKey = @"BackgroundTextColor";
+static NSString *ForegroundTextColorDarkKey = @"ForegroundTextColorDark";
+static NSString *BackgroundTextColorDarkKey = @"BackgroundTextColorDark";
 static NSString *UseSoftTabsKey = @"UseSoftTabs";
 static NSString *NumberOfSpacesInTabKey = @"NumberOfSpacesInTab";
 static NSString *MakeURLsClickableKey = @"MakeURLsClickable";
@@ -149,7 +151,7 @@ static void sendCallbacksForGlobalPrefs(GlobalPrefs* self, SEL selector, id orig
 			[NSNumber numberWithBool:NO], StatusBarItem, 
 			[NSNumber numberWithBool:NO], KeepsMaxTextWidth,
 			[NSNumber numberWithFloat:660.0], NoteBodyMaxWidth,
-			[NSNumber numberWithInt:0], ColorScheme, //B/W, which follows light and dark mode
+			[NSNumber numberWithInt:2], ColorScheme, //the User Scheme, which has light and dark colors
             [NSNumber numberWithBool:YES],ShowDockIcon,
 			[NSNumber numberWithBool:NO], RTLKey,
             [NSNumber numberWithBool:YES], ShowWordCount,
@@ -164,6 +166,9 @@ static void sendCallbacksForGlobalPrefs(GlobalPrefs* self, SEL selector, id orig
 			
 			[NSArchiver archivedDataWithRootObject:[NSColor blackColor]], ForegroundTextColorKey,
 			[NSArchiver archivedDataWithRootObject:[NSColor whiteColor]], BackgroundTextColorKey,
+			//the User Scheme's dark-mode colors default to those of Low Contrast's dark variant
+			[NSArchiver archivedDataWithRootObject:[NSColor colorWithSRGBRed:0xC2/255.0 green:0xBF/255.0 blue:0xB8/255.0 alpha:1.0]], ForegroundTextColorDarkKey,
+			[NSArchiver archivedDataWithRootObject:[NSColor colorWithSRGBRed:0x26/255.0 green:0x26/255.0 blue:0x24/255.0 alpha:1.0]], BackgroundTextColorDarkKey,
 			
 			[NSArchiver archivedDataWithRootObject:
 			 [NSColor colorWithCalibratedRed:0.945 green:0.702 blue:0.702 alpha:1.0f]], SearchTermHighlightColorKey,
@@ -736,6 +741,33 @@ BOOL ColorsEqualWith8BitChannels(NSColor *c1, NSColor *c2) {
 	if (theData) return (NSColor *)[NSUnarchiver unarchiveObjectWithData:theData];
 
 	return nil;	
+}
+
+//the User Scheme's colors in dark mode (Settings > Fonts & Colors, the Dark column)
+- (void)setForegroundTextColorDark:(NSColor*)aColor sender:(id)sender {
+	if (aColor) {
+		[defaults setObject:[NSArchiver archivedDataWithRootObject:aColor] forKey:ForegroundTextColorDarkKey];
+		SEND_CALLBACKS();
+	}
+}
+
+- (NSColor*)foregroundTextColorDark {
+	NSData *theData = [defaults dataForKey:ForegroundTextColorDarkKey];
+	if (theData) return (NSColor *)[NSUnarchiver unarchiveObjectWithData:theData];
+	return nil;
+}
+
+- (void)setBackgroundTextColorDark:(NSColor*)aColor sender:(id)sender {
+	if (aColor) {
+		[defaults setObject:[NSArchiver archivedDataWithRootObject:aColor] forKey:BackgroundTextColorDarkKey];
+		SEND_CALLBACKS();
+	}
+}
+
+- (NSColor*)backgroundTextColorDark {
+	NSData *theData = [defaults dataForKey:BackgroundTextColorDarkKey];
+	if (theData) return (NSColor *)[NSUnarchiver unarchiveObjectWithData:theData];
+	return nil;
 }
 
 - (BOOL)tableColumnsShowPreview {

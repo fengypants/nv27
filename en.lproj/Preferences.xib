@@ -21,6 +21,8 @@
                 <outlet property="externalEditorMenuButton" destination="561" id="567"/>
                 <outlet property="folderLocationsMenuButton" destination="252" id="260"/>
                 <outlet property="fontsColorsView" destination="352" id="425"/>
+                <outlet property="foregroundColorWellDark" destination="nv27-fg-dark" id="nv27-fg-dark-outlet"/>
+                <outlet property="backgroundColorWellDark" destination="nv27-bg-dark" id="nv27-bg-dark-outlet"/>
                 <outlet property="foregroundColorWell" destination="396" id="424"/>
                 <outlet property="generalView" destination="155" id="236"/>
                 <outlet property="highlightSearchTermsButton" destination="415" id="419"/>
@@ -480,23 +482,49 @@
             </subviews>
         </customView>
         <customView id="352" userLabel="fonts colors view">
-            <rect key="frame" x="0" y="0" width="420" height="311"/>
+            <rect key="frame" x="0" y="0" width="420" height="329"/>
             <autoresizingMask key="autoresizingMask"/>
             <subviews>
                 <colorWell id="354" propertyAccessControl="none">
-                    <rect key="frame" x="269" y="222" width="52" height="24"/>
+                    <rect key="frame" x="269" y="240" width="52" height="24"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
                     <color key="color" red="0.05813049898" green="0.055541899059999997" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                     <connections>
                         <action selector="changedSearchHighlightColorWell:" target="-2" id="382"/>
                     </connections>
                 </colorWell>
+                <textField verticalHuggingPriority="750" id="nv27-col-light">
+                    <rect key="frame" x="263" y="209" width="64" height="14"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
+                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" alignment="center" title="Light" id="nv27-col-light-cell">
+                        <font key="font" metaFont="smallSystem"/>
+                        <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <textField verticalHuggingPriority="750" id="nv27-col-dark">
+                    <rect key="frame" x="323" y="209" width="64" height="14"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
+                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" alignment="center" title="Dark" id="nv27-col-dark-cell">
+                        <font key="font" metaFont="smallSystem"/>
+                        <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
                 <colorWell id="396" propertyAccessControl="none">
                     <rect key="frame" x="269" y="183" width="52" height="24"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
                     <color key="color" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                     <connections>
                         <action selector="changedForegroundTextColorWell:" target="-2" id="421"/>
+                    </connections>
+                </colorWell>
+                <colorWell id="nv27-fg-dark" propertyAccessControl="none">
+                    <rect key="frame" x="329" y="183" width="52" height="24"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
+                    <color key="color" red="0.15" green="0.15" blue="0.14" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                    <connections>
+                        <action selector="changedForegroundTextColorWellDark:" target="-2" id="nv27-fg-dark-action"/>
                     </connections>
                 </colorWell>
                 <textField verticalHuggingPriority="750" id="397" propertyAccessControl="none">
@@ -516,6 +544,14 @@
                         <action selector="changedBackgroundTextColorWell:" target="-2" id="420"/>
                     </connections>
                 </colorWell>
+                <colorWell id="nv27-bg-dark" propertyAccessControl="none">
+                    <rect key="frame" x="329" y="151" width="52" height="24"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
+                    <color key="color" red="0.15" green="0.15" blue="0.14" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                    <connections>
+                        <action selector="changedBackgroundTextColorWellDark:" target="-2" id="nv27-bg-dark-action"/>
+                    </connections>
+                </colorWell>
                 <textField verticalHuggingPriority="750" id="401" propertyAccessControl="none">
                     <rect key="frame" x="171" y="155" width="94" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
@@ -526,7 +562,7 @@
                     </textFieldCell>
                 </textField>
                 <textField verticalHuggingPriority="750" id="387" propertyAccessControl="none">
-                    <rect key="frame" x="121" y="267" width="188" height="21"/>
+                    <rect key="frame" x="121" y="285" width="188" height="21"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" lineBreakMode="truncatingTail" allowsUndo="NO" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="left" title="Helvetica 12" drawsBackground="YES" id="392">
                         <font key="font" metaFont="system"/>
@@ -535,7 +571,7 @@
                     </textFieldCell>
                 </textField>
                 <button verticalHuggingPriority="750" id="388" propertyAccessControl="none">
-                    <rect key="frame" x="316" y="261" width="90" height="32"/>
+                    <rect key="frame" x="316" y="279" width="90" height="32"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="push" title="Select…" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="391">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -546,7 +582,7 @@
                     </connections>
                 </button>
                 <textField verticalHuggingPriority="750" id="389" propertyAccessControl="none">
-                    <rect key="frame" x="42" y="269" width="76" height="17"/>
+                    <rect key="frame" x="42" y="287" width="76" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
                     <textFieldCell key="cell" sendsActionOnEndEditing="YES" alignment="right" title="Body Font:" id="390">
                         <font key="font" metaFont="system"/>
@@ -555,7 +591,7 @@
                     </textFieldCell>
                 </textField>
                 <button id="415">
-                    <rect key="frame" x="135" y="225" width="130" height="18"/>
+                    <rect key="frame" x="135" y="243" width="130" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Search Highlight:" bezelStyle="regularSquare" imagePosition="left" alignment="left" state="on" inset="2" id="416">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -568,7 +604,7 @@
                 <textField verticalHuggingPriority="750" id="467" propertyAccessControl="none">
                     <rect key="frame" x="29" y="132" width="326" height="14"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
-                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" alignment="left" title="Text and Background Colors affect User Color Scheme only." id="468">
+                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" alignment="left" title="These colors are used by the User Scheme (View › Color Schemes, ⌥⌘3)." id="468">
                         <font key="font" metaFont="smallSystem"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>

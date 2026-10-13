@@ -139,6 +139,13 @@
 - (IBAction)changedForegroundTextColorWell:(id)sender {
 	[prefsController setForegroundTextColor:[foregroundColorWell color] sender:self];
 }
+//the User Scheme's dark-mode colors
+- (IBAction)changedForegroundTextColorWellDark:(id)sender {
+	[prefsController setForegroundTextColorDark:[foregroundColorWellDark color] sender:self];
+}
+- (IBAction)changedBackgroundTextColorWellDark:(id)sender {
+	[prefsController setBackgroundTextColorDark:[backgroundColorWellDark color] sender:self];
+}
 - (IBAction)changedSearchHighlightColorWell:(id)sender {
 	[prefsController setSearchTermHighlightColor:[searchHighlightColorWell color] sender:self];
 }
@@ -442,6 +449,8 @@
 	[highlightSearchTermsButton setState:[prefsController highlightSearchTerms]];
 	[foregroundColorWell setColor:[prefsController foregroundTextColor]];
 	[backgroundColorWell setColor:[prefsController backgroundTextColor]];
+	[foregroundColorWellDark setColor:[prefsController foregroundTextColorDark]];
+	[backgroundColorWellDark setColor:[prefsController backgroundTextColorDark]];
     //maximum note body width: a whole number of points within the stepper's range
     NSNumberFormatter *widthFormatter = [[[NSNumberFormatter alloc] init] autorelease];
     [widthFormatter setNumberStyle:NSNumberFormatterNoStyle];

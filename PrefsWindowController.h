@@ -39,6 +39,7 @@
 	IBOutlet NSButton *makeURLsClickable;
 	IBOutlet NSButton *highlightSearchTermsButton;
 	IBOutlet NSColorWell *searchHighlightColorWell, *foregroundColorWell, *backgroundColorWell;
+	IBOutlet NSColorWell *foregroundColorWellDark, *backgroundColorWellDark;
     IBOutlet NSButton *togDockButton;
     IBOutlet NSPopUpButton *appearancePopUp;
 	IBOutlet NSTextField *maxWidthField;
@@ -62,6 +63,8 @@
 
 - (IBAction)changedBackgroundTextColorWell:(id)sender;
 - (IBAction)changedForegroundTextColorWell:(id)sender;
+- (IBAction)changedForegroundTextColorWellDark:(id)sender;
+- (IBAction)changedBackgroundTextColorWellDark:(id)sender;
 - (IBAction)changedHighlightSearchTerms:(id)sender;	
 - (IBAction)changedSearchHighlightColorWell:(id)sender;
 - (IBAction)changedMakeURLsClickable:(id)sender;

@@ -480,6 +480,7 @@ void outletObjectAwoke(id sender) {
 	 @selector(setNoteBodyFont:sender:),  //when to tell notationcontroller to restyle its notes
 	 @selector(setForegroundTextColor:sender:),  //ditto
 	 @selector(setBackgroundTextColor:sender:),  //ditto
+	 @selector(setForegroundTextColorDark:sender:), @selector(setBackgroundTextColorDark:sender:),  //ditto, for dark mode
 	 @selector(setTableFontSize:sender:),  //when to tell notationcontroller to regenerate the (now potentially too-short) note-body previews
 	 @selector(addTableColumn:sender:),  //ditto
 	 @selector(removeTableColumn:sender:),  //ditto
@@ -1013,20 +1014,10 @@ terminateApp:
 		if (currentNote) {
 			[self contentsUpdatedForNote:currentNote];
 		}
-	} else if ([selectorString isEqualToString:SEL_STR(setForegroundTextColor:sender:)]) {
-		if (userScheme!=2) {
-			[self setUserColorScheme:self];
-		}else {
-			[self setForegrndColor:[prefsController foregroundTextColor]];
-			[self updateColorScheme];
-		}
-	} else if ([selectorString isEqualToString:SEL_STR(setBackgroundTextColor:sender:)]) {
-		if (userScheme!=2) {
-			[self setUserColorScheme:self];
-		}else {
-			[self setBackgrndColor:[prefsController backgroundTextColor]];
-			[self updateColorScheme];
-		}
+	} else if ([selectorString isEqualToString:SEL_STR(setForegroundTextColor:sender:)] || [selectorString isEqualToString:SEL_STR(setBackgroundTextColor:sender:)] ||
+			   [selectorString isEqualToString:SEL_STR(setForegroundTextColorDark:sender:)] || [selectorString isEqualToString:SEL_STR(setBackgroundTextColorDark:sender:)]) {
+		//editing the User Scheme's colors switches to (or refreshes) the User Scheme
+		[self setUserColorScheme:self];
 		
 	} else if ([selectorString isEqualToString:SEL_STR(setTableFontSize:sender:)] || [selectorString isEqualToString:SEL_STR(setTableColumnsShowPreview:sender:)]) {
 		
@@ -2810,20 +2801,28 @@ static NSColor *SchemeColor(NSInteger scheme, BOOL background, BOOL dark) {
 }
 
 //Settings > General > Appearance: 0 follows the system, 1 is always light, 2 always dark
+//the User Scheme's colors (Settings > Fonts & Colors) for the current appearance
+- (NSColor *)userSchemeColor:(BOOL)background {
+    GlobalPrefs *prefs = [GlobalPrefs defaultPrefs];
+    NSColor *color = [self appearanceIsDark] ? (background ? [prefs backgroundTextColorDark] : [prefs foregroundTextColorDark]) :
+        (background ? [prefs backgroundTextColor] : [prefs foregroundTextColor]);
+    return color ? color : (background ? [NSColor textBackgroundColor] : [NSColor textColor]);
+}
+
 - (void)applyAppearancePreference {
     NSInteger choice = [[NSUserDefaults standardUserDefaults] integerForKey:@"AppAppearance"];
     [NSApp setAppearance:choice == 1 ? [NSAppearance appearanceNamed:NSAppearanceNameAqua] :
      choice == 2 ? [NSAppearance appearanceNamed:NSAppearanceNameDarkAqua] : nil];
 }
 
-//called by the notes list when its effective appearance changes (the system switched between light and dark, or
-//the Appearance setting changed): re-pick the light or dark variant of the built-in schemes; a user scheme keeps
-//its own colors
+//Accessibility's Increase contrast setting changed: Low Contrast switches to (or back from) the B/W colors
 - (void)accessibilityDisplayOptionsDidChange:(NSNotification *)aNotification {
     if (userScheme == 1)
         [self setLCColorScheme:self];
 }
 
+//called by the notes list when its effective appearance changes (the system switched between light and dark, or
+//the Appearance setting changed): re-pick the light or dark colors of the current scheme
 - (void)appearanceDidChange {
     static NSInteger lastDark = -1;
     NSInteger dark = [self appearanceIsDark];
@@ -2833,6 +2832,8 @@ static NSColor *SchemeColor(NSInteger scheme, BOOL background, BOOL dark) {
         [self setBWColorScheme:self];
     } else if (userScheme == 1) {
         [self setLCColorScheme:self];
+    } else if (userScheme == 2) {
+        [self setUserColorScheme:self];
     }
 }
     
@@ -2879,8 +2880,8 @@ static NSColor *SchemeColor(NSInteger scheme, BOOL background, BOOL dark) {
     - (IBAction)setUserColorScheme:(id)sender{
         userScheme=2;
         [[NSUserDefaults standardUserDefaults] setInteger:userScheme forKey:@"ColorScheme"];
-        [self setForegrndColor:[prefsController foregroundTextColor]];
-        [self setBackgrndColor:[prefsController backgroundTextColor]];
+        [self setForegrndColor:[self userSchemeColor:NO]];
+        [self setBackgrndColor:[self userSchemeColor:YES]];
         NSMenu *mainM = [NSApp mainMenu];
         NSMenu *viewM = [[mainM itemWithTitle:@"View"] submenu];
         mainM = [[viewM itemWithTitle:@"Color Schemes"] submenu];
@@ -2962,13 +2963,7 @@ static NSColor *SchemeColor(NSInteger scheme, BOOL background, BOOL dark) {
             if (userScheme==0 || userScheme==1) {
                 theColor = SchemeColor(userScheme, YES, [self appearanceIsDark]);
             }else if (userScheme==2) {
-                NSData *theData = [[NSUserDefaults standardUserDefaults] dataForKey:@"BackgroundTextColor"];
-                if (theData){
-                    theColor = (NSColor *)[NSUnarchiver unarchiveObjectWithData:theData];
-                }else {
-                    theColor = [prefsController backgroundTextColor];
-                }
-                
+                theColor = [self userSchemeColor:YES];
             }else{
                 theColor =  [NSColor whiteColor];
             }
@@ -2990,13 +2985,7 @@ static NSColor *SchemeColor(NSInteger scheme, BOOL background, BOOL dark) {
             if (userScheme==0 || userScheme==1) {
                 theColor = SchemeColor(userScheme, NO, [self appearanceIsDark]);
             }else if (userScheme==2) {
-                
-                NSData *theData = [[NSUserDefaults standardUserDefaults] dataForKey:@"ForegroundTextColor"];
-                if (theData){
-                    theColor = (NSColor *)[NSUnarchiver unarchiveObjectWithData:theData];
-                }else {
-                    theColor = [prefsController foregroundTextColor];
-                }
+                theColor = [self userSchemeColor:NO];
             }
             [self setForegrndColor:theColor];
             return theColor;

@@ -99,6 +99,10 @@ BOOL ColorsEqualWith8BitChannels(NSColor *c1, NSColor *c2);
 - (NSColor*)foregroundTextColor;
 - (void)setBackgroundTextColor:(NSColor*)aColor sender:(id)sender;
 - (NSColor*)backgroundTextColor;
+- (void)setForegroundTextColorDark:(NSColor*)aColor sender:(id)sender;
+- (NSColor*)foregroundTextColorDark;
+- (void)setBackgroundTextColorDark:(NSColor*)aColor sender:(id)sender;
+- (NSColor*)backgroundTextColorDark;
 
 - (void)setTabIndenting:(BOOL)value sender:(id)sender;
 - (BOOL)tabKeyIndents;
