@@ -157,7 +157,44 @@
 	if ([tabView numberOfTabViewItems] == 1) {
 		[tabView selectTabViewItemAtIndex:0];
 		[tabView setTabViewType:NSNoTabsNoBorder];
+		[self closeGapAboveTabView:tabView];
 	}
+}
+
+//without its tab strip the remaining tab's controls sit well below the rows above the tab view: move those rows
+//down to the usual spacing and shorten the pane by the same amount
+- (void)closeGapAboveTabView:(NSTabView*)tabView {
+	NSView *pane = [tabView superview];
+	NSView *content = [[tabView selectedTabViewItem] view];
+	if (!pane || !content || [pane isFlipped]) return;
+	
+	CGFloat contentTop = -CGFLOAT_MAX;
+	for (NSView *control in [content subviews]) {
+		if (![control isHidden])
+			contentTop = MAX(contentTop, NSMaxY([content convertRect:[control frame] toView:pane]));
+	}
+	NSMutableArray *rowsAbove = [NSMutableArray array];
+	CGFloat rowsBottom = CGFLOAT_MAX;
+	for (NSView *sibling in [pane subviews]) {
+		if (sibling != tabView && ![sibling isHidden] && NSMinY([sibling frame]) >= contentTop) {
+			[rowsAbove addObject:sibling];
+			rowsBottom = MIN(rowsBottom, NSMinY([sibling frame]));
+		}
+	}
+	CGFloat shift = rowsBottom - contentTop - 16.0;
+	if (![rowsAbove count] || shift <= 0.0) return;
+	
+	for (NSView *row in rowsAbove)
+		[row setFrameOrigin:NSMakePoint(NSMinX([row frame]), NSMinY([row frame]) - shift)];
+	BOOL autoresizes = [pane autoresizesSubviews];
+	[pane setAutoresizesSubviews:NO];
+	[pane setFrameSize:NSMakeSize(NSWidth([pane frame]), NSHeight([pane frame]) - shift)];
+	[pane setAutoresizesSubviews:autoresizes];
+	//the tab view now extends behind those rows; keep it underneath so they still get the clicks
+	[tabView retain];
+	[tabView removeFromSuperview];
+	[pane addSubview:tabView positioned:NSWindowBelow relativeTo:nil];
+	[tabView release];
 }
 
 //Simplenote syncing, note encryption and Secure Text Entry were removed: drop the "Synchronization" and
