@@ -39,8 +39,6 @@
                 <outlet property="togDockButton" destination="380" id="386"/>
                 <outlet property="togDockLabel" destination="381" id="387"/>
                 <outlet property="useETScrollbarsOnLionButton" destination="481" id="484"/>
-                <outlet property="useMarkdownImportButton" destination="438" id="454"/>
-                <outlet property="useReadabilityButton" destination="439" id="455"/>
                 <outlet property="window" destination="5" id="238"/>
             </connections>
         </customObject>
@@ -71,7 +69,7 @@
                     </textFieldCell>
                 </textField>
                 <button verticalHuggingPriority="750" id="289">
-                    <rect key="frame" x="321" y="185" width="118" height="32"/>
+                    <rect key="frame" x="321" y="186" width="118" height="32"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="push" title="Definieren..." bezelStyle="rounded" alignment="center" borderStyle="border" inset="2" id="333">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -142,7 +140,7 @@
                     </connections>
                 </button>
                 <popUpButton verticalHuggingPriority="750" id="158">
-                    <rect key="frame" x="220" y="232" width="102" height="26"/>
+                    <rect key="frame" x="223" y="232" width="99" height="26"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
                     <popUpButtonCell key="cell" type="push" title="Andere…" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" tag="3" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="160" id="326">
                         <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
@@ -163,7 +161,7 @@
                     </connections>
                 </popUpButton>
                 <textField verticalHuggingPriority="750" id="157">
-                    <rect key="frame" x="41" y="221" width="177" height="34"/>
+                    <rect key="frame" x="41" y="219" width="177" height="34"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
                     <textFieldCell key="cell" sendsActionOnEndEditing="YES" alignment="right" title="Textgröße der Liste:" id="325">
                         <font key="font" metaFont="system"/>
@@ -252,11 +250,11 @@
             </subviews>
         </customView>
         <customView id="268" userLabel="editing view">
-            <rect key="frame" x="0.0" y="0.0" width="464" height="458"/>
+            <rect key="frame" x="0.0" y="0.0" width="464" height="375"/>
             <autoresizingMask key="autoresizingMask"/>
             <subviews>
                 <button id="311">
-                    <rect key="frame" x="157" y="236" width="251" height="18"/>
+                    <rect key="frame" x="157" y="153" width="251" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="URLs als klickbare Links formatieren" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="350">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -267,7 +265,7 @@
                     </connections>
                 </button>
                 <button id="307">
-                    <rect key="frame" x="157" y="272" width="173" height="18"/>
+                    <rect key="frame" x="157" y="189" width="173" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Soft-Tabs (Leerzeichen)" bezelStyle="regularSquare" imagePosition="left" alignment="left" state="on" inset="2" id="349">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -278,7 +276,7 @@
                     </connections>
                 </button>
                 <button id="283">
-                    <rect key="frame" x="157" y="216" width="214" height="18"/>
+                    <rect key="frame" x="157" y="133" width="214" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Titel in Notizlinks vorschlagen" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="348">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -289,7 +287,7 @@
                     </connections>
                 </button>
                 <textField verticalHuggingPriority="750" id="282">
-                    <rect key="frame" x="96" y="237" width="58" height="17"/>
+                    <rect key="frame" x="96" y="154" width="58" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
                     <textFieldCell key="cell" sendsActionOnEndEditing="YES" alignment="right" title="Links:" id="347">
                         <font key="font" metaFont="system"/>
@@ -298,7 +296,7 @@
                     </textFieldCell>
                 </textField>
                 <textField verticalHuggingPriority="750" id="280">
-                    <rect key="frame" x="46" y="392" width="108" height="21"/>
+                    <rect key="frame" x="46" y="309" width="108" height="21"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
                     <textFieldCell key="cell" sendsActionOnEndEditing="YES" alignment="right" title="Orthographie:" id="346">
                         <font key="font" metaFont="system"/>
@@ -307,7 +305,7 @@
                     </textFieldCell>
                 </textField>
                 <textField verticalHuggingPriority="750" id="279">
-                    <rect key="frame" x="17" y="404" width="137" height="34"/>
+                    <rect key="frame" x="17" y="321" width="137" height="34"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
                     <textFieldCell key="cell" sendsActionOnEndEditing="YES" alignment="right" id="345">
                         <font key="font" metaFont="system"/>
@@ -318,7 +316,7 @@
                     </textFieldCell>
                 </textField>
                 <button id="278">
-                    <rect key="frame" x="157" y="420" width="289" height="18"/>
+                    <rect key="frame" x="157" y="337" width="289" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Kopierte Formatierungen beibehalten" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="344">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -329,7 +327,7 @@
                     </connections>
                 </button>
                 <button id="276">
-                    <rect key="frame" x="157" y="395" width="291" height="18"/>
+                    <rect key="frame" x="157" y="312" width="291" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Rechtschreibprüfung während der Eingabe" bezelStyle="regularSquare" imagePosition="left" alignment="left" state="on" inset="2" id="342">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -340,7 +338,7 @@
                     </connections>
                 </button>
                 <textField verticalHuggingPriority="750" id="275">
-                    <rect key="frame" x="175" y="301" width="272" height="28"/>
+                    <rect key="frame" x="175" y="218" width="272" height="28"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
                     <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Optionstaste in Verbindung dazu rückt ein und Umschalttaste bringt den Schreibfokus zurück." id="341">
                         <font key="font" metaFont="smallSystem"/>
@@ -349,7 +347,7 @@
                     </textFieldCell>
                 </textField>
                 <textField verticalHuggingPriority="750" id="274">
-                    <rect key="frame" x="46" y="341" width="108" height="34"/>
+                    <rect key="frame" x="46" y="258" width="108" height="34"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
                     <textFieldCell key="cell" sendsActionOnEndEditing="YES" alignment="right" title="Tabulatortaste:" id="340">
                         <font key="font" metaFont="system"/>
@@ -358,7 +356,7 @@
                     </textFieldCell>
                 </textField>
                 <matrix verticalHuggingPriority="750" allowsEmptySelection="NO" autosizesCells="NO" id="271">
-                    <rect key="frame" x="157" y="337" width="241" height="38"/>
+                    <rect key="frame" x="157" y="254" width="241" height="38"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     <size key="cellSize" width="241" height="18"/>
@@ -398,46 +396,6 @@
                             </dictionary>
                         </binding>
                     </connections>
-                </textField>
-                <button id="438">
-                    <rect key="frame" x="157" y="179" width="289" height="18"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
-                    <buttonCell key="cell" type="check" title="Importierte URL in Markdown umwandeln" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="445">
-                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                        <font key="font" metaFont="system"/>
-                    </buttonCell>
-                    <connections>
-                        <action selector="changedUseMarkdownImport:" target="-2" id="452"/>
-                    </connections>
-                </button>
-                <button id="439">
-                    <rect key="frame" x="157" y="159" width="235" height="18"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
-                    <buttonCell key="cell" type="check" title="Mit Readability anzeigen" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="444">
-                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                        <font key="font" metaFont="system"/>
-                    </buttonCell>
-                    <connections>
-                        <action selector="changedUseReadability:" target="-2" id="453"/>
-                    </connections>
-                </button>
-                <textField verticalHuggingPriority="750" id="440">
-                    <rect key="frame" x="74" y="163" width="80" height="34"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
-                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" alignment="right" title="URL Import:" id="443">
-                        <font key="font" metaFont="system"/>
-                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                    </textFieldCell>
-                </textField>
-                <textField verticalHuggingPriority="750" id="441">
-                    <rect key="frame" x="175" y="116" width="247" height="42"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
-                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Options-Taste gedrückt halten, während ein Link zur Notizliste gezogen wird, dies aktiviert temporär Readability." id="442">
-                        <font key="font" metaFont="smallSystem"/>
-                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                    </textFieldCell>
                 </textField>
                 <textField verticalHuggingPriority="750" id="446">
                     <rect key="frame" x="-3" y="50" width="157" height="17"/>

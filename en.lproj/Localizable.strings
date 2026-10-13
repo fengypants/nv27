@@ -639,7 +639,6 @@
 "Switch to Horizontal Layout" = "Switch to Horizontal Layout";
 
 /* for warning about incompatibility with TextExpander, Typinator, etc. */
-"Secure Text Entry will prevent %@, which is currently installed on this computer, from working in nvALT." = "Secure Text Entry will prevent %@, which is currently installed on this computer, from working in nvALT.";
 
 /* Status message after downloading a URL */
 "Importing content..." = "Importing content…";

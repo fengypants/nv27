@@ -35,7 +35,6 @@
 	NSMutableDictionary *documentSettings;
 	BOOL shouldGrabCreationDates;
     
-    BOOL shouldUseReadability;
 }
 
 //a directory containing notes, a custom bundle, or custom file format in which more than one note could be expected
@@ -61,8 +60,6 @@
 - (NSArray*)notesInDirectory:(NSString*)filename;
 - (NSArray*)notesInFile:(NSString*)filename;
 
-- (BOOL)shouldUseReadability;
-- (void)setShouldUseReadability:(BOOL)value;
 
 @end
 

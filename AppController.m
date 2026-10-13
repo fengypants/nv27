@@ -35,7 +35,6 @@
 #import "BookmarksController.h"
 #import "MultiplePageView.h"
 #import "LinearDividerShader.h"
-#import "SecureTextEntryManager.h"
 #import "TagEditingManager.h"
 #import "DFView.h"
 #import "ETContentView.h"
@@ -342,7 +341,6 @@ void outletObjectAwoke(id sender) {
     [prefsController registerAppActivationKeystrokeWithTarget:self selector:@selector(toggleNVActivation:)];
     [notationController updateLabelConnectionsAfterDecoding];
     [notationController checkIfNotationIsTrashed];
-    [[SecureTextEntryManager sharedInstance] checkForIncompatibleApps];
 
     //Sparkle (and its update feed, which serves the original Intel-only nvALT) has been removed;
     //hide the "Check for Updates…" items until an updater for this build is set up
@@ -554,12 +552,6 @@ terminateApp:
 			[self _forceRegeneratePreviewsForTitleColumn];
 			[notesTableView setNeedsDisplay:YES];
 		}
-		if ([[notationController notationPrefs] secureTextEntry]) {
-			[[SecureTextEntryManager sharedInstance] enableSecureTextEntry];
-		} else {
-			[[SecureTextEntryManager sharedInstance] disableSecureTextEntry];
-		}
-		
 		[field selectText:nil];
 		
 		[oldNotation autorelease];
@@ -3287,22 +3279,15 @@ terminateApp:
 
 - (void)setUpStatusBarItem{
 
-    NSImage *statusIcon=[NSImage imageNamed:@"nvMenuDark"];
-    [statusIcon setSize:NSMakeSize(16.0, 16.0)];
+    //a template SF Symbol, so the menu bar tints it like the system's own items
+    NSImage *statusIcon = [NSImage imageWithSystemSymbolName:@"note.text" accessibilityDescription:@"nv27"];
+    statusIcon = [statusIcon imageWithSymbolConfiguration:[NSImageSymbolConfiguration configurationWithPointSize:15.0 weight:NSFontWeightRegular]];
     [statusIcon setTemplate:YES];
-    statusItem =[[NSStatusBar systemStatusBar] statusItemWithLength:24.f];
-    if (IsYosemiteOrLater) {
-        statusItem.button.image=statusIcon;
-        statusItem.button.target=self;
-        statusItem.button.action=@selector(statusItemAction:);
-        [statusItem.button sendActionOn:NSEventMaskLeftMouseUp|NSEventMaskRightMouseUp];
-    }else{
-        statusItem.image=statusIcon;
-        statusItem.target=self;
-        statusItem.action=@selector(statusItemAction:);
-         [statusItem sendActionOn:NSEventMaskLeftMouseUp|NSEventMaskRightMouseUp];
-        statusItem.highlightMode=YES;
-    }
+    statusItem =[[NSStatusBar systemStatusBar] statusItemWithLength:NSSquareStatusItemLength];
+    statusItem.button.image=statusIcon;
+    statusItem.button.target=self;
+    statusItem.button.action=@selector(statusItemAction:);
+    [statusItem.button sendActionOn:NSEventMaskLeftMouseUp|NSEventMaskRightMouseUp];
     [statusItem retain];
 
 }

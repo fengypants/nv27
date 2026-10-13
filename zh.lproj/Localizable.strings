@@ -639,7 +639,6 @@
 "Switch to Horizontal Layout" = "切换到横向排版";
 
 /* for warning about incompatibility with TextExpander, Typinator, etc. */
-"Secure Text Entry will prevent %@, which is currently installed on this computer, from working in Notational Velocity." = "安全文本输入会阻止 %@ 的访问，并且可能影响 Notational Velocity 的正常运行。";
 
 /* Status message after downloading a URL */
 "Importing content..." = "正在导入内容…";

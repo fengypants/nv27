@@ -80,6 +80,7 @@
 	
 	[self removeSynchronizationTab];
 	[self removeEncryptionControls];
+	[self useStandardListButtons];
 	
 	NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
 	[center addObserver:self selector:@selector(initializeControls) name:NotationPrefsDidChangeNotification object:nil];
@@ -125,8 +126,6 @@
 		[self setSeparateFileControlsState:[notationPrefs notesStorageFormat]];
 		[confirmFileDeletionButton setState:[notationPrefs confirmFileDeletion]];
 		
-		[secureTextEntryButton setState:[notationPrefs secureTextEntry]];
-		
 		[allowedTypesTable reloadData];
 		[allowedExtensionsTable reloadData];
 		//tags are stored as Finder tags by default; the button only converts from the older OpenMeta tags
@@ -135,58 +134,63 @@
     }
 }
 
-//Simplenote syncing was removed; the nib still contains its "Synchronization" tab (and outlets to its
-//controls, which is why those ivars remain declared), so drop the tab from whichever tab view holds it
-- (void)removeSynchronizationTab {
-	NSView *ancestor = [enabledSyncButton superview];
+//drop the tab holding `view` from whichever tab view contains it (the compiled nib still has tabs for removed
+//features, and outlets to their controls, which is why those ivars remain declared)
+- (void)removeTabContainingView:(NSView*)view {
+	NSView *ancestor = [view superview];
 	while (ancestor && ![ancestor isKindOfClass:[NSTabView class]])
 		ancestor = [ancestor superview];
 	NSTabView *tabView = (NSTabView*)ancestor;
 	
 	for (NSTabViewItem *item in [[[tabView tabViewItems] copy] autorelease]) {
-		if ([enabledSyncButton isDescendantOf:[item view]]) {
+		if ([view isDescendantOf:[item view]]) {
 			[tabView removeTabViewItem:item];
 			break;
 		}
 	}
+	//a single remaining tab needs no tab strip
+	if ([tabView numberOfTabViewItems] == 1)
+		[tabView setTabViewType:NSTabViewTypeNoTabsNoBorder];
 }
 
-//note encryption was removed; its controls share the nib's "Security" tab with Secure Text Entry, so hide
-//them (their outlets stay declared because the compiled nib connects them) and move the Secure Text Entry
-//row (its checkbox plus the labels beside and beneath it) to the top of the tab
+//Simplenote syncing, note encryption and Secure Text Entry were removed: drop the "Synchronization" and
+//"Security" tabs (encryption and Secure Text Entry shared the latter)
+- (void)removeSynchronizationTab {
+	[self removeTabContainingView:enabledSyncButton];
+}
+
 - (void)removeEncryptionControls {
-	NSView *securityView = [secureTextEntryButton superview];
-	if (!securityView) return;
-	
-	NSRect entryFrame = [secureTextEntryButton frame];
-	NSArray *encryptionControls = [NSArray arrayWithObjects:enableEncryptionButton, changePasswordButton, passwordSettingsMatrix,
-								   keyLengthStepper, keyLengthField, removeFromKeychainButton, nil];
-	CGFloat topEdge = 0.0, keptTopEdge = 0.0;
-	NSMutableArray *keptViews = [NSMutableArray array];
-	
-	for (NSView *subview in [securityView subviews]) {
-		NSRect frame = [subview frame];
-		topEdge = MAX(topEdge, NSMaxY(frame));
-		
-		BOOL inSecureEntryRow = NSMidY(frame) >= NSMinY(entryFrame) - 40.0 && NSMidY(frame) <= NSMaxY(entryFrame) + 10.0;
-		if (subview == secureTextEntryButton || (inSecureEntryRow && ![encryptionControls containsObject:subview])) {
-			[keptViews addObject:subview];
-			keptTopEdge = MAX(keptTopEdge, NSMaxY(frame));
-		} else {
-			[subview setHidden:YES];
-		}
-	}
-	
-	CGFloat offset = topEdge - keptTopEdge;
-	if ([securityView isFlipped]) offset = -offset;
-	for (NSView *subview in keptViews) {
-		[subview setFrameOrigin:NSMakePoint(NSMinX([subview frame]), NSMinY([subview frame]) + offset)];
-	}
+	[self removeTabContainingView:secureTextEntryButton];
 	
 	//notes are only stored as separate files, so the single-database choice is gone
 	NSMenuItem *databaseItem = [[storageFormatPopupButton menu] itemWithTag:SingleDatabaseFormat];
 	if (databaseItem)
 		[[storageFormatPopupButton menu] removeItem:databaseItem];
+}
+
+//the nib's add/remove/make-default buttons under the extension and type lists use old custom artwork;
+//give them the standard small square bezel with SF Symbols, as list controls elsewhere in macOS have
+- (void)useStandardListButtons {
+	NSDictionary *symbols = [NSDictionary dictionaryWithObjectsAndKeys:
+							 @"plus", [NSValue valueWithNonretainedObject:newExtensionButton],
+							 @"minus", [NSValue valueWithNonretainedObject:removeExtensionButton],
+							 @"checkmark", [NSValue valueWithNonretainedObject:makeDefaultExtensionButton],
+							 @"plus", [NSValue valueWithNonretainedObject:newTypeButton],
+							 @"minus", [NSValue valueWithNonretainedObject:removeTypeButton], nil];
+	for (NSValue *key in symbols) {
+		NSButton *button = [key nonretainedObjectValue];
+		if (!button) continue;
+		NSImage *image = [NSImage imageWithSystemSymbolName:[symbols objectForKey:key] accessibilityDescription:[button toolTip]];
+		NSImageSymbolConfiguration *config = [NSImageSymbolConfiguration configurationWithPointSize:11.0 weight:NSFontWeightMedium];
+		[button setBezelStyle:NSBezelStyleSmallSquare];
+		[button setBordered:YES];
+		[button setTitle:@""];
+		[button setAlternateImage:nil];
+		[button setImage:[image imageWithSymbolConfiguration:config]];
+		[button setImagePosition:NSImageOnly];
+		[button setImageScaling:NSImageScaleNone];
+		[button setButtonType:NSButtonTypeMomentaryPushIn];
+	}
 }
 
 - (void)setSeparateFileControlsState:(BOOL)separateFileControlsState {
@@ -290,8 +294,8 @@
 	[[NSUserDefaults standardUserDefaults] setObject:@"Default" forKey:@"TextEditor"];
 }
 
+//still connected in the compiled nib; the control is no longer shown
 - (IBAction)changedSecureTextEntry:(id)sender {
-	[notationPrefs setSecureTextEntry:[secureTextEntryButton state]];
 }
 
 - (IBAction)makeDefaultExtension:(id)sender {

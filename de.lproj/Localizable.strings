@@ -641,7 +641,6 @@
 "Switch to Horizontal Layout" = "Zu horizontaler Darstellung wechseln";
 
 /* for warning about incompatibility with TextExpander, Typinator, etc. */
-"Secure Text Entry will prevent %@, which is currently installed on this computer, from working in Notational Velocity." = "Die Sichere Texteingabe wird %@, das momentan auf diesem Computer installiert ist, daran hindern, in Notational Velocity zu funktionieren.";
 
 /* Status message after downloading a URL */
 "Importing content..." = "Importiere Inhalt…";

@@ -354,7 +354,7 @@ NSString *ShouldImportCreationDates = @"ShouldImportCreationDates";
 
 	if (fileType == HTML_TYPE_ID || [extension isEqualToString:@"htm"] || [extension isEqualToString:@"html"] || [extension isEqualToString:@"shtml"]) {
 		//HTML-to-Markdown conversion used bundled Python 2 scripts (readability/html2text), and macOS no longer
-		//ships Python 2; until a native converter exists, import HTML as rich text regardless of the Markdown import pref
+		//ships Python 2; HTML is imported as rich text
 		attributedStringFromData = [[NSMutableAttributedString alloc] initWithHTML:[NSData uncachedDataFromFile:filename] 
 																		   options:[NSDictionary optionsDictionaryWithTimeout:10.0] documentAttributes:NULL];
 	} else if (fileType == RTF_TYPE_ID || [extension isEqualToString:@"rtf"] || [extension isEqualToString:@"nvhelp"] || [extension isEqualToString:@"rtx"]) {
@@ -510,16 +510,6 @@ NSString *ShouldImportCreationDates = @"ShouldImportCreationDates";
 			return [NSArray arrayWithObject:note];
 	}
 	return nil;
-}
-
--(BOOL)shouldUseReadability
-{
-    return shouldUseReadability;
-}
-
--(void) setShouldUseReadability:(BOOL)value
-{
-	shouldUseReadability = value;
 }
 
 @end

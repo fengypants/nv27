@@ -93,9 +93,9 @@
                         </tabViewItems>
                     </tabView>
                     <button toolTip="Lock note to preview" wantsLayer="YES" verticalHuggingPriority="750" alphaValue="0.80000000000000004" id="261">
-                        <rect key="frame" x="300" y="7" width="28" height="19"/>
+                        <rect key="frame" x="336" y="7" width="28" height="19"/>
                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
-                        <buttonCell key="cell" type="recessed" bezelStyle="recessed" image="HUDIconLock" imagePosition="overlaps" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="262">
+                        <buttonCell key="cell" type="recessed" bezelStyle="recessed" image="lock" catalog="system" imagePosition="only" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="262">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
                             <font key="font" metaFont="systemBold" size="12"/>
                             <string key="keyEquivalent">L</string>
@@ -108,7 +108,7 @@
                     <button toolTip="Save Preview" wantsLayer="YES" verticalHuggingPriority="750" alphaValue="0.80000000000000004" id="263">
                         <rect key="frame" x="404" y="7" width="28" height="19"/>
                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
-                        <buttonCell key="cell" type="recessed" bezelStyle="recessed" image="HUDIconSave" imagePosition="only" alignment="center" borderStyle="border" imageScaling="axesIndependently" inset="2" id="264">
+                        <buttonCell key="cell" type="recessed" bezelStyle="recessed" image="square.and.arrow.down" catalog="system" imagePosition="only" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="264">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="systemBold" size="12"/>
                             <string key="keyEquivalent">S</string>
@@ -119,9 +119,9 @@
                         </connections>
                     </button>
                     <button toolTip="Print/PDF" wantsLayer="YES" verticalHuggingPriority="750" alphaValue="0.80000000000000004" id="267">
-                        <rect key="frame" x="334" y="7" width="28" height="19"/>
+                        <rect key="frame" x="370" y="7" width="28" height="19"/>
                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
-                        <buttonCell key="cell" type="recessed" bezelStyle="recessed" image="HUDIconPrint" imagePosition="only" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="268">
+                        <buttonCell key="cell" type="recessed" bezelStyle="recessed" image="printer" catalog="system" imagePosition="only" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="268">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="systemBold" size="12"/>
                             <string key="keyEquivalent">P</string>
@@ -150,11 +150,10 @@
         </window>
     </objects>
     <resources>
-        <image name="HUDIconLock" width="512" height="512"/>
-        <image name="HUDIconPrint" width="512" height="512"/>
-        <image name="HUDIconSave" width="512" height="512"/>
-        <image name="HUDIconShare" width="512" height="512"/>
         <image name="TabClose_Front_Pressed" width="12" height="13"/>
         <image name="TabClose_Front_Rollover" width="12" height="13"/>
+        <image name="lock" catalog="system" width="13" height="15"/>
+        <image name="printer" catalog="system" width="16" height="15"/>
+        <image name="square.and.arrow.down" catalog="system" width="14" height="16"/>
     </resources>
 </document>

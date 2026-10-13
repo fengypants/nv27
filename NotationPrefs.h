@@ -29,7 +29,7 @@ enum { SingleDatabaseFormat = 0, PlainTextFormat, RTFTextFormat, HTMLFormat, Wor
 extern NSString *NotationPrefsDidChangeNotification;
 
 @interface NotationPrefs : NSObject {
-	BOOL databaseIsEncrypted, secureTextEntry;
+	BOOL databaseIsEncrypted;
 	
 	NSColor *foregroundColor;
 	NSFont *baseBodyFont;
@@ -62,14 +62,12 @@ extern NSString *NotationPrefsDidChangeNotification;
 - (BOOL)databaseIsEncrypted;
 - (UInt32)epochIteration;
 - (BOOL)firstTimeUsed;
-- (BOOL)secureTextEntry;
 
 - (void)setPreferencesAreStored;
 - (NSData*)WALSessionKey;
 
 - (void)setNotesStorageFormat:(NSInteger)formatID;
 - (void)setConfirmsFileDeletion:(BOOL)value;
-- (void)setSecureTextEntry:(BOOL)value;
 
 - (NSUInteger)tableIndexOfDiskUUID:(CFUUIDRef)UUIDRef;
 

@@ -23,7 +23,6 @@
 #import "NotationPrefsViewController.h"
 #import "NSData_transformations.h"
 #import "NotationFileManager.h"
-#import "SecureTextEntryManager.h"
 #import "DiskUUIDEntry.h"
 #include <CoreServices/CoreServices.h>
 #include <Security/Security.h>
@@ -51,7 +50,7 @@ NSString *NotationPrefsDidChangeNotification = @"NotationPrefsDidChangeNotificat
 		}
 		
 		confirmFileDeletion = YES;
-		secureTextEntry = databaseIsEncrypted = NO;
+		databaseIsEncrypted = NO;
 		seenDiskUUIDEntries = [[NSMutableArray alloc] init];
 		notesStorageFormat = PlainTextFormat; //nv27 stores notes only as separate files
 		baseBodyFont = [[[GlobalPrefs defaultPrefs] noteBodyFont] retain];
@@ -79,7 +78,6 @@ NSString *NotationPrefsDidChangeNotification = @"NotationPrefsDidChangeNotificat
 		
 		epochIteration = [decoder decodeInt32ForKey:VAR_STR(epochIteration)];
 		notesStorageFormat = [decoder decodeIntForKey:VAR_STR(notesStorageFormat)];
-		secureTextEntry = [decoder decodeBoolForKey:VAR_STR(secureTextEntry)];
 		
 		//note encryption is no longer supported; remember whether this database was encrypted by an earlier
 		//version (as that version decided it) so that loading can stop instead of misreading the notes
@@ -146,7 +144,6 @@ NSString *NotationPrefsDidChangeNotification = @"NotationPrefsDidChangeNotificat
 	[coder encodeInt32:EPOC_ITERATION forKey:VAR_STR(epochIteration)];
 	
 	[coder encodeInteger:notesStorageFormat forKey:VAR_STR(notesStorageFormat)];
-	[coder encodeBool:secureTextEntry forKey:VAR_STR(secureTextEntry)];
 	
 	[coder encodeBool:confirmFileDeletion forKey:VAR_STR(confirmFileDeletion)];
 	[coder encodeObject:baseBodyFont forKey:VAR_STR(baseBodyFont)];
@@ -236,10 +233,6 @@ NSString *NotationPrefsDidChangeNotification = @"NotationPrefsDidChangeNotificat
 	return databaseIsEncrypted;
 }
 
-- (BOOL)secureTextEntry {
-	return secureTextEntry;
-}
-
 - (void)setPreferencesAreStored {
 	preferencesChanged = NO;
 }
@@ -302,24 +295,6 @@ NSString *NotationPrefsDidChangeNotification = @"NotationPrefsDidChangeNotificat
 - (void)setConfirmsFileDeletion:(BOOL)value {
     confirmFileDeletion = value;
     preferencesChanged = YES;
-}
-
-- (void)setSecureTextEntry:(BOOL)value {
-	
-	secureTextEntry = value;
-	
-	preferencesChanged = YES;
-	
-	SecureTextEntryManager *tem = [SecureTextEntryManager sharedInstance];
-	
-	if (secureTextEntry) {
-		[tem enableSecureTextEntry];
-		[tem checkForIncompatibleApps];
-	} else {
-		//"forget" that the user had disabled the warning dialog when disabling this feature permanently
-		[[NSUserDefaults standardUserDefaults] removeObjectForKey:ShouldHideSecureTextEntryWarningKey];
-		[tem disableSecureTextEntry];
-	}
 }
 
 - (NSUInteger)tableIndexOfDiskUUID:(CFUUIDRef)UUIDRef {
