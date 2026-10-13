@@ -1098,7 +1098,7 @@ force_inline id unifiedCellForNote(NotesTableView *tv, NoteObject *note, NSInteg
 	NSMutableDictionary *idsDict = [NSMutableDictionary dictionaryWithCapacity:1];
 	[idsDict setObject:[[NSData dataWithBytes:&uniqueNoteIDBytes length:16] encodeBase64WithNewlines:NO] forKey:@"NV"];
 	
-	return [NSURL URLWithString:[@"nvalt://find/" stringByAppendingFormat:@"%@/?%@", [titleString stringWithPercentEscapes], 
+	return [NSURL URLWithString:[[kNVURLScheme stringByAppendingString:@"://find/"] stringByAppendingFormat:@"%@/?%@", [titleString stringWithPercentEscapes], 
 								 [idsDict URLEncodedString]]];
 }
 

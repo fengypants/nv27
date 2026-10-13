@@ -203,7 +203,7 @@
                 <textField hidden="YES" verticalHuggingPriority="750" id="431">
                     <rect key="frame" x="160" y="24" width="192" height="14"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" enabled="NO" sendsActionOnEndEditing="YES" title="This will immediately restart nvALT" id="433">
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" enabled="NO" sendsActionOnEndEditing="YES" title="This will immediately restart nv27" id="433">
                         <font key="font" metaFont="smallSystem"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>

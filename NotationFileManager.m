@@ -400,8 +400,11 @@ terminate:
 	NSLog(@"Unable to locate or create an Application Support directory: %d", err);
 	return err;
     } else {
-	//now try to get Notational Database directory
-	if ((err = CreateDirectoryIfNotPresent(&appSupportFoundRef, (CFStringRef)@"Notational Data", notesDir)) != noErr) {
+	//now try to get the notes directory: Application Support/nv27/Notes, so that this app never opens
+	//the original nvALT's default database ("Notational Data") while that app may be using it
+	FSRef appFolderRef;
+	if ((err = CreateDirectoryIfNotPresent(&appSupportFoundRef, (CFStringRef)@"nv27", &appFolderRef)) != noErr ||
+		(err = CreateDirectoryIfNotPresent(&appFolderRef, (CFStringRef)@"Notes", notesDir)) != noErr) {
 	    
 	    return err;
 	}

@@ -98,6 +98,9 @@ typedef char _COMPILE_ASSERT_SYMBOL(__LINE__, msg) [ ((test) ? 1 : -1) ]
 #define IsMavericksOrLater (floor(NSFoundationVersionNumber) >= NSFoundationVersionNumber10_9)
 #define IsYosemiteOrLater (floor(NSFoundationVersionNumber) >= NSFoundationVersionNumber10_10)
 
+//URL scheme this app registers and uses for links between notes (the original nvALT owns "nvalt" and "nv")
+#define kNVURLScheme @"nv27"
+
 #define NOTES_MENU_ID 89
 #define VIEW_MENU_ID 99
 

@@ -2535,7 +2535,7 @@ terminateApp:
     }
     //        [[NSUserDefaults standardUserDefaults] setBool:!isVis forKey:@"ToolbarHidden"];
     if (isVis) {
-        [window setTitle:@"nvALT"];
+        [window setTitle:[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleName"]];
         if (currentNote&&(![[field stringValue]isEqualToString:titleOfNote(currentNote)]))
             [field setStringValue:titleOfNote(currentNote)];
         

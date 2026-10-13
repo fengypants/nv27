@@ -57,9 +57,9 @@ jobs:
 
       - name: Verify architecture
         run: |
-          APP="build/DerivedData/Build/Products/${{ matrix.configuration }}/nvALT.app"
-          file "$APP/Contents/MacOS/nvALT"
-          lipo -archs "$APP/Contents/MacOS/nvALT" | grep -qx arm64
+          APP="build/DerivedData/Build/Products/${{ matrix.configuration }}/nv27.app"
+          file "$APP/Contents/MacOS/nv27"
+          lipo -archs "$APP/Contents/MacOS/nv27" | grep -qx arm64
           # Every Mach-O in the bundle must be arm64-only (no Rosetta dependency).
           find "$APP" -type f -perm -u+x -print0 | xargs -0 file | grep Mach-O | tee macho.txt
           ! grep -v "arm64" macho.txt | grep -q .
@@ -69,14 +69,14 @@ jobs:
         if: matrix.configuration == 'ForBuilding'
         # ditto keeps the signature, symlinks and resource names intact (the bundle has files the
         # artifact uploader can't take directly, e.g. "How does this thing work?.nvhelp")
-        run: ditto -c -k --keepParent build/DerivedData/Build/Products/ForBuilding/nvALT.app nvALT-arm64.zip
+        run: ditto -c -k --keepParent build/DerivedData/Build/Products/ForBuilding/nv27.app nv27-arm64.zip
 
       - name: Upload app
         if: matrix.configuration == 'ForBuilding'
         uses: actions/upload-artifact@v4
         with:
-          name: nvALT-arm64
-          path: nvALT-arm64.zip
+          name: nv27-arm64
+          path: nv27-arm64.zip
 
       - name: Publish to the "latest-build" release
         # one stable download link for the newest build of a push (pull requests only build)
@@ -85,13 +85,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release delete latest-build --yes --cleanup-tag || true
-          gh release create latest-build nvALT-arm64.zip \
+          gh release create latest-build nv27-arm64.zip \
             --prerelease \
             --target "$GITHUB_SHA" \
-            --title "nvALT for Apple silicon (latest build)" \
+            --title "nv27 (nvALT for Apple silicon), latest build" \
             --notes "Built from ${GITHUB_REF_NAME} at ${GITHUB_SHA::7}.
 
-          To install: download nvALT-arm64.zip, double-click it to unzip, and drag nvALT.app into Applications.
+          To install: download nv27-arm64.zip, double-click it to unzip, and drag nv27.app into Applications.
           The first time, macOS will refuse to open it because it isn't signed with an Apple Developer ID:
           click Done, then go to System Settings > Privacy & Security, scroll down and click Open Anyway."
 

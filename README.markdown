@@ -1,7 +1,9 @@
-# nvALT 2
+# nv27 (nvALT 2 for Apple silicon)
 
-> **This fork** is a modernized, Apple silicon–only build of nvALT for current macOS.
-> See [Building on Apple silicon](#building-on-apple-silicon) below.
+> **This fork** is **nv27**, a modernized, Apple silicon–only build of nvALT for current macOS that runs
+> side by side with the original nvALT. **[Download the latest build](https://github.com/fengypants/nvalt/releases/download/latest-build/nv27-arm64.zip)**
+> ([install steps](https://github.com/fengypants/nvalt/releases/tag/latest-build)), or see
+> [Building on Apple silicon](#building-on-apple-silicon) below.
 
 A collaboration between Brett Terpstra (ttscoff) and David Halter (ElasticThreads) based on [DivineDominion's](github.com/divineDominion/nv) fork. nvALT adds a few features we'd been looking for (and let me get some coding practice).
 
@@ -27,7 +29,7 @@ Requirements: an Apple silicon Mac and Xcode 16 or later. The app targets macOS 
 From the command line:
 
     xcodebuild -project Notation.xcodeproj -scheme "Notation Release" -derivedDataPath build/DerivedData build
-    open build/DerivedData/Build/Products/ForBuilding/nvALT.app
+    open build/DerivedData/Build/Products/ForBuilding/nv27.app
 
 Builds are signed ad hoc ("Sign to Run Locally"), which is enough to run the app on the Mac that built it. To distribute it, set your own signing team and notarize.
 
@@ -41,7 +43,14 @@ What changed from the original Intel build:
 - **Removed features:** note encryption (passphrases, keychain storage and the encryption controls in Preferences → Notes → Security; Secure Text Entry remains), Simplenote sync (including its preferences tab and title-bar status menu), the Textile preview mode, and "Share on Peg.gd" in the preview window. Databases that were synced with Simplenote still open; their old sync settings are ignored. **An encrypted database will not open**: turn encryption off in the previous version of nvALT first.
 - **TaskPaper** conversion in the preview still uses the system `ruby`; if macOS stops shipping it, TaskPaper notes render as plain MultiMarkdown.
 
-Preferences and notes are shared with the original nvALT (same bundle identifier, `net.elasticthreads.nv`).
+### Running alongside the original nvALT
+
+nv27 is a separate app (bundle identifier `io.github.fengypants.nv27`, with a blue "27" badge on its icon), so it keeps its own preferences and never touches nvALT's:
+
+- **Notes:** it starts with its own folder, `~/Library/Application Support/nv27/Notes`, instead of nvALT's default `Notational Data` folder. To bring your notes over, quit nvALT, copy its notes folder, and choose the copy in nv27's Preferences → Notes. **Don't point both apps at the same folder while both are running**: neither locks its database, so they would overwrite each other's changes.
+- **Links:** nv27 registers the `nv27://` URL scheme and uses it for note links; `nvalt://` and `nv://` stay with the original nvALT. Clicking an existing `nvalt://` link inside a note in nv27 still works.
+- **Services:** the Services menu item is "nv27: New Note from Selection" and has no default shortcut, so it doesn't take ⌘⇧V away from nvALT (assign one in System Settings → Keyboard → Keyboard Shortcuts → Services if you like).
+- **Custom preview CSS/HTML** lives in `~/Library/Application Support/nv27`.
 
 ## About nvALT
 
