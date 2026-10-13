@@ -2349,7 +2349,13 @@ terminateApp:
             if (([window firstResponder]==notesTableView)||(isEditing&&([notesTableView editedRow]==rowIndex))) {//([notesTableView rowHeight]>30.0)||
                 [aCell setTextColor:[NSColor whiteColor]];
                 return;
-            }else if ([[foregrndColor colorUsingColorSpaceName:NSCalibratedWhiteColorSpace] whiteComponent]>0.5) {                    
+            }
+            //an inactive selection is light gray in light mode and dark gray in dark mode: pick text that reads on it
+            BOOL lightText = [[foregrndColor colorUsingColorSpaceName:NSCalibratedWhiteColorSpace] whiteComponent]>0.5;
+            if ([self appearanceIsDark] && !lightText) {
+                [aCell setTextColor:[NSColor whiteColor]];
+                return;
+            } else if (![self appearanceIsDark] && lightText) {
                 [aCell setTextColor:[NSColor colorWithCalibratedWhite:0.2 alpha:1.0]];
                 return;
             }

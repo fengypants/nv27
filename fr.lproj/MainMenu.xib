@@ -396,17 +396,20 @@ CA
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Color Schemes" id="1206">
                                     <items>
-                                        <menuItem title="B/W" state="on" alternate="YES" keyEquivalent="A" id="1207">
+                                        <menuItem title="B/W" state="on" alternate="YES" keyEquivalent="1" id="1207">
+                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                             <connections>
                                                 <action selector="setBWColorScheme:" target="213" id="1213"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Low Contrast" alternate="YES" keyEquivalent="S" id="1208">
+                                        <menuItem title="Low Contrast" alternate="YES" keyEquivalent="2" id="1208">
+                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                             <connections>
                                                 <action selector="setLCColorScheme:" target="213" id="1210"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="User Scheme" alternate="YES" keyEquivalent="D" id="1209">
+                                        <menuItem title="User Scheme" alternate="YES" keyEquivalent="3" id="1209">
+                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                             <connections>
                                                 <action selector="setUserColorScheme:" target="213" id="1211"/>
                                             </connections>
@@ -931,17 +934,20 @@ CA
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <menu key="submenu" title="Color Schemes" id="1143">
                         <items>
-                            <menuItem title="B/W" state="on" alternate="YES" keyEquivalent="A" id="1146">
+                            <menuItem title="B/W" state="on" alternate="YES" keyEquivalent="1" id="1146">
+                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                 <connections>
                                     <action selector="setBWColorScheme:" target="213" id="1180"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Low Contrast" alternate="YES" keyEquivalent="S" id="1145">
+                            <menuItem title="Low Contrast" alternate="YES" keyEquivalent="2" id="1145">
+                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                 <connections>
                                     <action selector="setLCColorScheme:" target="213" id="1181"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="User Scheme" alternate="YES" keyEquivalent="D" id="1144">
+                            <menuItem title="User Scheme" alternate="YES" keyEquivalent="3" id="1144">
+                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                 <connections>
                                     <action selector="setUserColorScheme:" target="213" id="1182"/>
                                 </connections>
