@@ -1,0 +1,23 @@
+name: App icon
+
+# run by hand: redraws the app icon (see tools/make_icon.py) on macOS, where SF Pro and iconutil are available,
+# and prints the result to the log as base64
+on: workflow_dispatch
+
+jobs:
+  icon:
+    runs-on: macos-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Draw the icon
+        run: |
+          python3 -m pip install --quiet --break-system-packages pillow || python3 -m pip install --quiet pillow
+          git show 7401933^:Notality.icns > "$RUNNER_TEMP/original.icns"
+          python3 tools/make_icon.py "$RUNNER_TEMP/original.icns" "$RUNNER_TEMP/Notality.icns"
+          ls -la "$RUNNER_TEMP"
+          echo "ICON-ICNS-SHA $(shasum -a 256 "$RUNNER_TEMP/Notality.icns")"
+          base64 -i "$RUNNER_TEMP/Notality.icns" | fold -w 4000 | sed 's/^/ICON-ICNS /'
+          base64 -i "$RUNNER_TEMP/Notality-preview.png" | fold -w 4000 | sed 's/^/ICON-PNG /'
