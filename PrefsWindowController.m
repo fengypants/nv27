@@ -450,23 +450,6 @@
     [maxWidthField setFormatter:widthFormatter];
     [maxWidthField setDoubleValue:[prefsController maxNoteBodyWidth]];
     [maxWidthStepper setDoubleValue:[prefsController maxNoteBodyWidth]];
-	//for elasticthreads' hide dock icon option, check if OS compatible
-	if (IsSnowLeopardOrLater) {
-		[togDockButton setEnabled:YES];
-		
-		if ([[NSUserDefaults standardUserDefaults] boolForKey:@"ShowDockIcon"]) {
-            [togDockButton setTitle:@"Hide Dock Icon"];
-//			[togDockLabel setStringValue:@"This will immediately restart NV"];		
-		}else {
-            [togDockButton setTitle:@"Show Dock Icon"];
-//			[togDockLabel setStringValue:@""];
-		}
-
-	}else {	
-		[togDockButton setEnabled:NO];
-		[togDockButton setHidden:YES];
-//		[togDockLabel setHidden:YES];
-	}
     [altRowsButton setState:[prefsController alternatingRows]];
     [showGridButton setState:[prefsController showGrid]];
     [autoPairButton setState:[prefsController useAutoPairing]];
@@ -580,19 +563,14 @@ NSRect ScaleRectWithFactor(NSRect rect, float factor) {
 
 //elasticwork
 
+//the "Show Dock icon" checkbox (its value is bound to the ShowDockIcon default); without a Dock icon the menu bar
+//icon is the way back to nv27, so it is turned on (and its checkbox disabled) while the Dock icon is hidden
 - (IBAction)toggleHideDockIcon:(id)sender{
     NSUserDefaults *stdDefaults=[NSUserDefaults standardUserDefaults];
-    BOOL showIt=![stdDefaults boolForKey:@"ShowDockIcon"];
-    if (showIt) {
-        [stdDefaults setBool:YES forKey:@"ShowDockIcon"];
-        [togDockButton setTitle:@"Hide Dock Icon"];        
-//        [togDockLabel setStringValue:@"This will immediately restart NV"];	
-    }else{
-        [stdDefaults setBool:YES forKey:@"StatusBarItem"];
-        [stdDefaults setBool:NO forKey:@"ShowDockIcon"];
-        [togDockButton setTitle:@"Show Dock Icon"];
-    }
-    [stdDefaults synchronize];
+    BOOL showIt=[sender state]==NSControlStateValueOn;
+    [stdDefaults setBool:showIt forKey:@"ShowDockIcon"];
+    if (!showIt)
+        [stdDefaults setBool:YES forKey:@"StatusBarItem"]; //the app controller adds the menu bar icon if it's missing
 	[[NSNotificationCenter defaultCenter]postNotificationName:@"AppShouldToggleDockIcon" object:[NSNumber numberWithBool:showIt]];
 }
 

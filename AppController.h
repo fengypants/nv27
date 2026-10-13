@@ -226,9 +226,6 @@ void outletObjectAwoke(id sender);
 - (void)updateModifier:(NSTimer*)theTimer;
 #pragma mark toggling dock icon
 - (void)togDockIcon:(NSNotification *)notification;
-- (void)hideDockIconAfterDelay;
-- (void)hideDockIcon;
-- (void)showDockIcon;
 - (void)reActivate:(id)sender;
 - (void)toggleStatusItem:(NSNotification *)notification;
 - (void)setUpStatusBarItem;

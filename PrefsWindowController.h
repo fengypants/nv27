@@ -40,7 +40,6 @@
 	IBOutlet NSButton *highlightSearchTermsButton;
 	IBOutlet NSColorWell *searchHighlightColorWell, *foregroundColorWell, *backgroundColorWell;
     IBOutlet NSButton *togDockButton;
-	IBOutlet NSTextField *togDockLabel;
 	IBOutlet NSTextField *maxWidthField;
 	IBOutlet NSStepper *maxWidthStepper;
     IBOutlet NotationPrefsViewController *notationPrefsViewController;

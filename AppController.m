@@ -98,22 +98,11 @@ BOOL splitViewAwoke;
         hasLaunched=NO;
         
         if (![[NSUserDefaults standardUserDefaults] boolForKey:@"ShowDockIcon"]){
-            if (IsLionOrLater) {
-                ProcessSerialNumber psn = { 0, kCurrentProcess };
-                OSStatus returnCode = TransformProcessType(&psn, kProcessTransformToUIElementApplication);
-                if( returnCode != 0) {
-                    NSLog(@"Could not bring the application to front. Error %d", returnCode);
-                }                
-            }
+            //no Dock icon: run as an accessory app, reachable from the menu bar icon
+            [NSApp setActivationPolicy:NSApplicationActivationPolicyAccessory];
             if (![[NSUserDefaults standardUserDefaults] boolForKey:@"StatusBarItem"]) {
                 [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"StatusBarItem"];
             }
-        }else{
-            if (!IsLionOrLater) {
-                enum {NSApplicationActivationPolicyRegular};
-                [[NSApplication sharedApplication] setActivationPolicy:NSApplicationActivationPolicyRegular];
-            }
-        
         }
         
         splitViewAwoke = NO;
@@ -3234,66 +3223,20 @@ terminateApp:
     
 #pragma mark toggleDock
     - (void)togDockIcon:(NSNotification *)notification{
-        
-        [NSApp hide:self];
+        //switch between a regular app and one without a Dock icon (an accessory app) in place, then bring nv27 back
+        //to the front, since the switch can deactivate it
         BOOL showIt=[[notification object]boolValue];
-        if (showIt) {
-            [self performSelectorOnMainThread:@selector(showDockIcon) withObject:nil waitUntilDone:NO];
-        }else {
-            [self performSelectorOnMainThread:@selector(hideDockIconAfterDelay) withObject:nil waitUntilDone:NO];
-            
+        if (!showIt && !statusItem) {
+            [self setUpStatusBarItem];
         }
-    }
-    
-    - (void)showDockIcon{
-        if (IsLionOrLater) {
-            ProcessSerialNumber psn = { 0, kCurrentProcess };
-            OSStatus returnCode = TransformProcessType(&psn, kProcessTransformToForegroundApplication);
-            if( returnCode != 0) {
-                NSLog(@"Could not bring the application to front. Error %d", returnCode);
-            }
-
-        }else{
-            enum {NSApplicationActivationPolicyRegular};
-            [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
-        }
-              [self performSelector:@selector(reActivate:) withObject:self afterDelay:0.16];
-    }
-
-    - (void)hideDockIcon{
-        //    id fullPath = [[NSBundle mainBundle] executablePath];
-        //    NSArray *arg = [NSArray arrayWithObjects:nil];
-        //    [NSTask launchedTaskWithLaunchPath:fullPath arguments:arg];
-        //    [NSApp terminate:sender];
-        if (IsLionOrLater) {
-            ProcessSerialNumber psn = { 0, kCurrentProcess };
-            OSStatus returnCode = TransformProcessType(&psn, kProcessTransformToUIElementApplication);
-            if( returnCode != 0) {
-                NSLog(@"Could not bring the application to front. Error %d", returnCode);
-            }
-            if (!statusItem) {
-                [self setUpStatusBarItem];
-            }
-            
-            [self performSelector:@selector(reActivate:) withObject:self afterDelay:0.36];
-        }else{
-//            NSLog(@"hiding dock incon in snow leopard");
-            id fullPath = [[NSBundle mainBundle] executablePath];
-//            NSArray *arg = [NSArray arrayWithObjects:nil];
-            [NSTask launchedTaskWithLaunchPath:fullPath arguments:@[]];
-            [NSApp terminate:self];
-        }
-        
+        [NSApp setActivationPolicy:showIt ? NSApplicationActivationPolicyRegular : NSApplicationActivationPolicyAccessory];
+        [self performSelector:@selector(reActivate:) withObject:self afterDelay:0.1];
     }
     
     - (void)reActivate:(id)sender{
         [NSApp activateIgnoringOtherApps:YES];
     }
     
-    - (void)hideDockIconAfterDelay{
-        
-        [self performSelector:@selector(hideDockIcon) withObject:nil afterDelay:0.22];
-    }
 
 
 
