@@ -168,14 +168,14 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 	NSWindow *settingsWindow = [self _selfTestSettingsWindow];
 	if (settingsWindow) PrintSnapshotOfWindow(settingsWindow, @"settings");
 	//then each of the other panes, switching the way a toolbar click does
-	NSArray *panes = [NSArray arrayWithObjects:@"Notes", @"Editing", nil];
+	NSArray *panes = [NSArray arrayWithObjects:@"Notes", @"Editing", @"Fonts & Colors", nil];
 	for (NSString *pane in panes) {
 		for (NSToolbarItem *item in [[settingsWindow toolbar] items]) {
 			if ([[item itemIdentifier] isEqualToString:pane]) {
 				[[settingsWindow toolbar] setSelectedItemIdentifier:pane];
 				[prefsWindowController performSelector:@selector(switchViews:) withObject:item];
 				[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1.0]];
-				PrintSnapshotOfWindow(settingsWindow, [@"settings-" stringByAppendingString:[pane lowercaseString]]);
+				PrintSnapshotOfWindow(settingsWindow, [@"settings-" stringByAppendingString:[[[pane lowercaseString] componentsSeparatedByString:@" "] objectAtIndex:0]]);
 			}
 		}
 	}

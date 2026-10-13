@@ -126,33 +126,11 @@
 }
 
 - (void)previewNoteBodyFont {
-
-	if (!centerStyle) {
-		centerStyle = [[NSMutableParagraphStyle alloc] init];
-		[centerStyle setAlignment:NSCenterTextAlignment];
-	}
-
+	//the font's name and size, in the field's own (system) font, as font settings elsewhere in macOS show it
 	NSFont *font = [prefsController noteBodyFont];
-    CGFloat lh=[font pointSize];
-    if (lh<27.0) {
-        lh=floorf(27.0-((27.0-lh)/2));
-    }
-    [centerStyle setMaximumLineHeight:lh];
-	NSDictionary *attributes = [NSDictionary dictionaryWithObjectsAndKeys:font ? font : [NSFont systemFontOfSize:12.0],
-		NSFontAttributeName, [NSColor blackColor], NSForegroundColorAttributeName, centerStyle, NSParagraphStyleAttributeName, nil];
-
-	NSString *fontNameAndSize = font ? [NSString stringWithFormat:@"%@ %g", [font fontName], [font pointSize]] : @"Unknown";
-	NSAttributedString *attributedString = [[NSAttributedString alloc] initWithString:fontNameAndSize attributes:attributes];
-	
-	[[bodyTextFontField cell] setAttributedStringValue:attributedString];
-    [bodyTextFontField updateCell:[bodyTextFontField cell]];
-	
-	[attributedString autorelease];
-	
-}
-
-- (IBAction)changedUseETScrollbarsOnLion:(id)sender{
-    [prefsController setUseETScrollbarsOnLion:[useETScrollbarsOnLionButton state] sender:self];
+	NSString *fontNameAndSize = font ? [NSString stringWithFormat:@"%@ %g", [font displayName], [font pointSize]] : @"Unknown";
+	[bodyTextFontField setStringValue:fontNameAndSize];
+	[bodyTextFontField setToolTip:fontNameAndSize];
 }
 
 - (IBAction)changedBackgroundTextColorWell:(id)sender {
@@ -464,7 +442,14 @@
 	[highlightSearchTermsButton setState:[prefsController highlightSearchTerms]];
 	[foregroundColorWell setColor:[prefsController foregroundTextColor]];
 	[backgroundColorWell setColor:[prefsController backgroundTextColor]];
-    [maxWidthSlider setDoubleValue:[[NSUserDefaults standardUserDefaults] doubleForKey:@"NoteBodyMaxWidth"]];
+    //maximum note body width: a whole number of points within the stepper's range
+    NSNumberFormatter *widthFormatter = [[[NSNumberFormatter alloc] init] autorelease];
+    [widthFormatter setNumberStyle:NSNumberFormatterNoStyle];
+    [widthFormatter setMinimum:[NSNumber numberWithDouble:[maxWidthStepper minValue]]];
+    [widthFormatter setMaximum:[NSNumber numberWithDouble:[maxWidthStepper maxValue]]];
+    [maxWidthField setFormatter:widthFormatter];
+    [maxWidthField setDoubleValue:[prefsController maxNoteBodyWidth]];
+    [maxWidthStepper setDoubleValue:[prefsController maxNoteBodyWidth]];
 	//for elasticthreads' hide dock icon option, check if OS compatible
 	if (IsSnowLeopardOrLater) {
 		[togDockButton setEnabled:YES];
@@ -502,8 +487,6 @@
 	[window setToolbarStyle:NSWindowToolbarStylePreference];
 	
 	[window setShowsToolbarButton:NO];
-    [useETScrollbarsOnLionButton setState:[prefsController useETScrollbarsOnLion]];
-    [useETScrollbarsOnLionButton setHidden:!IsLionOrLater];
     [self switchViews:nil];  //select last selected pane by default
     
 }
@@ -634,8 +617,11 @@ NSRect ScaleRectWithFactor(NSRect rect, float factor) {
 }
 
 - (IBAction)setMaxWidth:(id)sender{
-	CGFloat dbWidth = [maxWidthSlider floatValue];	
+	//from either the field or its stepper; keep the two in step
+	CGFloat dbWidth = MIN(MAX([sender floatValue], [maxWidthStepper minValue]), [maxWidthStepper maxValue]);
 	dbWidth = dbWidth - fmod(dbWidth,2.0);
+	[maxWidthField setDoubleValue:dbWidth];
+	[maxWidthStepper setDoubleValue:dbWidth];
 	[prefsController setMaxNoteBodyWidth:dbWidth sender:self];
 //	[[NSApp delegate] setMaxNoteBodyWidth];
 }

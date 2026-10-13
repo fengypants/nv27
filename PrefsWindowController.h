@@ -22,7 +22,6 @@
 <NSWindowDelegate, NSToolbarDelegate>
 #endif
 {
-    IBOutlet NSButton *useETScrollbarsOnLionButton;
     IBOutlet NSPopUpButton *folderLocationsMenuButton;
     IBOutlet NSTextField *bodyTextFontField;
     IBOutlet NSMatrix *tabKeyRadioMatrix;
@@ -42,12 +41,12 @@
 	IBOutlet NSColorWell *searchHighlightColorWell, *foregroundColorWell, *backgroundColorWell;
     IBOutlet NSButton *togDockButton;
 	IBOutlet NSTextField *togDockLabel;
-	IBOutlet NSSlider *maxWidthSlider;	
+	IBOutlet NSTextField *maxWidthField;
+	IBOutlet NSStepper *maxWidthStepper;
     IBOutlet NotationPrefsViewController *notationPrefsViewController;
 	IBOutlet NSComboBox *appList;
     IBOutlet NSButton *showGridButton;
     IBOutlet NSButton *altRowsButton;
-	NSMutableParagraphStyle *centerStyle;
 	NSMutableDictionary *items;
 	NSToolbar *toolbar;
 	BOOL fontPanelWasOpen;
@@ -61,7 +60,6 @@
 }
 - (void)showWindow:(id)sender;
 
-- (IBAction)changedUseETScrollbarsOnLion:(id)sender;
 - (IBAction)changedBackgroundTextColorWell:(id)sender;
 - (IBAction)changedForegroundTextColorWell:(id)sender;
 - (IBAction)changedHighlightSearchTerms:(id)sender;	

@@ -1,24 +1,13 @@
 //
-//  ETScrollView.m
+//  ETScrollView.h
 //  Notation
 //
 //  Created by elasticthreads on 3/14/11.
 //
 
-#import <Foundation/Foundation.h>
+#import <Cocoa/Cocoa.h>
 
-
-
-@interface ETScrollView : NSScrollView {
-    Class scrollerClass;
-    BOOL needsOverlayTiling;
-}
-
-//- (void)setNeedsOverlayTiling:(BOOL)overlay;
-//- (void)setScrollerClassWithString:(NSString *)scrollerClassName;
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7
-- (void)changeUseETScrollbarsOnLion;
-- (void)settingChangedForSelectorString:(NSString*)selectorString;
-#endif
+//the scroll view around the notes list and the note editor; it uses the standard system scrollers
+@interface ETScrollView : NSScrollView
 
 @end

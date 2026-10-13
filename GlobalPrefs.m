@@ -83,7 +83,6 @@ static NSString *RTLKey = @"rtl";
 static NSString *ShowWordCount = @"ShowWordCount";
 static NSString *markupPreviewMode = @"markupPreviewMode";
 static NSString *UseAutoPairing = @"UseAutoPairing";
-static NSString *UseETScrollbarsOnLion = @"UseETScrollbarsOnLion";
 static NSString *UsesMarkdownCompletions = @"UsesMarkdownCompletions";
 static NSString *UseFinderTagsKey = @"UseFinderTags";
 static NSString *UseSmartInsertDeleteKey = @"UseSmartInsertDelete";
@@ -158,7 +157,6 @@ static void sendCallbacksForGlobalPrefs(GlobalPrefs* self, SEL selector, id orig
             [NSNumber numberWithBool:YES], ShowGridKey,
             [NSNumber numberWithBool:NO], AlternatingRowsKey,
             [NSNumber numberWithBool:NO], UseAutoPairing,
-            [NSNumber numberWithBool:NO], UseETScrollbarsOnLion,
             [NSNumber numberWithBool:NO], UsesMarkdownCompletions,
 
 			[NSArchiver archivedDataWithRootObject:
@@ -440,14 +438,6 @@ static void sendCallbacksForGlobalPrefs(GlobalPrefs* self, SEL selector, id orig
 	[defaults setBool:value forKey:ShowWordCount];
 }
 
-- (void)setUseETScrollbarsOnLion:(BOOL)value sender:(id)sender{
-	[defaults setBool:value forKey:UseETScrollbarsOnLion];
-	SEND_CALLBACKS();
-}
-
-- (BOOL)useETScrollbarsOnLion{
-	return [defaults boolForKey:UseETScrollbarsOnLion];
-}
 
 
 
