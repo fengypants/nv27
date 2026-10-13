@@ -262,6 +262,13 @@ CGFloat _perceptualColorDifference(NSColor*a, NSColor*b) {
 	if (brightness <= 0.24)
 		return [NSColor blueColor];
 	
+	//prefer blue, as links usually are: a light blue (like the system's dark-mode link color) on dark backgrounds,
+	//a deep blue on light ones; rotate the hue only when blue wouldn't stand out from this color scheme
+	NSColor *blueLink = _perceptualDarkness(bgColor) > 0.5 ? [NSColor colorWithCalibratedRed:0.33 green:0.62 blue:1.0 alpha:1.0] :
+		[NSColor colorWithCalibratedRed:0.0 green:0.30 blue:0.85 alpha:1.0];
+	if (_perceptualColorDifference(blueLink, bgColor) >= 300.0 && _perceptualColorDifference(blueLink, fgColor) >= 170.0)
+		return blueLink;
+	
 	brightness = _perceptualDarkness(bgColor) > 0.5 ? MAX(0.75, brightness) : MIN(0.35, brightness);
 	
 	saturation = MAX(0.5, saturation);
