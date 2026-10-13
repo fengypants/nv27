@@ -1081,17 +1081,11 @@ terminateApp:
 		case 3:		//product site
 			[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:NSLocalizedString(@"SiteURL", nil)]];
 			break;
-		case 4:		//development site
-			[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://github.com/ttscoff/nv/wiki"]];
-			break;
-        case 5:     //nvALT home
-            [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://brettterpstra.com/project/nvalt/"]];
+        case 5:     //nvALT website
+            [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://brettterpstra.com/project/nvalt/"]];
             break;
-        case 6:     //ElasticThreads
-            [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://elasticthreads.tumblr.com/nv"]];
-            break;
-        case 7:     //Brett Terpstra
-            [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://brettterpstra.com"]];
+        case 6:     //nv27 on GitHub
+            [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://github.com/fengypants/nv27"]];
             break;
 		default:
 			NSBeep();

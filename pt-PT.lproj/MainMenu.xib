@@ -659,34 +659,22 @@ CA
                             <menuItem isSeparatorItem="YES" id="1058">
                                 <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                             </menuItem>
-                            <menuItem title="nvALT Home" tag="5" id="1286">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <action selector="showHelpDocument:" target="213" id="1289"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Web Site do Elasticthreads" tag="6" id="1287">
+                            <menuItem title="nv27 GitHub" tag="6" id="1287">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="showHelpDocument:" target="213" id="1290"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Web Site do Brett Terpstra" tag="7" id="1288">
+                            <menuItem title="Web Site do nvALT" tag="5" id="1286">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
-                                    <action selector="showHelpDocument:" target="213" id="1291"/>
+                                    <action selector="showHelpDocument:" target="213" id="1289"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Web Site do Notational Velocity" tag="3" id="1053">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="showHelpDocument:" target="213" id="1091"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Web Site de Desenvolvimento" tag="4" id="1087">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <action selector="showHelpDocument:" target="213" id="1090"/>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="1057">
