@@ -146,6 +146,8 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 	SelfTestLog(@"search field frameInWindow=%@ notes header=%@", NSStringFromRect([field convertRect:[field bounds] toView:nil]),
 				NSStringFromRect([[notesTableView headerView] convertRect:[[notesTableView headerView] bounds] toView:nil]));
 	PrintSnapshotOfWindow(window, @"main");
+	for (NSString *symbolName in [NSArray arrayWithObjects:@"rocket", @"rocket.fill", @"note.text", nil])
+		SelfTestLog(@"SF Symbol %@ available=%d", symbolName, [NSImage imageWithSystemSymbolName:symbolName accessibilityDescription:nil] != nil);
 	//the "back to search" button that replaces the pencil while hovering over it
 	[(DualFieldCell*)[field cell] setShowsSnapbackButton:YES];
 	[field display];

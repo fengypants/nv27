@@ -3255,8 +3255,13 @@ terminateApp:
 
 - (void)setUpStatusBarItem{
 
-    //a template SF Symbol, so the menu bar tints it like the system's own items
-    NSImage *statusIcon = [NSImage imageWithSystemSymbolName:@"note.text" accessibilityDescription:@"nv27"];
+    //a template SF Symbol, so the menu bar tints it like the system's own items: a rocket where this macOS
+    //version's SF Symbols has one, otherwise the note symbol
+    NSImage *statusIcon = nil;
+    for (NSString *symbolName in [NSArray arrayWithObjects:@"rocket", @"rocket.fill", @"note.text", nil]) {
+        if ((statusIcon = [NSImage imageWithSystemSymbolName:symbolName accessibilityDescription:@"nv27"]))
+            break;
+    }
     statusIcon = [statusIcon imageWithSymbolConfiguration:[NSImageSymbolConfiguration configurationWithPointSize:15.0 weight:NSFontWeightRegular]];
     [statusIcon setTemplate:YES];
     statusItem =[[NSStatusBar systemStatusBar] statusItemWithLength:NSSquareStatusItemLength];
