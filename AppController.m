@@ -2495,8 +2495,9 @@ terminateApp:
 	[window setToolbar:toolbar];
 	
 	//put the search field on its own row below the window title, spanning the window (the default unified
-	//style squeezes toolbar items into the title bar next to the title)
-	[window setToolbarStyle:NSWindowToolbarStyleExpanded];
+	//style squeezes toolbar items into the title bar next to the title); the preference style does this
+	//with the title centered, where the expanded style puts it at the leading edge
+	[window setToolbarStyle:NSWindowToolbarStylePreference];
 	[window setTitleVisibility:NSWindowTitleVisible];
 	[window setShowsToolbarButton:NO];
 	
