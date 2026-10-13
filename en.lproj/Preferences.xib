@@ -604,7 +604,7 @@
                 <textField verticalHuggingPriority="750" id="467" propertyAccessControl="none">
                     <rect key="frame" x="29" y="132" width="326" height="14"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
-                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" alignment="left" title="These colors are used by the User Scheme (View › Color Schemes, ⌥⌘3)." id="468">
+                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" alignment="left" title="These colors are used by the User Scheme (⌥⌘3)." id="468">
                         <font key="font" metaFont="smallSystem"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
