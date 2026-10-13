@@ -217,7 +217,16 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 				[self appearanceIsDark], [notesTableView backgroundColor], [textView backgroundColor], [field drawsBackground],
 				[field backgroundColor], [field isBezeled]);
 	PrintSnapshotOfWindow(window, @"main-dark");
+	//the Low Contrast scheme, dark then light, then back to B/W
+	[self setLCColorScheme:nil];
+	[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.5]];
+	[window display];
+	PrintSnapshotOfWindow(window, @"main-lc-dark");
 	[NSApp setAppearance:nil];
+	[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1.0]];
+	[window display];
+	PrintSnapshotOfWindow(window, @"main-lc");
+	[self setBWColorScheme:nil];
 	[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.5]];
 	
 	[self showPreferencesWindow:nil];

@@ -98,6 +98,8 @@ BOOL splitViewAwoke;
         hasLaunched=NO;
         
         [self applyAppearancePreference];
+        [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver:self selector:@selector(accessibilityDisplayOptionsDidChange:)
+                                                                   name:NSWorkspaceAccessibilityDisplayOptionsDidChangeNotification object:nil];
         
         if (![[NSUserDefaults standardUserDefaults] boolForKey:@"ShowDockIcon"]){
             //no Dock icon: run as an accessory app, reachable from the menu bar icon
@@ -2782,12 +2784,22 @@ terminateApp:
 
 //the fixed colors of the B/W (0) and Low Contrast (1) schemes, in a light and a dark variant
 static NSColor *SchemeColor(NSInteger scheme, BOOL background, BOOL dark) {
-    CGFloat white;
-    if (scheme == 1)
-        white = dark ? (background ? 0.20 : 0.72) : (background ? 0.902 : 0.243);
-    else
-        white = dark ? (background ? 0.118 : 0.92) : (background ? 1.0 : 0.0); //like the system's text views
-    return [[NSColor colorWithCalibratedWhite:white alpha:1.0] colorUsingColorSpaceName:NSCalibratedRGBColorSpace];
+    //with Accessibility > Display > Increase contrast on, Low Contrast falls back to B/W
+    if (scheme == 1 && [[NSWorkspace sharedWorkspace] accessibilityDisplayShouldIncreaseContrast])
+        scheme = 0;
+    NSColor *color;
+    if (scheme == 1) {
+        //softer than B/W but still about 8:1 contrast: soft charcoal on warm off-white ("paper"), and warm light
+        //gray on warm charcoal in dark mode
+        color = dark ? (background ? [NSColor colorWithSRGBRed:0x26/255.0 green:0x26/255.0 blue:0x24/255.0 alpha:1.0] :
+                                     [NSColor colorWithSRGBRed:0xC2/255.0 green:0xBF/255.0 blue:0xB8/255.0 alpha:1.0]) :
+                       (background ? [NSColor colorWithSRGBRed:0xF6/255.0 green:0xF5/255.0 blue:0xF2/255.0 alpha:1.0] :
+                                     [NSColor colorWithSRGBRed:0x4A/255.0 green:0x49/255.0 blue:0x46/255.0 alpha:1.0]);
+    } else {
+        //like the system's text views
+        color = [NSColor colorWithCalibratedWhite:dark ? (background ? 0.118 : 0.92) : (background ? 1.0 : 0.0) alpha:1.0];
+    }
+    return [color colorUsingColorSpaceName:NSCalibratedRGBColorSpace];
 }
 
 - (BOOL)appearanceIsDark {
@@ -2807,6 +2819,11 @@ static NSColor *SchemeColor(NSInteger scheme, BOOL background, BOOL dark) {
 //called by the notes list when its effective appearance changes (the system switched between light and dark, or
 //the Appearance setting changed): re-pick the light or dark variant of the built-in schemes; a user scheme keeps
 //its own colors
+- (void)accessibilityDisplayOptionsDidChange:(NSNotification *)aNotification {
+    if (userScheme == 1)
+        [self setLCColorScheme:self];
+}
+
 - (void)appearanceDidChange {
     static NSInteger lastDark = -1;
     NSInteger dark = [self appearanceIsDark];
