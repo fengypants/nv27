@@ -25,17 +25,17 @@
 #define CLEAR_BUTTON_IMG_DIM 16.0
 #define TEXT_LEFT_OFFSET (MAX_STATE_IMG_DIM + BORDER_LEFT_OFFSET + 1.0)
 
-//an SF Symbol drawn in the given color; the color resolves when drawn, so it follows Light/Dark Mode
+//an SF Symbol rendered in the given (dynamic) color, so it follows Light/Dark Mode
 static NSImage *TintedSymbolImage(NSString *name, NSColor *color, CGFloat pointSize) {
-	NSImage *symbol = [[NSImage imageWithSystemSymbolName:name accessibilityDescription:nil]
-					   imageWithSymbolConfiguration:[NSImageSymbolConfiguration configurationWithPointSize:pointSize weight:NSFontWeightMedium]];
-	if (!symbol) return nil;
-	return [NSImage imageWithSize:[symbol size] flipped:NO drawingHandler:^BOOL(NSRect dstRect) {
-		[symbol drawInRect:dstRect];
-		[color set];
-		NSRectFillUsingOperation(dstRect, NSCompositingOperationSourceAtop);
-		return YES;
-	}];
+	NSImageSymbolConfiguration *config = [[NSImageSymbolConfiguration configurationWithPointSize:pointSize weight:NSFontWeightMedium]
+										  configurationByApplyingConfiguration:[NSImageSymbolConfiguration configurationWithPaletteColors:[NSArray arrayWithObject:color]]];
+	return [[NSImage imageWithSystemSymbolName:name accessibilityDescription:nil] imageWithSymbolConfiguration:config];
+}
+
+//the search field's rounded background, in the system fill color native search fields use
+static NSBezierPath *SearchFieldShape(NSRect bounds) {
+	CGFloat radius = NSHeight(bounds) / 2.0;
+	return [NSBezierPath bezierPathWithRoundedRect:NSInsetRect(bounds, 0.5, 0.5) xRadius:radius yRadius:radius];
 }
 
 @implementation DualFieldCell
@@ -46,12 +46,11 @@ static NSImage *TintedSymbolImage(NSString *name, NSColor *color, CGFloat pointS
 		[self setStringValue:@""];
 		[self setEditable:YES];
 		[self setSelectable:YES];
-		//a standard rounded text field bezel (drawn by AppKit, so it matches the system and Dark Mode),
-		//with the search/note icon and the clear button drawn inside it
-		[self setBezeled:YES];
-		[self setBezelStyle:NSTextFieldRoundedBezel];
-		[self setDrawsBackground:YES];
-		[self setBackgroundColor:[NSColor textBackgroundColor]];
+		//no bezel: DualField draws a search-field style rounded background itself (inside a toolbar, AppKit
+		//renders field bezels as a system "glass" layer that can't be relied on for a custom field)
+		[self setBezeled:NO];
+		[self setBordered:NO];
+		[self setDrawsBackground:NO];
 		[self setTextColor:[NSColor controlTextColor]];
 		[self setWraps:YES];
 		[self setPlaceholderString:NSLocalizedString(@"Search or Create", @"placeholder text in search/create field")];
@@ -439,9 +438,11 @@ static NSImage *TintedSymbolImage(NSString *name, NSColor *color, CGFloat pointS
 - (void)drawRect:(NSRect)rect {
 	NSRect tBounds = [self bounds];
 	
-	//the standard text field drawing: the rounded bezel (which modern AppKit draws at the control level,
-	//not in the cell), background and text, plus the cell's clear and snapback buttons
-	[super drawRect:rect];
+	[[NSColor tertiarySystemFillColor] setFill];
+	[SearchFieldShape(tBounds) fill];
+	
+	//text, plus the cell's clear and snapback buttons
+	[[self cell] drawWithFrame:tBounds inView:self];
 	
 	//the leading icon: a magnifying glass while searching, a pencil when the field shows the selected note's title
 	if (![(DualFieldCell*)[self cell] snapbackButtonIsVisible]) {
@@ -453,6 +454,15 @@ static NSImage *TintedSymbolImage(NSString *name, NSColor *color, CGFloat pointS
 //elasticwork
 
 
+
+//the standard focus ring, following the rounded background
+- (void)drawFocusRingMask {
+	[SearchFieldShape([self bounds]) fill];
+}
+
+- (NSRect)focusRingMaskBounds {
+	return [self bounds];
+}
 
 - (void)mouseDown:(NSEvent*)anEvent {
     
