@@ -52,8 +52,11 @@
 
 //http://abyss.designheresy.com/nvalt/betaupdates.xml
 
-#define kSplitViewExpandedDividerThickness 8.0f
-#define kSplitViewCollapsedDividerThickness 5.0f
+//a standard thin divider (like NSSplitViewDividerStyleThin); kSplitViewDividerGrabMargin widens the area that can
+//be dragged on each side of the line
+#define kSplitViewExpandedDividerThickness 1.0f
+#define kSplitViewCollapsedDividerThickness 1.0f
+#define kSplitViewDividerGrabMargin 3.0f
 
 //#define NSTextViewChangedNotification @"TextViewHasChangedContents"
 //#define kDefaultMarkupPreviewMode @"markupPreviewMode"
@@ -2271,16 +2274,33 @@ terminateApp:
 
 - (NSRect)splitView:(RBSplitView*)sender willDrawDividerInRect:(NSRect)dividerRect betweenView:(RBSplitSubview*)leading
 			andView:(RBSplitSubview*)trailing withProposedRect:(NSRect)imageRect {
-	[dividerShader drawDividerInRect:dividerRect withDimpleRect:imageRect blendVertically:![prefsController horizontalLayout]];
+	[[NSColor separatorColor] setFill];
+	NSRectFillUsingOperation(dividerRect, NSCompositingOperationSourceOver);
 	
 	return NSZeroRect;
 }
 
+//the divider's line plus kSplitViewDividerGrabMargin on either side, in the split view's coordinates
+- (NSRect)_dividerGrabRectOfSplitView:(RBSplitView*)sender {
+	if ([sender numberOfSubviews] < 2) return NSZeroRect;
+	NSRect leading = [[sender subviewAtPosition:0] frame], trailing = [[sender subviewAtPosition:1] frame];
+	NSRect bounds = [sender bounds];
+	if ([sender isVertical]) {
+		CGFloat lo = MIN(NSMaxX(leading), NSMinX(trailing)), hi = MAX(NSMaxX(leading), NSMinX(trailing));
+		return NSMakeRect(lo - kSplitViewDividerGrabMargin, NSMinY(bounds), hi - lo + 2 * kSplitViewDividerGrabMargin, NSHeight(bounds));
+	}
+	CGFloat lo = MIN(MIN(NSMaxY(leading), NSMaxY(trailing)), MAX(NSMinY(leading), NSMinY(trailing)));
+	CGFloat hi = MAX(MIN(NSMaxY(leading), NSMaxY(trailing)), MAX(NSMinY(leading), NSMinY(trailing)));
+	return NSMakeRect(NSMinX(bounds), lo - kSplitViewDividerGrabMargin, NSWidth(bounds), hi - lo + 2 * kSplitViewDividerGrabMargin);
+}
+
+- (NSRect)splitView:(RBSplitView*)sender cursorRect:(NSRect)rect forDivider:(NSUInteger)divider {
+	return NSIsEmptyRect(rect) ? rect : [self _dividerGrabRectOfSplitView:sender];
+}
+
 - (NSUInteger)splitView:(RBSplitView*)sender dividerForPoint:(NSPoint)point inSubview:(RBSplitSubview*)subview {
-	//if ([(AugmentedScrollView*)[notesTableView enclosingScrollView] shouldDragWithPoint:point sender:sender]) {
-	//	return 0;       // [firstSplit position], which we assume to be zero
-	//}
-	return NSNotFound;
+	//the thin divider can also be dragged from just beside it, as with NSSplitView
+	return NSPointInRect(point, [self _dividerGrabRectOfSplitView:sender]) ? 0 : NSNotFound;
 }
 
 - (BOOL)splitView:(RBSplitView*)sender canCollapse:(RBSplitSubview*)subview {
