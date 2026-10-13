@@ -1,8 +1,13 @@
 name: App icon
 
-# run by hand: redraws the app icon (see tools/make_icon.py) on macOS, where SF Pro and iconutil are available,
-# and prints the result to the log as base64
-on: workflow_dispatch
+# redraws the app icon (see tools/make_icon.py) on macOS, where SF Pro and iconutil are available, and prints the
+# result to the log as base64; runs by hand, or when the icon script changes
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - tools/make_icon.py
+      - .github/workflows/icon.yml
 
 jobs:
   icon:
