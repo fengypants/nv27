@@ -57,6 +57,7 @@
 	IBOutlet NSMatrix *passwordSettingsMatrix;
     
     IBOutlet NSView *view;
+	NSSegmentedControl *extensionButtons;
 
 	BOOL didAwakeFromNib;
     

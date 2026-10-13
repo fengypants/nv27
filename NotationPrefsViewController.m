@@ -64,6 +64,7 @@
 }
 - (void)dealloc {
 	[notationPrefs release];
+	[extensionButtons release];
 	
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 	
@@ -80,7 +81,7 @@
 	
 	[self removeSynchronizationTab];
 	[self removeEncryptionControls];
-	[self useStandardListButtons];
+	[self useStandardExtensionList];
 	
 	NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
 	[center addObserver:self selector:@selector(initializeControls) name:NotationPrefsDidChangeNotification object:nil];
@@ -101,6 +102,7 @@
 	if (tv == allowedExtensionsTable) {
 		[removeExtensionButton setEnabled:isRowSelected];
 		[makeDefaultExtensionButton setEnabled:isRowSelected];
+		[self updateExtensionButtons];
 	} else if (tv == allowedTypesTable) {
 		[removeTypeButton setEnabled:isRowSelected];
 	}
@@ -201,35 +203,92 @@
 		[[storageFormatPopupButton menu] removeItem:databaseItem];
 }
 
-//the nib's add/remove/make-default buttons under the extension and type lists use old custom artwork;
-//give them the standard small square bezel with SF Symbols, as list controls elsewhere in macOS have
-- (void)useStandardListButtons {
-	NSDictionary *symbols = [NSDictionary dictionaryWithObjectsAndKeys:
-							 @"plus", [NSValue valueWithNonretainedObject:newExtensionButton],
-							 @"minus", [NSValue valueWithNonretainedObject:removeExtensionButton],
-							 @"checkmark", [NSValue valueWithNonretainedObject:makeDefaultExtensionButton],
-							 @"plus", [NSValue valueWithNonretainedObject:newTypeButton],
-							 @"minus", [NSValue valueWithNonretainedObject:removeTypeButton], nil];
-	for (NSValue *key in symbols) {
-		NSButton *button = [key nonretainedObjectValue];
-		if (!button) continue;
-		NSImage *image = [NSImage imageWithSystemSymbolName:[symbols objectForKey:key] accessibilityDescription:[button toolTip]];
-		NSImageSymbolConfiguration *config = [NSImageSymbolConfiguration configurationWithPointSize:11.0 weight:NSFontWeightMedium];
-		[button setBezelStyle:NSBezelStyleSmallSquare];
-		[button setBordered:YES];
-		[button setTitle:@""];
-		[button setAlternateImage:nil];
-		[button setImage:[image imageWithSymbolConfiguration:config]];
-		[button setImagePosition:NSImageOnly];
-		[button setImageScaling:NSImageScaleNone];
-		[button setButtonType:NSButtonTypeMomentaryPushIn];
-	}
+//the compiled nib lays out two header-topped lists (extensions and old HFS file type codes) with loose buttons
+//below; show one standard list instead: the extensions in a bordered list with +/- attached to its bottom edge
+//and "Set as Default" in its contextual menu (the default extension is shown in bold). File type codes are
+//something macOS no longer sets, so that list is hidden.
+- (void)useStandardExtensionList {
+	NSScrollView *extensionsScrollView = [allowedExtensionsTable enclosingScrollView];
+	NSScrollView *typesScrollView = [allowedTypesTable enclosingScrollView];
+	NSView *container = [extensionsScrollView superview];
+	if (!extensionsScrollView || !container) return;
+	
+	for (NSView *view in [NSArray arrayWithObjects:typesScrollView, newTypeButton, removeTypeButton,
+						  newExtensionButton, removeExtensionButton, makeDefaultExtensionButton, nil])
+		[view setHidden:YES];
+	
+	[fileAttributesHelpText setStringValue:NSLocalizedString(@"Recognize files with these extensions:", @"label above the list of note file extensions")];
+	
+	NSRect listFrame = [extensionsScrollView frame];
+	CGFloat left = [fileAttributesHelpText superview] == container ? NSMinX([fileAttributesHelpText frame]) + 2.0 : NSMinX(listFrame);
+	CGFloat right = typesScrollView && [typesScrollView superview] == container ? NSMaxX([typesScrollView frame]) : NSMaxX(listFrame);
+	listFrame = NSMakeRect(left, NSMinY(listFrame), right - left, NSHeight(listFrame));
+	[extensionsScrollView setFrame:listFrame];
+	[extensionsScrollView setBorderType:NSBezelBorder];
+	[allowedExtensionsTable setHeaderView:nil];
+	[allowedExtensionsTable setCornerView:nil];
+	[allowedExtensionsTable setColumnAutoresizingStyle:NSTableViewUniformColumnAutoresizingStyle];
+	[allowedExtensionsTable sizeLastColumnToFit];
+	[extensionsScrollView tile];
+	
+	NSMenu *menu = [[[NSMenu alloc] initWithTitle:@""] autorelease];
+	NSMenuItem *defaultItem = [menu addItemWithTitle:NSLocalizedString(@"Set as Default", @"contextual menu item in the note file extensions list")
+											  action:@selector(makeClickedExtensionDefault:) keyEquivalent:@""];
+	[defaultItem setTarget:self];
+	[allowedExtensionsTable setMenu:menu];
+	
+	extensionButtons = [[NSSegmentedControl alloc] initWithFrame:NSZeroRect];
+	[extensionButtons setSegmentStyle:NSSegmentStyleSmallSquare];
+	[extensionButtons setTrackingMode:NSSegmentSwitchTrackingMomentary];
+	[extensionButtons setSegmentCount:2];
+	[extensionButtons setImage:[NSImage imageWithSystemSymbolName:@"plus" accessibilityDescription:NSLocalizedString(@"Add", nil)] forSegment:0];
+	[extensionButtons setImage:[NSImage imageWithSystemSymbolName:@"minus" accessibilityDescription:NSLocalizedString(@"Remove", nil)] forSegment:1];
+	[extensionButtons setWidth:24.0 forSegment:0];
+	[extensionButtons setWidth:24.0 forSegment:1];
+	[extensionButtons setTarget:self];
+	[extensionButtons setAction:@selector(clickedExtensionButtons:)];
+	[extensionButtons sizeToFit];
+	//attached to the list's bottom edge, sharing its border line
+	NSRect buttonsFrame = [extensionButtons frame];
+	buttonsFrame.origin.x = NSMinX(listFrame);
+	buttonsFrame.origin.y = [container isFlipped] ? NSMaxY(listFrame) - 1.0 : NSMinY(listFrame) - NSHeight(buttonsFrame) + 1.0;
+	[extensionButtons setFrame:buttonsFrame];
+	[extensionButtons setAutoresizingMask:[extensionsScrollView autoresizingMask] & (NSViewMinYMargin | NSViewMaxYMargin)];
+	[container addSubview:extensionButtons];
+	[self updateExtensionButtons];
+}
+
+- (void)updateExtensionButtons {
+	[extensionButtons setEnabled:[newExtensionButton isEnabled] forSegment:0];
+	[extensionButtons setEnabled:[removeExtensionButton isEnabled] forSegment:1];
+}
+
+- (void)clickedExtensionButtons:(id)sender {
+	if ([sender selectedSegment] == 0)
+		[self addedExtension:sender];
+	else
+		[self removedExtension:sender];
+	[self updateExtensionButtons];
+}
+
+- (void)makeClickedExtensionDefault:(id)sender {
+	NSInteger row = [allowedExtensionsTable clickedRow];
+	if (row < 0) return;
+	[allowedExtensionsTable selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+	[self makeDefaultExtension:sender];
+}
+
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
+	if ([menuItem action] == @selector(makeClickedExtensionDefault:))
+		return [allowedExtensionsTable clickedRow] >= 0 && [allowedExtensionsTable isEnabled];
+	return YES;
 }
 
 - (void)setSeparateFileControlsState:(BOOL)separateFileControlsState {
 	[newExtensionButton setEnabled:separateFileControlsState];
 	[removeExtensionButton setEnabled:separateFileControlsState && [allowedExtensionsTable selectedRow] > -1];
 	[makeDefaultExtensionButton setEnabled:separateFileControlsState && [allowedExtensionsTable selectedRow] > -1];
+	[self updateExtensionButtons];
 	[newTypeButton setEnabled:separateFileControlsState];
 	[removeTypeButton setEnabled:separateFileControlsState && [allowedTypesTable selectedRow] > -1];
 	

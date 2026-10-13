@@ -513,7 +513,7 @@
                     </textFieldCell>
                 </textField>
                 <textField verticalHuggingPriority="750" id="355" propertyAccessControl="none">
-                    <rect key="frame" x="170" y="265" width="203" height="21"/>
+                    <rect key="frame" x="170" y="265" width="198" height="21"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" lineBreakMode="truncatingTail" allowsUndo="NO" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="left" title="Helvetica 12" drawsBackground="YES" id="365">
                         <font key="font" metaFont="system"/>

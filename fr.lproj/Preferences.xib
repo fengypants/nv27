@@ -511,7 +511,7 @@
                     </connections>
                 </button>
                 <textField verticalHuggingPriority="750" id="368">
-                    <rect key="frame" x="97" y="268" width="224" height="21"/>
+                    <rect key="frame" x="97" y="268" width="219" height="21"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" lineBreakMode="truncatingTail" allowsUndo="NO" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="left" title="Helvetica 12" drawsBackground="YES" id="373">
                         <font key="font" metaFont="system"/>

@@ -511,7 +511,7 @@
                     </textFieldCell>
                 </textField>
                 <textField verticalHuggingPriority="750" id="387" propertyAccessControl="none">
-                    <rect key="frame" x="166" y="246" width="210" height="21"/>
+                    <rect key="frame" x="166" y="246" width="205" height="21"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" lineBreakMode="truncatingTail" allowsUndo="NO" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="left" title="Helvetica 12" drawsBackground="YES" id="392">
                         <font key="font" metaFont="system"/>
