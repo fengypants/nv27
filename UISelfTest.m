@@ -201,6 +201,14 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 	PrintSnapshotOfWindow(window, @"main-snapback");
 	[(DualFieldCell*)[field cell] setShowsSnapbackButton:NO];
 	
+	//the side-by-side ("horizontal") layout, then back
+	[self switchViewLayout:nil];
+	[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1.0]];
+	[window display];
+	PrintSnapshotOfWindow(window, @"main-horizontal");
+	[self switchViewLayout:nil];
+	[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.5]];
+	
 	//the same window in Dark Mode (the B/W scheme switches to its dark variant), then back to the system setting
 	[NSApp setAppearance:[NSAppearance appearanceNamed:NSAppearanceNameDarkAqua]];
 	[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1.0]];
