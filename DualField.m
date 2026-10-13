@@ -182,9 +182,9 @@ static NSBezierPath *SearchFieldShape(NSRect bounds) {
 	}
 	if (BUTTON_HIDDEN != snapbackButtonState) {
 		NSRect snRect = [self snapbackButtonRectForBounds:cellFrame];
-		NSImage *snapImg = [NSImage imageNamed:
-							[(DualField *)controlView hasFollowedLinks] ? (snapbackButtonState == BUTTON_NORMAL ? @"LinkBack" : @"LinkBackPressed") :
-							(snapbackButtonState == BUTTON_NORMAL ? @"SnapBack" : @"SnapBackPressed") ];
+		//back to the search (or, after following note links, back along them), drawn darker while pressed
+		NSImage *snapImg = TintedSymbolImage([(DualField *)controlView hasFollowedLinks] ? @"chevron.backward.circle.fill" : @"arrow.uturn.backward.circle.fill",
+											 snapbackButtonState == BUTTON_NORMAL ? [NSColor secondaryLabelColor] : [NSColor labelColor], 13.0);
 		[snapImg drawCenteredInRect:snRect];
 	}
 }

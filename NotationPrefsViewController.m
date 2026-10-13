@@ -150,7 +150,7 @@
 	}
 	//a single remaining tab needs no tab strip
 	if ([tabView numberOfTabViewItems] == 1)
-		[tabView setTabViewType:NSTabViewTypeNoTabsNoBorder];
+		[tabView setTabViewType:NSNoTabsNoBorder];
 }
 
 //Simplenote syncing, note encryption and Secure Text Entry were removed: drop the "Synchronization" and
