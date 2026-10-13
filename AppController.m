@@ -37,7 +37,6 @@
 #import "LinearDividerShader.h"
 #import "SecureTextEntryManager.h"
 #import "TagEditingManager.h"
-#import "NotesTableHeaderCell.h"
 #import "DFView.h"
 #import "ETContentView.h"
 #import "PreviewController.h"
@@ -2831,7 +2830,6 @@ terminateApp:
         [dualFieldView setBackgroundColor:backgrndColor];
     }
     [mainView setBackgroundColor:backgrndColor];
-    [NotesTableHeaderCell setTxtColor:foregrndColor];
     
     [notesTableView setGridColor:foregrndColor];
     [notesTableView setBackgroundColor:backgrndColor];

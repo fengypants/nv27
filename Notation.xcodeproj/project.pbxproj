@@ -140,7 +140,6 @@
 		5CF01B08132975910083D66E /* greyscrollervertbottom.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 5CF01B02132975910083D66E /* greyscrollervertbottom.tiff */; };
 		5CF01B0C132975910083D66E /* greyscrollerverttop.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 5CF01B06132975910083D66E /* greyscrollerverttop.tiff */; };
 		5CF01B22132975DB0083D66E /* BTransparentScrollerSlotBottom.tif in Resources */ = {isa = PBXBuildFile; fileRef = 5CF01B16132975DA0083D66E /* BTransparentScrollerSlotBottom.tif */; };
-		5CF33C721308B478002B5499 /* NotesTableHeaderCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 5CF33C711308B478002B5499 /* NotesTableHeaderCell.m */; };
 		5CF96DA8132EA29D0079B3FD /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5CF96BFD132EA0300079B3FD /* MainMenu.xib */; };
 		5CF96DAA132EA29D0079B3FD /* Acknowledgments.txt in Resources */ = {isa = PBXBuildFile; fileRef = 21813561105AF27400A0AE18 /* Acknowledgments.txt */; };
 		5CF96DBC132EA29D0079B3FD /* greyscrollervertfill3.tif in Resources */ = {isa = PBXBuildFile; fileRef = 5C94376D132A0C9D00B08B80 /* greyscrollervertfill3.tif */; };
@@ -594,8 +593,6 @@
 		5CF01B0E132975A40083D66E /* scrollbarblue.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = scrollbarblue.tif; sourceTree = "<group>"; };
 		5CF01B16132975DA0083D66E /* BTransparentScrollerSlotBottom.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = BTransparentScrollerSlotBottom.tif; sourceTree = "<group>"; };
 		5CF01B1A132975DA0083D66E /* BTransparentScrollerSlotTop.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = BTransparentScrollerSlotTop.tif; sourceTree = "<group>"; };
-		5CF33C701308B478002B5499 /* NotesTableHeaderCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NotesTableHeaderCell.h; sourceTree = "<group>"; };
-		5CF33C711308B478002B5499 /* NotesTableHeaderCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NotesTableHeaderCell.m; sourceTree = "<group>"; };
 		5CF96BFF132EA03E0079B3FD /* de */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = de; path = de.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		5CF96CBE132EA1970079B3FD /* de */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = de; path = de.lproj/BlorPasswordRetriever.nib; sourceTree = "<group>"; };
 		5CF96CBF132EA1970079B3FD /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = de; path = de.lproj/CarbonErrorStrings.plist; sourceTree = "<group>"; };
@@ -1134,8 +1131,6 @@
 				5CCEEF1C130B599B00E15B77 /* DFView.m */,
 				5C9C7732131DA04200FB2652 /* WordCountToken.h */,
 				5C9C7733131DA04300FB2652 /* WordCountToken.m */,
-				5CF33C701308B478002B5499 /* NotesTableHeaderCell.h */,
-				5CF33C711308B478002B5499 /* NotesTableHeaderCell.m */,
 				5C2CD035132ED47900CA0D7C /* ETScrollView.h */,
 				5C2CD036132ED47900CA0D7C /* ETScrollView.m */,
 				5C43669E1DA283720086FF84 /* ETNoteScrollView.h */,
@@ -1419,7 +1414,6 @@
 				21B64C4E12E62A5700D87EFC /* UnifiedCell.m in Sources */,
 				5CBA7A981305E38C004ADEBB /* TagEditingManager.m in Sources */,
 				5C4B356A1307225000014119 /* ETTransparentScroller.m in Sources */,
-				5CF33C721308B478002B5499 /* NotesTableHeaderCell.m in Sources */,
 				5CCEEF1D130B599B00E15B77 /* DFView.m in Sources */,
 				5CA10F1A131C297000DE1F91 /* PreviewController.m in Sources */,
 				5CA10F32131C29E900DE1F91 /* AppController_Preview.m in Sources */,

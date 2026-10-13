@@ -28,7 +28,6 @@
 #import "UnifiedCell.h"
 #import "HeaderViewWithMenu.h"
 #import "NSString_NV.h"
-#import "NotesTableHeaderCell.h"
 #import "LinkingEditor.h"
 #import "AppController.h"
 //#import "NotesTableCornerView.h"
@@ -84,7 +83,8 @@ static void _CopyItemWithSelectorFromMenu(NSMenu *destMenu, NSMenu *sourceMenu, 
 		for (i=0; i<sizeof(colStrings)/sizeof(NSString*); i++) {
 			NoteAttributeColumn *column = [[NoteAttributeColumn alloc] initWithIdentifier:colStrings[i]];
 			[column setEditable:(colMutators[i] != NULL)];
-			[column setHeaderCell:[[[NotesTableHeaderCell alloc] initTextCell:[[NSBundle mainBundle] localizedStringForKey:colStrings[i] value:@"" table:nil]] autorelease]];
+			//standard header cells, drawn by AppKit
+			[column setHeaderCell:[[[NSTableHeaderCell alloc] initTextCell:[[NSBundle mainBundle] localizedStringForKey:colStrings[i] value:@"" table:nil]] autorelease]];
 			
 			[column setMutatingSelector:colMutators[i]];
 			[column setDereferencingFunction:colReferencors[i]];
@@ -107,6 +107,10 @@ static void _CopyItemWithSelectorFromMenu(NSMenu *destMenu, NSMenu *sourceMenu, 
 
         [[self cornerView] setFrameOrigin:NSMakePoint(-1000,-1000)];
         [self setCornerView:nil];
+		
+		//columns run edge to edge; the default (automatic) style insets them, which left empty
+		//header segments at both ends of the header row
+		[self setStyle:NSTableViewStyleFullWidth];
 
 		[self setHeaderView:hideHeader ? nil : headerView];
 		
@@ -1368,7 +1372,6 @@ enum { kNext_Tag = 'j', kPrev_Tag = 'k' };
     [super setBackgroundColor:color];
      
     if (![[color colorSpaceName] isEqualToString:@"NSNamedColorSpace"]) {
-        [NotesTableHeaderCell setBColor:color];
         CGFloat fWhite;
         fWhite = [[color colorUsingColorSpaceName:NSCalibratedWhiteColorSpace] whiteComponent];
         if (fWhite<0.25f) {
