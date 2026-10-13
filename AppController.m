@@ -2069,6 +2069,28 @@ terminateApp:
 	}
 }
 
+//the standard About panel, with the credits set in the system font and label color (so they also read correctly
+//in Dark Mode) instead of coming from an HTML file in the default serif font
+- (IBAction)showAboutPanel:(id)sender {
+	NSMutableParagraphStyle *centered = [[[NSMutableParagraphStyle alloc] init] autorelease];
+	[centered setAlignment:NSTextAlignmentCenter];
+	NSDictionary *attributes = [NSDictionary dictionaryWithObjectsAndKeys:
+								[NSFont systemFontOfSize:[NSFont smallSystemFontSize]], NSFontAttributeName,
+								[NSColor labelColor], NSForegroundColorAttributeName,
+								centered, NSParagraphStyleAttributeName, nil];
+	
+	NSString *repository = @"github.com/fengypants/nv27";
+	NSString *text = [NSString stringWithFormat:@"A modernized nvALT for Apple silicon.\n\n"
+					  @"Based on nvALT by Brett Terpstra and David Halter, and Notational Velocity by Zachary Schneirov. "
+					  @"Markdown preview by cmark-gfm.\n\n%@", repository];
+	NSMutableAttributedString *credits = [[[NSMutableAttributedString alloc] initWithString:text attributes:attributes] autorelease];
+	[credits addAttribute:NSLinkAttributeName value:[NSURL URLWithString:@"https://github.com/fengypants/nv27"]
+					range:[text rangeOfString:repository]];
+	
+	[NSApp activate];
+	[NSApp orderFrontStandardAboutPanelWithOptions:[NSDictionary dictionaryWithObject:credits forKey:NSAboutPanelOptionCredits]];
+}
+
 - (IBAction)fixFileEncoding:(id)sender {
 	if (currentNote) {
 		[notationController synchronizeNoteChanges:nil];

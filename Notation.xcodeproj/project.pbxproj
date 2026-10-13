@@ -109,7 +109,6 @@
 		5C43669C1DA268500086FF84 /* How does this thing work?.nvhelp in Resources */ = {isa = PBXBuildFile; fileRef = 5C4366971DA268500086FF84 /* How does this thing work?.nvhelp */; };
 		5C43669D1DA268500086FF84 /* This is the title of a note.nvhelp in Resources */ = {isa = PBXBuildFile; fileRef = 5C4366991DA268500086FF84 /* This is the title of a note.nvhelp */; };
 		5C4366A01DA283720086FF84 /* ETNoteScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 5C43669F1DA283720086FF84 /* ETNoteScrollView.m */; };
-		5C49E365131C5CC500696B68 /* Credits.html in Resources */ = {isa = PBXBuildFile; fileRef = 5C49E364131C5CC500696B68 /* Credits.html */; };
 		5C4B353E1307220E00014119 /* TransparentScrollerKnobTop.tif in Resources */ = {isa = PBXBuildFile; fileRef = 5C4B35361307220E00014119 /* TransparentScrollerKnobTop.tif */; };
 		5C4B35401307220E00014119 /* TransparentScrollerSlotBottom.tif in Resources */ = {isa = PBXBuildFile; fileRef = 5C4B35381307220E00014119 /* TransparentScrollerSlotBottom.tif */; };
 		5C4B35421307220E00014119 /* TransparentScrollerSlotVerticalFill.tif in Resources */ = {isa = PBXBuildFile; fileRef = 5C4B353A1307220E00014119 /* TransparentScrollerSlotVerticalFill.tif */; };
@@ -490,7 +489,6 @@
 		5C48A2A513A550B0006B73DD /* it */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = it; path = it.lproj/ImporterAccessory.nib; sourceTree = "<group>"; };
 		5C48A2A713A550B0006B73DD /* it */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = it; path = it.lproj/SavedSearches.nib; sourceTree = "<group>"; };
 		5C48A2A813A550B0006B73DD /* it */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = it; path = it.lproj/URLGetter.nib; sourceTree = "<group>"; };
-		5C49E364131C5CC500696B68 /* Credits.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = Credits.html; sourceTree = "<group>"; };
 		5C4B35351307220E00014119 /* TransparentScrollerKnobBottom.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = TransparentScrollerKnobBottom.tif; sourceTree = "<group>"; };
 		5C4B35361307220E00014119 /* TransparentScrollerKnobTop.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = TransparentScrollerKnobTop.tif; sourceTree = "<group>"; };
 		5C4B35371307220E00014119 /* TransparentScrollerKnobVerticalFill.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = TransparentScrollerKnobVerticalFill.tif; sourceTree = "<group>"; };
@@ -1056,7 +1054,6 @@
 				219196B109D4F1DB00586B15 /* Images */,
 				2114C259095885C800614E74 /* Localizable.strings */,
 				8D1107310486CEB800E47090 /* Info.plist */,
-				5C49E364131C5CC500696B68 /* Credits.html */,
 				2128651C1278AF220013820A /* ServicesMenu.strings */,
 				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
 				212850860B56E549005F6E34 /* CarbonErrorStrings.plist */,
@@ -1265,7 +1262,6 @@
 				5C96F709131C49D400A2E4AC /* TransparentButtonFillN.tiff in Resources */,
 				5C96F70B131C49D400A2E4AC /* TransparentButtonLeftN.tiff in Resources */,
 				5C96F70D131C49D400A2E4AC /* TransparentButtonRightN.tiff in Resources */,
-				5C49E365131C5CC500696B68 /* Credits.html in Resources */,
 				5CF01B08132975910083D66E /* greyscrollervertbottom.tiff in Resources */,
 				5CF01B0C132975910083D66E /* greyscrollerverttop.tiff in Resources */,
 				5CF01B22132975DB0083D66E /* BTransparentScrollerSlotBottom.tif in Resources */,

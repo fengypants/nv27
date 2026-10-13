@@ -35,7 +35,7 @@
                             <menuItem title="Über nv27" id="58">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
-                                    <action selector="orderFrontStandardAboutPanel:" target="-2" id="142"/>
+                                    <action selector="showAboutPanel:" target="213" id="142"/>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="196">
@@ -956,7 +956,7 @@ CA
                 <menuItem title="Über nv27" id="Eh7-wx-CCX">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
-                        <action selector="orderFrontStandardAboutPanel:" target="-2" id="XZy-fI-t9S"/>
+                        <action selector="showAboutPanel:" target="213" id="XZy-fI-t9S"/>
                     </connections>
                 </menuItem>
                 <menuItem title="Einstellungen…" keyEquivalent="," id="1182">

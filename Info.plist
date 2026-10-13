@@ -131,8 +131,6 @@
 	</array>
 	<key>CFBundleExecutable</key>
 	<string>${EXECUTABLE_NAME}</string>
-	<key>CFBundleGetInfoString</key>
-	<string>nv27, based on nvALT by David Halter and Brett Terpstra and NV 2.0 β5 Copyright © 2010 Zachary Schneirov, All Rights Reserved.</string>
 	<key>CFBundleIconFile</key>
 	<string>Notality.icns</string>
 	<key>CFBundleIdentifier</key>
@@ -179,6 +177,8 @@
 	<string>nv27 sends Apple Events to external editors and to Marked to open and preview your notes.</string>
 	<key>NSAppleScriptEnabled</key>
 	<true/>
+	<key>NSHumanReadableCopyright</key>
+	<string>© 2010–2012 Zachary Schneirov, Brett Terpstra and David Halter. Distributed under the GNU General Public License v3.</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>

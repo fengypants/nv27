@@ -1,4 +1,4 @@
 ﻿/* Localized versions of Info.plist keys */
 
-CFBundleName = "nvALT";
-NSHumanReadableCopyright = "Deutsche Übersetzung von Benedikt Hopmann";
+CFBundleName = "nv27";
+NSHumanReadableCopyright = "© 2010–2012 Zachary Schneirov, Brett Terpstra and David Halter. Distributed under the GNU General Public License v3.\nDeutsche Übersetzung von Benedikt Hopmann";

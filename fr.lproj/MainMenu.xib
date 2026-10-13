@@ -37,7 +37,7 @@
                             <menuItem title="A propos de nv27" id="58">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
-                                    <action selector="orderFrontStandardAboutPanel:" target="-2" id="142"/>
+                                    <action selector="showAboutPanel:" target="213" id="142"/>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="196">
@@ -953,7 +953,7 @@ CA
                 <menuItem title="A propos de nv27" id="bfT-Au-Zcz">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
-                        <action selector="orderFrontStandardAboutPanel:" target="-2" id="yLY-TW-6vf"/>
+                        <action selector="showAboutPanel:" target="213" id="yLY-TW-6vf"/>
                     </connections>
                 </menuItem>
                 <menuItem title="Préférences…" keyEquivalent="," id="1165">

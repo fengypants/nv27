@@ -38,7 +38,7 @@
                             <menuItem title="关于 nv27" id="58">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
-                                    <action selector="orderFrontStandardAboutPanel:" target="-2" id="1254"/>
+                                    <action selector="showAboutPanel:" target="213" id="1254"/>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="196">
@@ -962,7 +962,7 @@ CA
                 <menuItem title="关于 nv27" id="bVx-37-etW">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
-                        <action selector="orderFrontStandardAboutPanel:" target="-2" id="BYg-JI-cMQ"/>
+                        <action selector="showAboutPanel:" target="213" id="BYg-JI-cMQ"/>
                     </connections>
                 </menuItem>
                 <menuItem title="偏好设置…" keyEquivalent="," id="1180">

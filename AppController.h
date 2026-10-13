@@ -130,6 +130,7 @@ void outletObjectAwoke(id sender);
 - (void)runDelayedUIActionsAfterLaunch;
 - (void)updateNoteMenus;
 
+- (IBAction)showAboutPanel:(id)sender;
 - (IBAction)makeActiveAndShowWindow:(id)sender;
 - (IBAction)renameNote:(id)sender;
 - (IBAction)deleteNote:(id)sender;
