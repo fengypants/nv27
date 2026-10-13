@@ -389,7 +389,11 @@
     [item setPaletteLabel:localizedTitle];
     [item setLabel:localizedTitle];
     //[item setToolTip:@"General settings: appearance and behavior"];
-    [item setImage:[[[NSImage alloc] initWithContentsOfFile:[[NSBundle mainBundle] pathForResource:name ofType:@"tiff"]] autorelease]];
+    //standard SF Symbols for each settings pane
+    NSDictionary *symbolNames = [NSDictionary dictionaryWithObjectsAndKeys:
+                                 @"gearshape", @"General", @"note.text", @"Notes",
+                                 @"pencil.line", @"Editing", @"textformat", @"Fonts & Colors", nil];
+    [item setImage:[NSImage imageWithSystemSymbolName:[symbolNames objectForKey:name] accessibilityDescription:localizedTitle]];
     [item setTarget:self];
     [item setAction:@selector(switchViews:)];
     [items setObject:item forKey:name];
@@ -473,6 +477,8 @@
     [toolbar setAutosavesConfiguration:NO]; 
     [window setToolbar:toolbar];
     [toolbar release];  //setToolbar retains the toolbar we pass, so release the one we used.
+	//the standard Settings-window toolbar: centered pane icons with labels and a selection highlight
+	[window setToolbarStyle:NSWindowToolbarStylePreference];
 	
 	[window setShowsToolbarButton:NO];
     [useETScrollbarsOnLionButton setState:[prefsController useETScrollbarsOnLion]];

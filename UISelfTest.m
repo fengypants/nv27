@@ -53,6 +53,7 @@ static NSString *ResponderName(NSResponder *responder) {
 - (void)_selfTestPrepare {
 	[NSApp activateIgnoringOtherApps:YES];
 	[window makeKeyAndOrderFront:nil];
+	[window makeKeyWindow];
 	if (!currentNote && [notesTableView numberOfRows] > 0)
 		[notesTableView selectRowAndScroll:0];
 
@@ -75,11 +76,25 @@ static NSString *ResponderName(NSResponder *responder) {
 	NSEvent *up = [NSEvent mouseEventWithType:NSEventTypeLeftMouseUp location:point modifierFlags:0 timestamp:now + 0.05
 								 windowNumber:[window windowNumber] context:nil eventNumber:2 clickCount:1 pressure:0.0];
 	NSResponder *before = [window firstResponder];
-	//the text view runs a tracking loop on mouse-down that ends when it dequeues the mouse-up
+	//deliver it the way real clicks arrive (through NSApplication); the text view runs a tracking loop on
+	//mouse-down that ends when it dequeues the mouse-up
 	[NSApp postEvent:up atStart:NO];
-	[window sendEvent:down];
-	SelfTestLog(@"click %@ at %@: firstResponder before=%@ after=%@ editorFocused=%d", label, NSStringFromPoint(point),
-				ResponderName(before), ResponderName([window firstResponder]), [window firstResponder] == textView);
+	[NSApp sendEvent:down];
+	SelfTestLog(@"click %@ at %@ (windowKey=%d): firstResponder before=%@ after=%@ editorFocused=%d", label, NSStringFromPoint(point),
+				[window isKeyWindow], ResponderName(before), ResponderName([window firstResponder]), [window firstResponder] == textView);
+	//anything that moves focus back later (delayed performs, notifications) shows up after the run loop runs
+	[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.5]];
+	SelfTestLog(@"click %@: 0.5s later firstResponder=%@ editorFocused=%d", label, ResponderName([window firstResponder]),
+				[window firstResponder] == textView);
+	
+	//type a character the way the keyboard would, to confirm the click left the note editable
+	NSString *before2 = [[[textView string] copy] autorelease];
+	NSEvent *key = [NSEvent keyEventWithType:NSEventTypeKeyDown location:NSZeroPoint modifierFlags:0 timestamp:now + 0.6
+								windowNumber:[window windowNumber] context:nil characters:@"Z" charactersIgnoringModifiers:@"Z" isARepeat:NO keyCode:6];
+	[NSApp sendEvent:key];
+	SelfTestLog(@"click %@: typing 'Z' changed the note=%d (search field now \"%@\")", label,
+				![[textView string] isEqualToString:before2], [field stringValue]);
+	if (![[textView string] isEqualToString:before2]) [[textView undoManager] undo];
 }
 
 - (void)_selfTestClicks {
@@ -114,17 +129,33 @@ static NSString *ResponderName(NSResponder *responder) {
 	[self performSelector:@selector(_selfTestSnapshot) withObject:nil afterDelay:0.5];
 }
 
-- (void)_selfTestSnapshot {
-	NSView *frameView = [[window contentView] superview];
+static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
+	NSView *frameView = [[aWindow contentView] superview];
 	NSBitmapImageRep *rep = [frameView bitmapImageRepForCachingDisplayInRect:[frameView bounds]];
 	[frameView cacheDisplayInRect:[frameView bounds] toBitmapImageRep:rep];
 	NSData *png = [rep representationUsingType:NSBitmapImageFileTypePNG properties:[NSDictionary dictionary]];
 	NSString *base64 = [png base64EncodedStringWithOptions:0];
-	SelfTestLog(@"snapshot %ldx%ld px, %lu bytes", (long)[rep pixelsWide], (long)[rep pixelsHigh], (unsigned long)[png length]);
+	SelfTestLog(@"snapshot %@ (%@): %ldx%ld px, %lu bytes", tag, [aWindow title], (long)[rep pixelsWide], (long)[rep pixelsHigh], (unsigned long)[png length]);
 	for (NSUInteger i = 0; i < [base64 length]; i += 4000) {
-		fprintf(stdout, "SELFTEST-PNG %s\n", [[base64 substringWithRange:NSMakeRange(i, MIN(4000, [base64 length] - i))] UTF8String]);
+		fprintf(stdout, "SELFTEST-PNG-%s %s\n", [tag UTF8String], [[base64 substringWithRange:NSMakeRange(i, MIN(4000, [base64 length] - i))] UTF8String]);
 	}
 	fflush(stdout);
+}
+
+- (void)_selfTestSnapshot {
+	SelfTestLog(@"search field frameInWindow=%@ notes header=%@", NSStringFromRect([field convertRect:[field bounds] toView:nil]),
+				NSStringFromRect([[notesTableView headerView] convertRect:[[notesTableView headerView] bounds] toView:nil]));
+	PrintSnapshotOfWindow(window, @"main");
+	
+	[self showPreferencesWindow:nil];
+	[self performSelector:@selector(_selfTestSnapshotSettings) withObject:nil afterDelay:1.5];
+}
+
+- (void)_selfTestSnapshotSettings {
+	for (NSWindow *aWindow in [NSApp windows]) {
+		if (aWindow != window && [aWindow isVisible] && [aWindow toolbar])
+			PrintSnapshotOfWindow(aWindow, @"settings");
+	}
 	SelfTestLog(@"done");
 	exit(0);
 }

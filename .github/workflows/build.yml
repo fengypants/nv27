@@ -77,8 +77,8 @@ jobs:
           for i in $(seq 1 60); do kill -0 $PID 2>/dev/null || break; sleep 1; done
           kill $PID 2>/dev/null || true
           grep "^SELFTEST " selftest.log || { echo "no self-test output"; tail -60 selftest.log; }
-          echo "---- snapshot ($(grep -c '^SELFTEST-PNG ' selftest.log) lines) ----"
-          grep "^SELFTEST-PNG " selftest.log || true
+          echo "---- snapshot ($(grep -c "^SELFTEST-PNG" selftest.log) lines) ----"
+          grep "^SELFTEST-PNG" selftest.log || true
 
       - name: Package app
         if: matrix.configuration == 'ForBuilding'

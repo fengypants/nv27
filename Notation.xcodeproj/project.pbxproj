@@ -77,7 +77,6 @@
 		21B64C4E12E62A5700D87EFC /* UnifiedCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B64C4D12E62A5700D87EFC /* UnifiedCell.m */; };
 		21BD2ED110DAF31500BA3DF6 /* LinearDividerShader.m in Sources */ = {isa = PBXBuildFile; fileRef = 21BD2ECF10DAF31500BA3DF6 /* LinearDividerShader.m */; };
 		21BD2F3610DAF61700BA3DF6 /* SplitViewDimple.tif in Resources */ = {isa = PBXBuildFile; fileRef = 21BD2F3510DAF61700BA3DF6 /* SplitViewDimple.tif */; };
-		21C0F8A212C7E7160068693F /* Fonts & Colors.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 21C0F8A112C7E7160068693F /* Fonts & Colors.tiff */; };
 		21C737950B50C73E0048C08A /* MultiplePageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C737940B50C73E0048C08A /* MultiplePageView.m */; };
 		21D583620B78F0CC00245E29 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21D5834D0B78F0CC00245E29 /* ApplicationServices.framework */; };
 		21D60128098FDB46007440DF /* GlobalPrefs.m in Sources */ = {isa = PBXBuildFile; fileRef = 21D60127098FDB46007440DF /* GlobalPrefs.m */; };
@@ -159,9 +158,6 @@
 		5CF96DE2132EA29D0079B3FD /* PasswordAssistantButton.tif in Resources */ = {isa = PBXBuildFile; fileRef = 2144950D0ADC883000E2A2B6 /* PasswordAssistantButton.tif */; };
 		5CF96DE3132EA29D0079B3FD /* PasswordAssistantButtonPressed.tif in Resources */ = {isa = PBXBuildFile; fileRef = 2144950E0ADC883000E2A2B6 /* PasswordAssistantButtonPressed.tif */; };
 		5CF96DE5132EA29D0079B3FD /* SplitViewDimple2.tif in Resources */ = {isa = PBXBuildFile; fileRef = 5C5713F01309A42600961090 /* SplitViewDimple2.tif */; };
-		5CF96DE6132EA29D0079B3FD /* Editing.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 215DEE1209F1AA4C009A710B /* Editing.tiff */; };
-		5CF96DE7132EA29D0079B3FD /* Notes.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 215DEA4609EF6446009A710B /* Notes.tiff */; };
-		5CF96DE8132EA29D0079B3FD /* General.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 215DEA3D09EF5323009A710B /* General.tiff */; };
 		5CF96DEA132EA29D0079B3FD /* Add_Pressed.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 219196BB09D4F20000586B15 /* Add_Pressed.tiff */; };
 		5CF96DEC132EA29D0079B3FD /* Remove_Pressed.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 219196BD09D4F20000586B15 /* Remove_Pressed.tiff */; };
 		5CF96DED132EA29D0079B3FD /* Remove.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 219196BE09D4F20000586B15 /* Remove.tiff */; };
@@ -289,9 +285,6 @@
 		21582DC40B73F59A00711663 /* BookmarksController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BookmarksController.m; sourceTree = "<group>"; wrapsLines = 1; };
 		215DE83609ECC4FE009A710B /* HeaderViewWIthMenu.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = HeaderViewWIthMenu.h; sourceTree = "<group>"; };
 		215DE83709ECC4FE009A710B /* HeaderViewWIthMenu.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = HeaderViewWIthMenu.m; sourceTree = "<group>"; };
-		215DEA3D09EF5323009A710B /* General.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = General.tiff; path = Images/General.tiff; sourceTree = "<group>"; };
-		215DEA4609EF6446009A710B /* Notes.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = Notes.tiff; path = Images/Notes.tiff; sourceTree = "<group>"; };
-		215DEE1209F1AA4C009A710B /* Editing.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = Editing.tiff; path = Images/Editing.tiff; sourceTree = "<group>"; };
 		21665A9C10E6032F00188D3D /* Search.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Search.png; path = Images/Search.png; sourceTree = "<group>"; };
 		2168EC5109E33B0300778D02 /* FrozenNotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FrozenNotation.h; sourceTree = "<group>"; };
 		2168EC5209E33B0300778D02 /* FrozenNotation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FrozenNotation.m; sourceTree = "<group>"; };
@@ -363,7 +356,6 @@
 		21BD2ECF10DAF31500BA3DF6 /* LinearDividerShader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LinearDividerShader.m; sourceTree = "<group>"; };
 		21BD2ED010DAF31500BA3DF6 /* LinearDividerShader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinearDividerShader.h; sourceTree = "<group>"; };
 		21BD2F3510DAF61700BA3DF6 /* SplitViewDimple.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = SplitViewDimple.tif; sourceTree = "<group>"; };
-		21C0F8A112C7E7160068693F /* Fonts & Colors.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = "Fonts & Colors.tiff"; path = "Images/Fonts & Colors.tiff"; sourceTree = "<group>"; };
 		21C737930B50C73E0048C08A /* MultiplePageView.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MultiplePageView.h; sourceTree = "<group>"; };
 		21C737940B50C73E0048C08A /* MultiplePageView.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = MultiplePageView.m; sourceTree = "<group>"; };
 		21CF80F210FD33B90094AA90 /* SynchronizedNoteMixIns.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SynchronizedNoteMixIns.h; sourceTree = "<group>"; };
@@ -950,10 +942,6 @@
 				2144950E0ADC883000E2A2B6 /* PasswordAssistantButtonPressed.tif */,
 				21BD2F3510DAF61700BA3DF6 /* SplitViewDimple.tif */,
 				5C5713F01309A42600961090 /* SplitViewDimple2.tif */,
-				215DEE1209F1AA4C009A710B /* Editing.tiff */,
-				215DEA4609EF6446009A710B /* Notes.tiff */,
-				215DEA3D09EF5323009A710B /* General.tiff */,
-				21C0F8A112C7E7160068693F /* Fonts & Colors.tiff */,
 				219196BB09D4F20000586B15 /* Add_Pressed.tiff */,
 				219196BC09D4F20000586B15 /* Add.tiff */,
 				219196BD09D4F20000586B15 /* Remove_Pressed.tiff */,
@@ -1247,7 +1235,6 @@
 				212C6EA3110E493C004DD82C /* Clear.tif in Resources */,
 				57F27F7B11973A7F00C63ACF /* Notation.sdef in Resources */,
 				5C8BCF881DA2617C0036FA7E /* Contact.nvhelp in Resources */,
-				21C0F8A212C7E7160068693F /* Fonts & Colors.tiff in Resources */,
 				216D9C2E12CFEF2A0004B9CE /* LinkBackPressed.tif in Resources */,
 				21A38EE412EA864400CEB5F0 /* MakeDefault_Pressed.tiff in Resources */,
 				5CBA7A911305E2DF004ADEBB /* TagEditingManager.xib in Resources */,
@@ -1285,9 +1272,6 @@
 				5CF96DE2132EA29D0079B3FD /* PasswordAssistantButton.tif in Resources */,
 				5CF96DE3132EA29D0079B3FD /* PasswordAssistantButtonPressed.tif in Resources */,
 				5CF96DE5132EA29D0079B3FD /* SplitViewDimple2.tif in Resources */,
-				5CF96DE6132EA29D0079B3FD /* Editing.tiff in Resources */,
-				5CF96DE7132EA29D0079B3FD /* Notes.tiff in Resources */,
-				5CF96DE8132EA29D0079B3FD /* General.tiff in Resources */,
 				5CF96DEA132EA29D0079B3FD /* Add_Pressed.tiff in Resources */,
 				5CF96DEC132EA29D0079B3FD /* Remove_Pressed.tiff in Resources */,
 				5CF96DED132EA29D0079B3FD /* Remove.tiff in Resources */,
