@@ -119,6 +119,26 @@ NSString *NotationPrefsDidChangeNotification = @"NotationPrefsDidChangeNotificat
 			chosenExtIndices[i] = [decoder decodeIntForKey:[VAR_STR(chosenExtIndices) stringByAppendingFormat:@".%d",i]];
 		}
 		
+		//nv27 recognizes Markdown (.md) files as notes instead of TaskPaper files; update lists saved by
+		//nvALT or earlier nv27 builds once (after that, the list is the user's to edit)
+		if (![decoder decodeBoolForKey:@"nv27PlainTextExtensionsUpdated"]) {
+			NSMutableArray *extensions = [[pathExtensions[PlainTextFormat] mutableCopy] autorelease];
+			[pathExtensions[PlainTextFormat] release];
+			pathExtensions[PlainTextFormat] = [extensions retain];
+			NSString *chosen = chosenExtIndices[PlainTextFormat] < [extensions count] ?
+				[[[extensions objectAtIndex:chosenExtIndices[PlainTextFormat]] retain] autorelease] : nil;
+			NSUInteger j;
+			for (j = [extensions count]; j > 0; j--) {
+				if ([[extensions objectAtIndex:j - 1] caseInsensitiveCompare:@"taskpaper"] == NSOrderedSame)
+					[extensions removeObjectAtIndex:j - 1];
+			}
+			if (![extensions containsObject:@"md"])
+				[extensions addObject:@"md"];
+			NSUInteger chosenIndex = chosen ? [extensions indexOfObject:chosen] : NSNotFound;
+			chosenExtIndices[PlainTextFormat] = chosenIndex == NSNotFound ? 0 : (unsigned int)chosenIndex;
+			preferencesChanged = YES;
+		}
+		
 		//databases from earlier versions may also contain "syncServiceAccounts" (Simplenote settings) and
 		//keychain/key-derivation settings for encryption; they are ignored
 		
@@ -155,6 +175,7 @@ NSString *NotationPrefsDidChangeNotification = @"NotationPrefsDidChangeNotificat
 		[coder encodeObject:pathExtensions[i] forKey:[VAR_STR(pathExtensions) stringByAppendingFormat:@".%d",i]];
 		[coder encodeInt:chosenExtIndices[i] forKey:[VAR_STR(chosenExtIndices) stringByAppendingFormat:@".%d",i]];
 	}
+	[coder encodeBool:YES forKey:@"nv27PlainTextExtensionsUpdated"];
 	
 	[coder encodeObject:seenDiskUUIDEntries forKey:VAR_STR(seenDiskUUIDEntries)];
 }
@@ -202,7 +223,7 @@ NSString *NotationPrefsDidChangeNotification = @"NotationPrefsDidChangeNotificat
 	case SingleDatabaseFormat:
 	    return [NSMutableArray arrayWithCapacity:0];
 	case PlainTextFormat: 
-	    return [NSMutableArray arrayWithObjects:@"txt", @"text", @"utf8", @"taskpaper", nil];
+	    return [NSMutableArray arrayWithObjects:@"txt", @"text", @"utf8", @"md", nil];
 	case RTFTextFormat: 
 	    return [NSMutableArray arrayWithObjects:@"rtf", nil];
 	case HTMLFormat:
