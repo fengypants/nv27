@@ -24,8 +24,9 @@ static BOOL selfTestTracingFocus = NO;
 @end
 @implementation NSWindow (UISelfTestTracing)
 - (BOOL)nv27_selfTestMakeFirstResponder:(NSResponder*)responder {
-	if (selfTestTracingFocus && [responder isKindOfClass:[DualField class]]) {
-		fprintf(stdout, "SELFTEST focus moved to the search field from:\n");
+	if (selfTestTracingFocus) {
+		fprintf(stdout, "SELFTEST makeFirstResponder:%s (window %s, key=%d) from:\n", [NSStringFromClass([responder class]) UTF8String],
+				[NSStringFromClass([self class]) UTF8String], [self isKeyWindow]);
 		for (NSString *frame in [[NSThread callStackSymbols] subarrayWithRange:NSMakeRange(1, MIN((NSUInteger)18, [[NSThread callStackSymbols] count] - 1))])
 			fprintf(stdout, "SELFTEST   %s\n", [frame UTF8String]);
 		fflush(stdout);
@@ -135,6 +136,15 @@ static NSString *ResponderName(NSResponder *responder) {
 }
 
 - (void)_selfTestClicks {
+	//simulated clicks only reach the editor in the key window; give activation a few tries (CI runners can be slow)
+	for (int attempt = 0; attempt < 6 && ![window isKeyWindow]; attempt++) {
+		[NSApp activateIgnoringOtherApps:YES];
+		[window makeKeyAndOrderFront:nil];
+		[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.5]];
+	}
+	SelfTestLog(@"window key before clicks=%d", [window isKeyWindow]);
+	[window makeFirstResponder:textView];
+	[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.5]];
 	NSView *frameView = [[window contentView] superview];
 	NSScrollView *scrollView = [textView enclosingScrollView];
 
