@@ -94,6 +94,7 @@
 
 - (NotationPrefsViewController*)notationPrefsViewController;
 - (NSView*)databaseView;
+- (void)fitNotationPrefsView;
 - (void)addToolbarItemWithName:(NSString*)name;
 - (void)switchViews:(NSToolbarItem *)item;
 	NSRect ScaleRectWithFactor(NSRect rect, float factor);

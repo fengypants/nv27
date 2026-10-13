@@ -376,10 +376,36 @@
 }
 
 - (NSView*)databaseView {
-    if (![notationPrefsView subviews] || ![[notationPrefsView subviews] count])
+    if (![notationPrefsView subviews] || ![[notationPrefsView subviews] count]) {
 		[notationPrefsView addSubview:[[self notationPrefsViewController] view]];
+		[self fitNotationPrefsView];
+	}
 	
     return databaseView;
+}
+
+//the notes storage view can be shorter than its placeholder (its tabs for removed features are gone): shrink the
+//placeholder to fit, keeping the rows above it the same distance away, and the pane by the same amount
+- (void)fitNotationPrefsView {
+	NSView *storageView = [[self notationPrefsViewController] view];
+	NSRect placeholder = [notationPrefsView frame];
+	CGFloat delta = NSHeight(placeholder) - NSHeight([storageView frame]);
+	if (delta <= 0.0 || [databaseView isFlipped]) return;
+	
+	BOOL autoresizes = [databaseView autoresizesSubviews], placeholderAutoresizes = [notationPrefsView autoresizesSubviews];
+	[databaseView setAutoresizesSubviews:NO];
+	[notationPrefsView setAutoresizesSubviews:NO];
+	
+	[storageView setFrameOrigin:NSZeroPoint];
+	[notationPrefsView setFrameSize:NSMakeSize(NSWidth(placeholder), NSHeight(placeholder) - delta)];
+	for (NSView *row in [databaseView subviews]) {
+		if (row != notationPrefsView && NSMinY([row frame]) >= NSMaxY(placeholder) - 1.0)
+			[row setFrameOrigin:NSMakePoint(NSMinX([row frame]), NSMinY([row frame]) - delta)];
+	}
+	[databaseView setFrameSize:NSMakeSize(NSWidth([databaseView frame]), NSHeight([databaseView frame]) - delta)];
+	
+	[notationPrefsView setAutoresizesSubviews:placeholderAutoresizes];
+	[databaseView setAutoresizesSubviews:autoresizes];
 }
 
 - (void)addToolbarItemWithName:(NSString*)name {
