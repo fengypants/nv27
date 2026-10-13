@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A1B2C3D40000000000000012 /* UISelfTest.m in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40000000000000011 /* UISelfTest.m */; };
 		A1B2C3D40000000000000003 /* MarkdownRenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40000000000000002 /* MarkdownRenderer.m */; };
 		A1B2C3D40000000000000007 /* cmark-gfm in Frameworks */ = {isa = PBXBuildFile; productRef = A1B2C3D40000000000000005 /* cmark-gfm */; };
 		A1B2C3D40000000000000008 /* cmark-gfm-extensions in Frameworks */ = {isa = PBXBuildFile; productRef = A1B2C3D40000000000000006 /* cmark-gfm-extensions */; };
@@ -229,6 +230,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		A1B2C3D40000000000000011 /* UISelfTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UISelfTest.m; sourceTree = "<group>"; };
 		A1B2C3D40000000000000001 /* MarkdownRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MarkdownRenderer.h; sourceTree = "<group>"; };
 		A1B2C3D40000000000000002 /* MarkdownRenderer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MarkdownRenderer.m; sourceTree = "<group>"; };
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
@@ -1106,6 +1108,7 @@
 				5C96F5AC131C37DF00A2E4AC /* NSString_Markdown.m */,
 				A1B2C3D40000000000000001 /* MarkdownRenderer.h */,
 				A1B2C3D40000000000000002 /* MarkdownRenderer.m */,
+				A1B2C3D40000000000000011 /* UISelfTest.m */,
 			);
 			name = Markup;
 			sourceTree = "<group>";
@@ -1424,6 +1427,7 @@
 				5C96F5AF131C37DF00A2E4AC /* NSString_MultiMarkdown.m in Sources */,
 				5C96F5B0131C37DF00A2E4AC /* NSString_Markdown.m in Sources */,
 				A1B2C3D40000000000000003 /* MarkdownRenderer.m in Sources */,
+				A1B2C3D40000000000000012 /* UISelfTest.m in Sources */,
 				5C96F6DE131C488B00A2E4AC /* ETTransparentButtonCell.m in Sources */,
 				5C96F6E9131C48FE00A2E4AC /* ETTransparentButton.m in Sources */,
 				5C9C7734131DA04300FB2652 /* WordCountToken.m in Sources */,

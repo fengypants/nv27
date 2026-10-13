@@ -65,6 +65,21 @@ jobs:
           ! grep -v "arm64" macho.txt | grep -q .
           ! grep -E "x86_64|i386|ppc" macho.txt
 
+      - name: UI self-test
+        # debug builds only: launches the app with NV27_UI_SELFTEST set (see UISelfTest.m), which reports
+        # how clicks in the note editor are routed and prints a PNG snapshot of the window as base64
+        if: matrix.configuration == 'Development'
+        continue-on-error: true
+        run: |
+          APP="build/DerivedData/Build/Products/Development/nv27.app"
+          NV27_UI_SELFTEST=1 "$APP/Contents/MacOS/nv27" > selftest.log 2>&1 &
+          PID=$!
+          for i in $(seq 1 60); do kill -0 $PID 2>/dev/null || break; sleep 1; done
+          kill $PID 2>/dev/null || true
+          grep "^SELFTEST " selftest.log || { echo "no self-test output"; tail -60 selftest.log; }
+          echo "---- snapshot ($(grep -c '^SELFTEST-PNG ' selftest.log) lines) ----"
+          grep "^SELFTEST-PNG " selftest.log || true
+
       - name: Package app
         if: matrix.configuration == 'ForBuilding'
         # ditto keeps the signature, symlinks and resource names intact (the bundle has files the
