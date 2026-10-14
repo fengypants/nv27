@@ -131,8 +131,8 @@
 		
 		[allowedTypesTable reloadData];
 		[allowedExtensionsTable reloadData];
-		//tags are stored as Finder tags by default; the button only converts from the older OpenMeta tags
-		[useFinderTaggingButton setHidden:[[GlobalPrefs defaultPrefs] useFinderTags]];
+		//tags stay OpenMeta tags, separate from Finder's; the old switch to Finder tags isn't offered
+		[useFinderTaggingButton setHidden:YES];
 
     }
 }

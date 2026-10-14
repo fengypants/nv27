@@ -21,7 +21,7 @@ Requires an Apple silicon Mac with macOS 14 or later.
 ### New and updated
 
 - **Native on Apple silicon**, built with the current macOS SDK; no Rosetta.
-- **Notes are just files:** plain text by default, with Finder tags; `.md` files are recognized out of the box.
+- **Notes are just files:** plain text by default; `.md` files are recognized out of the box. Tags are stored on each file as OpenMeta tags, as in nvALT, so they stay separate from Finder tags.
 - **Faster Markdown preview** rendered in the app (tables, footnotes, task lists, strikethrough, autolinks); MultiMarkdown metadata is hidden.
 - **Light and Dark mode:** an Appearance setting (Automatic, Light, Dark), and every color scheme has light and dark variants. The User Scheme (default) has separate Light and Dark colors in Settings › Fonts & Colors — black on white in light mode and warm light gray on charcoal in dark mode by default. Low Contrast is now a soft "paper" look and follows *Increase contrast*.
 - **Modern interface throughout:** centered window title; full-width search field with SF Symbols; standard list headers, gridlines and divider; Mail-style list in the side-by-side layout; blue links; standard Settings toolbar and controls; SF Symbols in the preview window and menu bar; system font everywhere except your note text.

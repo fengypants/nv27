@@ -117,6 +117,7 @@ typedef struct _NoteCatalogEntry {
 - (void)flushEverything;
 
 - (void)mirrorAllOMToFinderTags;
+- (void)moveFinderTagsToOpenMetaIfNeeded;
 
 - (void)upgradeDatabaseIfNecessary;
 

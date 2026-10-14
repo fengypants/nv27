@@ -126,7 +126,7 @@ static void sendCallbacksForGlobalPrefs(GlobalPrefs* self, SEL selector, id orig
 		tableColumns = nil;
 
 		[defaults registerDefaults:[NSDictionary dictionaryWithObjectsAndKeys:
-			[NSNumber numberWithBool:YES], UseFinderTagsKey, //notes are files, so store their tags as standard Finder tags
+			[NSNumber numberWithBool:NO], UseFinderTagsKey, //nv27 stores tags as OpenMeta tags, not Finder tags
 			[NSNumber numberWithBool:YES], AutoSuggestLinksKey,
 			[NSNumber numberWithBool:YES], AutoFormatsDoneTagKey, 
 			[NSNumber numberWithBool:YES], AutoIndentsNewLinesKey, 
@@ -529,10 +529,7 @@ static void sendCallbacksForGlobalPrefs(GlobalPrefs* self, SEL selector, id orig
 
 - (BOOL)useFinderTags
 {
-    if (!IsMavericksOrLater) {
-        return NO;
-    }
-	return [defaults boolForKey:UseFinderTagsKey];
+	return NO; //tags are OpenMeta tags (see -[NSFileManager getTagsAtFSPath:])
 }
 
 - (void)setSoftTabs:(BOOL)value sender:(id)sender {

@@ -29,7 +29,7 @@ enum { SingleDatabaseFormat = 0, PlainTextFormat, RTFTextFormat, HTMLFormat, Wor
 extern NSString *NotationPrefsDidChangeNotification;
 
 @interface NotationPrefs : NSObject {
-	BOOL databaseIsEncrypted;
+	BOOL databaseIsEncrypted, tagsMovedToOpenMeta;
 	
 	NSColor *foregroundColor;
 	NSFont *baseBodyFont;
@@ -62,6 +62,8 @@ extern NSString *NotationPrefsDidChangeNotification;
 - (BOOL)databaseIsEncrypted;
 - (UInt32)epochIteration;
 - (BOOL)firstTimeUsed;
+- (BOOL)tagsMovedToOpenMeta;
+- (void)setTagsMovedToOpenMeta:(BOOL)value;
 
 - (void)setPreferencesAreStored;
 - (NSData*)WALSessionKey;
