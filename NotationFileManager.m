@@ -25,7 +25,6 @@
 #import "NSData_transformations.h"
 #include <sys/param.h>
 #include <sys/mount.h>
-#include <sys/xattr.h>
 
 #import <Foundation/Foundation.h>
 #include <CommonCrypto/CommonDigest.h>
@@ -37,7 +36,6 @@ NSString *NotesDatabaseFileName = @"Notes & Settings";
 
 static BOOL VolumeSupportsExchangeObjects(NotationController *controller);
 static struct statfs *StatFSVolumeInfo(NotationController *controller);
-static void CopyFinderTags(const FSRef *sourceRef, const FSRef *destRef);
 
 OSStatus CreateDirectoryIfNotPresent(FSRef *parentRef, CFStringRef subDirectoryName, FSRef *childRef) {
     UniChar chars[256];
@@ -173,28 +171,6 @@ CFUUIDRef CopySyntheticUUIDForVolumeCreationDate(FSRef *fsRef) {
 		}
 	}
 	return NULL;
-}
-
-//Finder tags (set in Finder, not by nv27) live in an extended attribute on the file itself; saving swaps in a newly written
-//file, which on APFS replaces the old file and its attributes, so copy the tags onto the new file first to keep them
-static void CopyFinderTags(const FSRef *sourceRef, const FSRef *destRef) {
-	const char *tagsAttrName = "com.apple.metadata:_kMDItemUserTags";
-	UInt8 sourcePath[PATH_MAX], destPath[PATH_MAX];
-	
-	if (FSRefMakePath(sourceRef, sourcePath, PATH_MAX) != noErr || FSRefMakePath(destRef, destPath, PATH_MAX) != noErr)
-		return;
-	
-	ssize_t size = getxattr((const char*)sourcePath, tagsAttrName, NULL, 0, 0, 0);
-	if (size <= 0) return;
-	
-	void *data = malloc(size);
-	if (data) {
-		if ((size = getxattr((const char*)sourcePath, tagsAttrName, data, size, 0, 0)) > 0) {
-			if (setxattr((const char*)destPath, tagsAttrName, data, size, 0, 0) < 0)
-				NSLog(@"couldn't keep Finder tags of %s: %d", sourcePath, errno);
-		}
-		free(data);
-	}
 }
 
 static BOOL VolumeSupportsExchangeObjects(NotationController *controller) {
@@ -613,8 +589,6 @@ terminate:
     }
     //if destRef is not zeros, just assume that it exists and retry if it doesn't
 	FSRef newSourceRef, newDestRef;
-	
-	CopyFinderTags(destRef, &tempFileRef);
 	
 	if (VolumeSupportsExchangeObjects(self) != 1) {
 		//NSLog(@"emulating fsexchange objects");
