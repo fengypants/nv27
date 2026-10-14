@@ -37,10 +37,6 @@
 - (NSDictionary *)attributesAtPath:(NSString *)path followLink:(BOOL)follow;
 - (NSArray *)folderContentsAtPath:(NSString *)path;
 - (NSArray *)mergedTagsForFileAtPath:(const char*)path;
-- (id)getFinderTagsAtFSPath:(const char*)path;
-- (BOOL)setFinderTags:(id)plistObject atFSPath:(const char*)path;
-- (id)getOpenMetaTagsAtFSPath:(const char*)path;
-- (BOOL)setOpenMetaTags:(id)plistObject atFSPath:(const char*)path;
 - (BOOL)deleteFileAtPath:(NSString *)path;
 
 @end

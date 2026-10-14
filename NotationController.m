@@ -206,39 +206,6 @@
     }
 }
 
-//earlier nv27 builds wrote note tags as Finder tags; nv27 keeps them in OpenMeta tags instead. Once per notes folder,
-//write each note's tags as OpenMeta tags and remove those tags from the file's Finder tags (any other Finder tags,
-//such as colors set in Finder, stay)
-- (void)moveFinderTagsToOpenMetaIfNeeded {
-	if ([notationPrefs tagsMovedToOpenMeta] || [self currentNoteStorageFormat] == SingleDatabaseFormat || !allNotes)
-		return;
-	NSFileManager *fileManager = [NSFileManager defaultManager];
-	NSUInteger movedCount = 0;
-	for (NoteObject *note in allNotes) {
-		NSArray *labels = [note orderedLabelTitles];
-		NSString *path = [note noteFilePath];
-		if (![labels count] || !path) continue;
-		const char *fsPath = [path fileSystemRepresentation];
-		
-		NSMutableArray *openMetaTags = [NSMutableArray arrayWithArray:[fileManager getOpenMetaTagsAtFSPath:fsPath] ?: [NSArray array]];
-		for (NSString *label in labels) {
-			if (![openMetaTags containsObject:label]) [openMetaTags addObject:label];
-		}
-		if (![fileManager setOpenMetaTags:openMetaTags atFSPath:fsPath]) continue;
-		
-		NSArray *finderTags = [fileManager getFinderTagsAtFSPath:fsPath];
-		if ([finderTags count]) {
-			NSMutableArray *otherFinderTags = [NSMutableArray arrayWithArray:finderTags];
-			[otherFinderTags removeObjectsInArray:labels];
-			if ([otherFinderTags count] != [finderTags count])
-				[fileManager setFinderTags:otherFinderTags atFSPath:fsPath];
-		}
-		movedCount++;
-	}
-	[notationPrefs setTagsMovedToOpenMeta:YES];
-	NSLog(@"moved the tags of %lu notes to OpenMeta tags", (unsigned long)movedCount);
-}
-
 - (void)upgradeDatabaseIfNecessary {
 	if (![notationPrefs firstTimeUsed]) {
 		

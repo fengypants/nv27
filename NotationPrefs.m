@@ -121,8 +121,6 @@ NSString *NotationPrefsDidChangeNotification = @"NotationPrefsDidChangeNotificat
 		
 		//nv27 recognizes Markdown (.md) files as notes instead of TaskPaper files; update lists saved by
 		//nvALT or earlier nv27 builds once (after that, the list is the user's to edit)
-		tagsMovedToOpenMeta = [decoder decodeBoolForKey:@"nv27TagsMovedToOpenMeta"];
-		
 		if (![decoder decodeBoolForKey:@"nv27PlainTextExtensionsUpdated"]) {
 			NSMutableArray *extensions = [[pathExtensions[PlainTextFormat] mutableCopy] autorelease];
 			[pathExtensions[PlainTextFormat] release];
@@ -178,7 +176,6 @@ NSString *NotationPrefsDidChangeNotification = @"NotationPrefsDidChangeNotificat
 		[coder encodeInt:chosenExtIndices[i] forKey:[VAR_STR(chosenExtIndices) stringByAppendingFormat:@".%d",i]];
 	}
 	[coder encodeBool:YES forKey:@"nv27PlainTextExtensionsUpdated"];
-	[coder encodeBool:tagsMovedToOpenMeta forKey:@"nv27TagsMovedToOpenMeta"];
 	
 	[coder encodeObject:seenDiskUUIDEntries forKey:VAR_STR(seenDiskUUIDEntries)];
 }
@@ -251,16 +248,6 @@ NSString *NotationPrefsDidChangeNotification = @"NotationPrefsDidChangeNotificat
 }
 - (BOOL)confirmFileDeletion {
     return confirmFileDeletion;
-}
-
-//whether this folder's tags have been moved from Finder tags (written by earlier nv27 builds) to OpenMeta tags
-- (BOOL)tagsMovedToOpenMeta {
-	return tagsMovedToOpenMeta;
-}
-
-- (void)setTagsMovedToOpenMeta:(BOOL)value {
-	tagsMovedToOpenMeta = value;
-	preferencesChanged = YES;
 }
 
 - (BOOL)databaseIsEncrypted {

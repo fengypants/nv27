@@ -531,7 +531,6 @@ terminateApp:
 		[notesTableView setDataSource:[notationController notesListDataSource]];
 		[notesTableView setLabelsListSource:[notationController labelsListDataSource]];
 		[notationController setDelegate:self];
-		[notationController moveFinderTagsToOpenMetaIfNeeded];
 		
 		//allow resolution of UUIDs to NoteObjects from saved searches
 		[[prefsController bookmarksController] setDataSource:notationController];
