@@ -666,3 +666,6 @@
 /* Menu Item for Use Selection for Find */
 "Use Selection for Find" = "Use Selection for Find";
 
+
+"Show Word Count" = "Wortanzahl anzeigen";
+"Hide Word Count" = "Wortanzahl ausblenden";

@@ -436,11 +436,6 @@ CA
                             <menuItem title="Wortanzahl anzeigen" alternate="YES" keyEquivalent="K" id="1286">
                                 <connections>
                                     <action selector="toggleWordCount:" target="213" id="1290"/>
-                                    <binding destination="1287" name="value" keyPath="values.ShowWordCount" id="1289">
-                                        <dictionary key="options">
-                                            <string key="NSValueTransformerName">NSNegateBoolean</string>
-                                        </dictionary>
-                                    </binding>
                                 </connections>
                             </menuItem>
                             <menuItem title="Notizvorschau in Liste anzeigen" keyEquivalent="p" id="1062">

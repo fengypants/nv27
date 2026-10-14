@@ -623,6 +623,11 @@ terminateApp:
         //		}
         //		[menuItem setTitle:[@"Open Note in " stringByAppendingString:defApp]];
         //		return (numberSelected == 1) && [notationController currentNoteStorageFormat] != SingleDatabaseFormat;
+	} else if (selector == @selector(toggleWordCount:)) {
+        //shows or hides part of the window, so the title changes (as View > Show/Hide Sidebar does) rather than a checkmark
+        [menuItem setTitle:[prefsController showWordCount] ? NSLocalizedString(@"Show Word Count", @"menu item title for showing the word count") :
+         NSLocalizedString(@"Hide Word Count", @"menu item title for hiding the word count")];
+        [menuItem setState:NSControlStateValueOff];
 	} else if (selector == @selector(toggleCollapse:)) {
         if ([notesSubview isCollapsed]) {
             [menuItem setTitle:NSLocalizedString(@"Expand Notes List",@"menu item title for expanding notes list")];
@@ -3029,10 +3034,10 @@ static NSColor *SchemeColor(NSInteger scheme, BOOL background, BOOL dark) {
     }
     
     - (IBAction)toggleWordCount:(id)sender{
-        
-        
-        [prefsController synchronize];
-        if ([prefsController showWordCount]) {
+        //the ShowWordCount default is YES while the word count is hidden (it then only pops up while a modifier key is held)
+        BOOL show = [prefsController showWordCount];
+        [prefsController setShowWordCount:!show];
+        if (show) {
             [self updateWordCount:YES];
             [wordCounter setHidden:NO];
             popped=1;
@@ -3041,11 +3046,6 @@ static NSColor *SchemeColor(NSInteger scheme, BOOL background, BOOL dark) {
             [wordCounter setStringValue:@""];
             popped=0;
         }
-        
-        if (![[sender className] isEqualToString:@"NSMenuItem"]) {
-            [prefsController setShowWordCount:![prefsController showWordCount]];
-        }
-        
     }
     
     - (void)flagsChanged:(NSEvent *)theEvent{

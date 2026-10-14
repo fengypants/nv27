@@ -438,11 +438,6 @@ CA
                             <menuItem title="Show Word Count" alternate="YES" keyEquivalent="K" id="1290">
                                 <connections>
                                     <action selector="toggleWordCount:" target="213" id="1294"/>
-                                    <binding destination="1291" name="value" keyPath="values.ShowWordCount" id="1293">
-                                        <dictionary key="options">
-                                            <string key="NSValueTransformerName">NSNegateBoolean</string>
-                                        </dictionary>
-                                    </binding>
                                 </connections>
                             </menuItem>
                             <menuItem title="Afficher l'aperçu des notes dans la liste" keyEquivalent="p" id="1062">
