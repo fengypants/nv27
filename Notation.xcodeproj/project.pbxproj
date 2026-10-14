@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		A1B2C3D40000000000000012 /* UISelfTest.m in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40000000000000011 /* UISelfTest.m */; };
+		A1B2C3D40000000000000023 /* ShortcutsWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40000000000000022 /* ShortcutsWindowController.m */; };
+		A1B2C3D40000000000000025 /* KeyboardShortcuts.md in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40000000000000024 /* KeyboardShortcuts.md */; };
 		A1B2C3D40000000000000003 /* MarkdownRenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40000000000000002 /* MarkdownRenderer.m */; };
 		A1B2C3D40000000000000007 /* cmark-gfm in Frameworks */ = {isa = PBXBuildFile; productRef = A1B2C3D40000000000000005 /* cmark-gfm */; };
 		A1B2C3D40000000000000008 /* cmark-gfm-extensions in Frameworks */ = {isa = PBXBuildFile; productRef = A1B2C3D40000000000000006 /* cmark-gfm-extensions */; };
@@ -101,7 +103,6 @@
 		5C1830CD132EA687005E2210 /* SaveHTMLPreview.nib in Resources */ = {isa = PBXBuildFile; fileRef = 5C1830CF132EA687005E2210 /* SaveHTMLPreview.nib */; };
 		5C2FAD2B1333970200FBFD34 /* ETScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 5C2CD036132ED47900CA0D7C /* ETScrollView.m */; };
 		5C38E2C414223D6900131682 /* ETOverlayScroller.m in Sources */ = {isa = PBXBuildFile; fileRef = 5C38E2C314223D6900131682 /* ETOverlayScroller.m */; };
-		5C43669B1DA268500086FF84 /* Excruciatingly Useful Shortcuts.nvhelp in Resources */ = {isa = PBXBuildFile; fileRef = 5C4366951DA268500086FF84 /* Excruciatingly Useful Shortcuts.nvhelp */; };
 		5C43669C1DA268500086FF84 /* How does this thing work?.nvhelp in Resources */ = {isa = PBXBuildFile; fileRef = 5C4366971DA268500086FF84 /* How does this thing work?.nvhelp */; };
 		5C43669D1DA268500086FF84 /* This is the title of a note.nvhelp in Resources */ = {isa = PBXBuildFile; fileRef = 5C4366991DA268500086FF84 /* This is the title of a note.nvhelp */; };
 		5C4366A01DA283720086FF84 /* ETNoteScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 5C43669F1DA283720086FF84 /* ETNoteScrollView.m */; };
@@ -212,6 +213,9 @@
 
 /* Begin PBXFileReference section */
 		A1B2C3D40000000000000011 /* UISelfTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UISelfTest.m; sourceTree = "<group>"; };
+		A1B2C3D40000000000000021 /* ShortcutsWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShortcutsWindowController.h; sourceTree = "<group>"; };
+		A1B2C3D40000000000000022 /* ShortcutsWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ShortcutsWindowController.m; sourceTree = "<group>"; };
+		A1B2C3D40000000000000024 /* KeyboardShortcuts.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = KeyboardShortcuts.md; sourceTree = "<group>"; };
 		A1B2C3D40000000000000001 /* MarkdownRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MarkdownRenderer.h; sourceTree = "<group>"; };
 		A1B2C3D40000000000000002 /* MarkdownRenderer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MarkdownRenderer.m; sourceTree = "<group>"; };
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
@@ -441,7 +445,6 @@
 		5C4366921DA268030086FF84 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/ServicesMenu.strings; sourceTree = "<group>"; };
 		5C4366931DA2680E0086FF84 /* en */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		5C4366941DA2682D0086FF84 /* en */ = {isa = PBXFileReference; lastKnownFileType = text; name = en; path = en.lproj/Contact.nvhelp; sourceTree = "<group>"; };
-		5C4366961DA268500086FF84 /* en */ = {isa = PBXFileReference; lastKnownFileType = text; name = en; path = "en.lproj/Excruciatingly Useful Shortcuts.nvhelp"; sourceTree = "<group>"; };
 		5C4366981DA268500086FF84 /* en */ = {isa = PBXFileReference; lastKnownFileType = text; name = en; path = "en.lproj/How does this thing work?.nvhelp"; sourceTree = "<group>"; };
 		5C43669A1DA268500086FF84 /* en */ = {isa = PBXFileReference; lastKnownFileType = text; name = en; path = "en.lproj/This is the title of a note.nvhelp"; sourceTree = "<group>"; };
 		5C43669E1DA283720086FF84 /* ETNoteScrollView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ETNoteScrollView.h; sourceTree = "<group>"; };
@@ -522,20 +525,15 @@
 		5CA10F31131C29E900DE1F91 /* AppController_Preview.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppController_Preview.m; sourceTree = SOURCE_ROOT; };
 		5CAB2F771DC76578000AFED9 /* it */ = {isa = PBXFileReference; lastKnownFileType = text; name = it; path = it.lproj/Contact.nvhelp; sourceTree = "<group>"; };
 		5CAB2F781DC765B5000AFED9 /* de */ = {isa = PBXFileReference; lastKnownFileType = text; name = de; path = de.lproj/Contact.nvhelp; sourceTree = "<group>"; };
-		5CAB2F7A1DC76619000AFED9 /* de */ = {isa = PBXFileReference; lastKnownFileType = text; name = de; path = "de.lproj/Excruciatingly Useful Shortcuts.nvhelp"; sourceTree = "<group>"; };
 		5CAB2F7B1DC76634000AFED9 /* de */ = {isa = PBXFileReference; lastKnownFileType = text; name = de; path = "de.lproj/How does this thing work?.nvhelp"; sourceTree = "<group>"; };
 		5CAB2F7C1DC76646000AFED9 /* de */ = {isa = PBXFileReference; lastKnownFileType = text; name = de; path = "de.lproj/This is the title of a note.nvhelp"; sourceTree = "<group>"; };
 		5CAB2F7D1DC76670000AFED9 /* pt-PT */ = {isa = PBXFileReference; lastKnownFileType = text; name = "pt-PT"; path = "pt-PT.lproj/How does this thing work?.nvhelp"; sourceTree = "<group>"; };
 		5CAB2F7E1DC7669F000AFED9 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text; name = fr; path = "fr.lproj/This is the title of a note.nvhelp"; sourceTree = "<group>"; };
-		5CAB2F7F1DC766C4000AFED9 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text; name = fr; path = "fr.lproj/Excruciatingly Useful Shortcuts.nvhelp"; sourceTree = "<group>"; };
 		5CAB2F801DC7699E000AFED9 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text; name = fr; path = "fr.lproj/How does this thing work?.nvhelp"; sourceTree = "<group>"; };
 		5CAB2F811DC769B3000AFED9 /* pt-PT */ = {isa = PBXFileReference; lastKnownFileType = text; name = "pt-PT"; path = "pt-PT.lproj/This is the title of a note.nvhelp"; sourceTree = "<group>"; };
 		5CAB2F821DC769C9000AFED9 /* pt-PT */ = {isa = PBXFileReference; lastKnownFileType = text; name = "pt-PT"; path = "pt-PT.lproj/Contact.nvhelp"; sourceTree = "<group>"; };
-		5CAB2F831DC769E6000AFED9 /* pt-PT */ = {isa = PBXFileReference; lastKnownFileType = text; name = "pt-PT"; path = "pt-PT.lproj/Excruciatingly Useful Shortcuts.nvhelp"; sourceTree = "<group>"; };
 		5CAB2F8A1DC76A7C000AFED9 /* it */ = {isa = PBXFileReference; lastKnownFileType = text; name = it; path = "it.lproj/How does this thing work?.nvhelp"; sourceTree = "<group>"; };
-		5CAB2F8B1DC76AA1000AFED9 /* it */ = {isa = PBXFileReference; lastKnownFileType = text; name = it; path = "it.lproj/Excruciatingly Useful Shortcuts.nvhelp"; sourceTree = "<group>"; };
 		5CAB2F8C1DC76EFB000AFED9 /* it */ = {isa = PBXFileReference; lastKnownFileType = text; name = it; path = "it.lproj/This is the title of a note.nvhelp"; sourceTree = "<group>"; };
-		5CAB2F8D1DC7998C000AFED9 /* zh */ = {isa = PBXFileReference; lastKnownFileType = text; name = zh; path = "zh.lproj/Excruciatingly Useful Shortcuts.nvhelp"; sourceTree = "<group>"; };
 		5CAB2F8E1DC799AB000AFED9 /* zh */ = {isa = PBXFileReference; lastKnownFileType = text; name = zh; path = zh.lproj/Contact.nvhelp; sourceTree = "<group>"; };
 		5CAB2F8F1DC799D2000AFED9 /* zh */ = {isa = PBXFileReference; lastKnownFileType = text; name = zh; path = "zh.lproj/This is the title of a note.nvhelp"; sourceTree = "<group>"; };
 		5CAB2F901DC799EE000AFED9 /* zh */ = {isa = PBXFileReference; lastKnownFileType = text; name = zh; path = "zh.lproj/How does this thing work?.nvhelp"; sourceTree = "<group>"; };
@@ -806,7 +804,6 @@
 		217DB1810B7CE5B9008CD564 /* Help Notes */ = {
 			isa = PBXGroup;
 			children = (
-				5C4366951DA268500086FF84 /* Excruciatingly Useful Shortcuts.nvhelp */,
 				5C4366971DA268500086FF84 /* How does this thing work?.nvhelp */,
 				5C4366991DA268500086FF84 /* This is the title of a note.nvhelp */,
 				5C8BCF821DA2617C0036FA7E /* Contact.nvhelp */,
@@ -1042,6 +1039,9 @@
 				A1B2C3D40000000000000001 /* MarkdownRenderer.h */,
 				A1B2C3D40000000000000002 /* MarkdownRenderer.m */,
 				A1B2C3D40000000000000011 /* UISelfTest.m */,
+				A1B2C3D40000000000000021 /* ShortcutsWindowController.h */,
+				A1B2C3D40000000000000022 /* ShortcutsWindowController.m */,
+				A1B2C3D40000000000000024 /* KeyboardShortcuts.md */,
 			);
 			name = Markup;
 			sourceTree = "<group>";
@@ -1188,6 +1188,7 @@
 				5C4B35401307220E00014119 /* TransparentScrollerSlotBottom.tif in Resources */,
 				5C4B35421307220E00014119 /* TransparentScrollerSlotVerticalFill.tif in Resources */,
 				5C43669C1DA268500086FF84 /* How does this thing work?.nvhelp in Resources */,
+				A1B2C3D40000000000000025 /* KeyboardShortcuts.md in Resources */,
 				5C96F4FF131C2F9500A2E4AC /* TabClose_Front_Pressed.tif in Resources */,
 				5C96F501131C2F9500A2E4AC /* TabClose_Front.tif in Resources */,
 				5C96F709131C49D400A2E4AC /* TransparentButtonFillN.tiff in Resources */,
@@ -1206,7 +1207,6 @@
 				5CF96DC2132EA29D0079B3FD /* greyscrollervertfill.tiff in Resources */,
 				5CF96DC5132EA29D0079B3FD /* TransparentButtonFillP.tiff in Resources */,
 				5CF96DC7132EA29D0079B3FD /* TransparentButtonLeftP.tiff in Resources */,
-				5C43669B1DA268500086FF84 /* Excruciatingly Useful Shortcuts.nvhelp in Resources */,
 				5CF96DC9132EA29D0079B3FD /* TransparentButtonRightP.tiff in Resources */,
 				5CF96DCB132EA29D0079B3FD /* TabClose_Front_Rollover.tif in Resources */,
 				5CF96DCD132EA29D0079B3FD /* TransparentScrollerKnobBottom.tif in Resources */,
@@ -1340,6 +1340,7 @@
 				5C96F5B0131C37DF00A2E4AC /* NSString_Markdown.m in Sources */,
 				A1B2C3D40000000000000003 /* MarkdownRenderer.m in Sources */,
 				A1B2C3D40000000000000012 /* UISelfTest.m in Sources */,
+				A1B2C3D40000000000000023 /* ShortcutsWindowController.m in Sources */,
 				5C96F6DE131C488B00A2E4AC /* ETTransparentButtonCell.m in Sources */,
 				5C96F6E9131C48FE00A2E4AC /* ETTransparentButton.m in Sources */,
 				5C9C7734131DA04300FB2652 /* WordCountToken.m in Sources */,
@@ -1564,19 +1565,6 @@
 				5C4366721DA267AC0086FF84 /* fr */,
 			);
 			name = SaveHTMLPreview.nib;
-			sourceTree = "<group>";
-		};
-		5C4366951DA268500086FF84 /* Excruciatingly Useful Shortcuts.nvhelp */ = {
-			isa = PBXVariantGroup;
-			children = (
-				5C4366961DA268500086FF84 /* en */,
-				5CAB2F7A1DC76619000AFED9 /* de */,
-				5CAB2F7F1DC766C4000AFED9 /* fr */,
-				5CAB2F831DC769E6000AFED9 /* pt-PT */,
-				5CAB2F8B1DC76AA1000AFED9 /* it */,
-				5CAB2F8D1DC7998C000AFED9 /* zh */,
-			);
-			name = "Excruciatingly Useful Shortcuts.nvhelp";
 			sourceTree = "<group>";
 		};
 		5C4366971DA268500086FF84 /* How does this thing work?.nvhelp */ = {

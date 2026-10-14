@@ -624,8 +624,8 @@
 "Now editing this note; rename it with %@-R" = "Modifica della nota; rinominala con %@-R";
 
 
-/* default files name */
-"Excruciatingly Useful Shortcuts" = "Scorciatoie terribilmente utili";
+/* title of the keyboard shortcuts window */
+"Keyboard Shortcuts" = "Scorciatoie di tastiera";
 "Contact Information" = "Contatti";
 "This is the title of a note" = "Questo è il titolo di una nota";
 "How does this thing work?" = "Come funziona questa cosa?";

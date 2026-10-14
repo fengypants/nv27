@@ -27,6 +27,7 @@ Requires an Apple silicon Mac with macOS 14 or later.
 - **Modern interface throughout:** centered window title; full-width search field with SF Symbols; standard list headers, gridlines and divider; Mail-style list in the side-by-side layout; blue links; standard Settings toolbar and controls; SF Symbols in the preview window and menu bar; system font everywhere except your note text.
 - **Show Dock icon** is a checkbox that applies instantly; hiding the Dock icon shows the menu bar icon.
 - **Color scheme shortcuts** are ⌥⌘1–3 in every language (⌘1–9 remain bookmarks).
+- **Keyboard Shortcuts** (Help menu) opens a window listing every shortcut, instead of an RTF document in TextEdit.
 - **Help menu** links to the nv27 repository and the nvALT and Notational Velocity websites.
 
 ### Removed

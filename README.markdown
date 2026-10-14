@@ -85,7 +85,7 @@ nv27 follows current macOS conventions throughout. In particular:
 - **Settings** use the standard toolbar with SF Symbols, aligned controls, standard buttons and lists (a single extensions list with attached +/− and *Set as Default* in its contextual menu), a standard font control, and a number field for the maximum note width. Panels for removed features are gone.
 - **Dock and menu bar:** "Show Dock icon" is a checkbox that applies immediately (no restart); hiding it turns on the menu bar icon, an SF Symbol.
 - **Preview window:** SF Symbols for lock, print and save.
-- **Help menu:** links to the nv27 repository and the nvALT and Notational Velocity websites.
+- **Help menu:** *Keyboard Shortcuts* opens a window listing every shortcut in tables, in standard macOS key order (instead of an RTF document in TextEdit; its text is in `KeyboardShortcuts.md`). The menu also links to the nv27 repository and the nvALT and Notational Velocity websites.
 - **About:** shows nv27, its version and a link to this repository, in the system font.
 - Remaining interface text uses the system font (SF Pro); the note body font is yours to choose in Settings › Fonts & Colors (default Helvetica 12).
 

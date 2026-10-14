@@ -626,8 +626,8 @@
 /* date added/created column name */
 "Now editing this note; rename it with %@-R" = "Bearbeitung dieser Notiz; Umbenennen mit %@-R";
 
-/* default files name */
-"Excruciatingly Useful Shortcuts" = "Moglicherweise nutzliche Tastenkurzel";
+/* title of the keyboard shortcuts window */
+"Keyboard Shortcuts" = "Tastenkürzel";
 "Contact Information" = "Kontaktdaten";
 "This is the title of a note" = "Dies ist der Titel einer Notiz";
 "How does this thing work?" = "Wie funktioniert dieses Programm?";

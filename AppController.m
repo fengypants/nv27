@@ -17,6 +17,7 @@
 #import "AppController_Importing.h"
 #import "NotationPrefs.h"
 #import "PrefsWindowController.h"
+#import "ShortcutsWindowController.h"
 #import "NoteAttributeColumn.h"
 #import "NotationDirectoryManager.h"
 #import "NotationFileManager.h"
@@ -1070,9 +1071,10 @@ terminateApp:
 	
 	switch ([sender tag]) {
 		case 1:		//shortcuts
-			path = [[NSBundle mainBundle] pathForResource:NSLocalizedString(@"Excruciatingly Useful Shortcuts", nil) ofType:@"nvhelp" inDirectory:nil];
+			[[ShortcutsWindowController sharedController] showWindow:self];
+			break;
 		case 2:		//acknowledgments
-			if (!path) path = [[NSBundle mainBundle] pathForResource:@"Acknowledgments" ofType:@"txt" inDirectory:nil];
+			path = [[NSBundle mainBundle] pathForResource:@"Acknowledgments" ofType:@"txt" inDirectory:nil];
 			[[NSWorkspace sharedWorkspace] openURLs:[NSArray arrayWithObject:[NSURL fileURLWithPath:path]] withAppBundleIdentifier:@"com.apple.TextEdit"
 											options:NSWorkspaceLaunchDefault additionalEventParamDescriptor:nil launchIdentifiers:NULL];
 			break;

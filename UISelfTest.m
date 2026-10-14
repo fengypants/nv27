@@ -14,6 +14,7 @@
 #import "NotesTableView.h"
 #import "DualField.h"
 #import "NoteObject.h"
+#import "ShortcutsWindowController.h"
 #import <objc/runtime.h>
 
 static BOOL selfTestTracingFocus = NO;
@@ -290,6 +291,29 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 		if (aWindow != window && [aWindow isVisible] && ![aWindow toolbar] && NSWidth([aWindow frame]) > 200)
 			PrintSnapshotOfWindow(aWindow, @"preview");
 	}
+
+	//Help › Keyboard Shortcuts, opened through its menu item, at the top and the end, in light and dark
+	NSMenuItem *shortcutsItem = nil;
+	for (NSMenuItem *topItem in [[NSApp mainMenu] itemArray])
+		for (NSMenuItem *item in [[topItem submenu] itemArray])
+			if ([item action] == @selector(showHelpDocument:) && [item tag] == 1) shortcutsItem = item;
+	SelfTestLog(@"keyboard shortcuts menu item: %@", [shortcutsItem title]);
+	[NSApp sendAction:[shortcutsItem action] to:[shortcutsItem target] from:shortcutsItem];
+	[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1.0]];
+	NSWindow *shortcutsWindow = [[ShortcutsWindowController sharedController] window];
+	NSTextView *shortcutsText = (NSTextView*)[[(NSScrollView*)[shortcutsWindow contentView] documentView] retain];
+	SelfTestLog(@"keyboard shortcuts window: visible=%d title=\"%@\" characters=%lu", [shortcutsWindow isVisible], [shortcutsWindow title],
+				(unsigned long)[[shortcutsText string] length]);
+	PrintSnapshotOfWindow(shortcutsWindow, @"shortcuts");
+	[shortcutsText scrollRangeToVisible:NSMakeRange([[shortcutsText string] length], 0)];
+	[shortcutsWindow display];
+	PrintSnapshotOfWindow(shortcutsWindow, @"shortcuts-end");
+	[shortcutsText scrollRangeToVisible:NSMakeRange(0, 0)];
+	[NSApp setAppearance:[NSAppearance appearanceNamed:NSAppearanceNameDarkAqua]];
+	[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1.0]];
+	[shortcutsWindow display];
+	PrintSnapshotOfWindow(shortcutsWindow, @"shortcuts-dark");
+	[shortcutsText release];
 	SelfTestLog(@"done");
 	exit(0);
 }

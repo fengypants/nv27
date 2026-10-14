@@ -624,8 +624,8 @@
 "Now editing this note; rename it with %@-R" = "Now editing this note; rename it with %@-R";
 
 
-/* default files name */
-"Excruciatingly Useful Shortcuts" = "Excruciatingly Useful Shortcuts";
+/* title of the keyboard shortcuts window */
+"Keyboard Shortcuts" = "Keyboard Shortcuts";
 "Contact Information" = "Contact Information";
 "This is the title of a note" = "This is the title of a note";
 "How does this thing work?" = "How does this thing work?";

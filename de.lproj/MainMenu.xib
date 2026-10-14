@@ -557,7 +557,7 @@ CA
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <menu key="submenu" title="Vorschau" id="1265">
                         <items>
-                            <menuItem title="(Multi)Markdown" tag="13372" id="1268">
+                            <menuItem title="MultiMarkdown" tag="13372" id="1268">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="selectPreviewMode:" target="213" id="1272"/>

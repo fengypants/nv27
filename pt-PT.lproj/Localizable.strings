@@ -623,8 +623,8 @@
 /* tooltip string for search/title field */
 "Now editing this note; rename it with %@-R" = "Editando esta nota no momento; para renomear pressione %@-R";
 
-/* default files name */
-"Excruciatingly Useful Shortcuts" = "Atalhos Incrivelmente Úteis";
+/* title of the keyboard shortcuts window */
+"Keyboard Shortcuts" = "Atalhos de Teclado";
 "Contact Information" = "Informações de Contato";
 "This is the title of a note" = "Este é o título de uma nota";
 "How does this thing work?" = "Como funciona isso?";
