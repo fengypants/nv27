@@ -47,11 +47,11 @@ static id _sharedKeyComboPanel = nil;
 {
 	mTitleFormat = [[mTitleField stringValue] retain];
 
-	//the panel's keyboard icon is the SF Symbol, in the image view at its top left
+	//the panel's icon is the command.square SF Symbol, in the image view at its top left
 	for (NSView *view in [[[self window] contentView] subviews]) {
 		if ([view isKindOfClass:[NSImageView class]]) {
 			NSImageSymbolConfiguration *config = [NSImageSymbolConfiguration configurationWithPointSize:24.0 weight:NSFontWeightRegular];
-			[(NSImageView*)view setImage:[[NSImage imageWithSystemSymbolName:@"keyboard" accessibilityDescription:nil] imageWithSymbolConfiguration:config]];
+			[(NSImageView*)view setImage:[[NSImage imageWithSystemSymbolName:@"command.square" accessibilityDescription:nil] imageWithSymbolConfiguration:config]];
 			[(NSImageView*)view setContentTintColor:[NSColor secondaryLabelColor]];
 		}
 	}

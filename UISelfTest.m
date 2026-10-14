@@ -262,7 +262,7 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 	}
 	[settingsWindow orderOut:nil];
 	
-	//the hotkey panel (its keyboard icon is an SF Symbol) and the Bookmarks window
+	//the hotkey panel (its icon is an SF Symbol) and the Bookmarks window
 	NSWindow *hotkeyPanel = [[PTKeyComboPanel sharedPanel] window];
 	[hotkeyPanel display];
 	PrintSnapshotOfWindow(hotkeyPanel, @"hotkey");
