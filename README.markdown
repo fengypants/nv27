@@ -53,7 +53,7 @@ Notational Velocity is a way to take notes quickly using just the keyboard. Pres
 nv27 stores every note as an ordinary file in your notes folder — plain text by default (`.txt`, `.text`, `.utf8` and `.md` are recognized), or RTF/HTML if you choose. You can edit, add, rename or delete notes in Finder or any other app, and nv27 picks up the change. There is no database, custom sync or proprietary storage.
 
 - **Single-database storage was removed.** nvALT could keep all notes inside one database file. If you open a folder that uses one (for example a copy of your nvALT notes), nv27 writes every note out as a plain text file and tells you it did.
-- **Tags stay with nv27.** Tags are stored on each note file as OpenMeta tags (an extended attribute, as nvALT did), not as Finder tags, so they don't join the system-wide tag list in Finder. Importing a file brings its Finder tags along as note tags.
+- **Tags stay with nv27.** Tags are stored on each note file as OpenMeta tags (an extended attribute, as nvALT did), not as Finder tags, so they don't join the system-wide tag list in Finder. Finder tags on imported files aren't brought in.
 - **Markdown instead of TaskPaper in the defaults.** New folders recognize `.md` files as notes; `.taskpaper` was dropped from the default list (you can add it back in Settings › Notes).
 - The folder also contains a **Notes & Settings** file. It is a cache (note IDs for links, selection and scroll positions, the folder's settings) so nv27 starts quickly; your notes are never stored only there.
 

@@ -59,7 +59,7 @@
 }
 
 //nv27 keeps note tags in OpenMeta extended attributes, separate from Finder tags (so they don't join the system's
-//tag list in Finder); Finder tags are only read when importing files
+//tag list in Finder); Finder tags are never read or written
 - (id)getTagsAtFSPath:(const char*)path
 {
 	return [self getOpenMetaTagsAtFSPath:path];
