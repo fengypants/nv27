@@ -2,7 +2,7 @@
 Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same rows in the same order.
 -->
 
-Du plus utile au moins utile :
+## Du plus utile au moins utile
 
 | ⌘L | Place le point d’insertion dans la zone de recherche/titre |
 | Échap | Efface la recherche en cours |

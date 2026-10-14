@@ -2,7 +2,7 @@
 Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same rows in the same order.
 -->
 
-Por ordem de utilidade, da mais à menos útil:
+## Por ordem de utilidade, da mais à menos útil
 
 | ⌘L | Coloca o cursor na área de pesquisa/título |
 | Esc | Apaga a pesquisa atual |
