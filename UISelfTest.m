@@ -271,9 +271,7 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 				NSTextView *tv = (NSTextView*)view;
 				CGFloat available = [[tv textContainer] size].width - 2 * [[tv textContainer] lineFragmentPadding];
 				NSDictionary *attrs = [NSDictionary dictionaryWithObject:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]] forKey:NSFontAttributeName];
-				for (NSString *line in [NSArray arrayWithObjects:@"A modernized, simplified nvALT for Apple silicon",
-										@"A modernized, simplified nvALT for Apple silicon.",
-										@"A modernized nvALT: stripped down and rebuilt for Apple silicon.", nil])
+				for (NSString *line in [NSArray arrayWithObjects:@"A simplified nvALT for Apple silicon.", nil])
 					SelfTestLog(@"about line \"%@\": %.1f pt wide, text area %.1f pt (fits=%d)", line,
 								[line sizeWithAttributes:attrs].width, available, [line sizeWithAttributes:attrs].width <= available);
 			}
