@@ -101,7 +101,7 @@ http://www.rogueamoeba.com/
                     <imageView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="48">
                         <rect key="frame" x="20" y="113" width="32" height="32"/>
                         <autoresizingMask key="autoresizingMask"/>
-                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyUpOrDown" image="keyboard" id="61"/>
+                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyUpOrDown" id="61"/>
                     </imageView>
                 </subviews>
             </view>
@@ -111,7 +111,4 @@ http://www.rogueamoeba.com/
             <point key="canvasLocation" x="139" y="147"/>
         </window>
     </objects>
-    <resources>
-        <image name="keyboard" catalog="system" width="32" height="24"/>
-    </resources>
 </document>
