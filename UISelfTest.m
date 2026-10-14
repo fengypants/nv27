@@ -135,6 +135,26 @@ static NSString *ResponderName(NSResponder *responder) {
 	if (![[textView string] isEqualToString:before2]) [[textView undoManager] undo];
 }
 
+//Finder tags someone put on a note file in Finder must survive nv27 saving the note, and must stay out of nv27's own tags
+- (void)_selfTestFinderTagsSurviveSave {
+	NSString *path = [currentNote noteFilePath];
+	if (!path) { SelfTestLog(@"finder tags: no current note file"); return; }
+	NSURL *url = [NSURL fileURLWithPath:path];
+	NSError *error = nil;
+	if (![url setResourceValue:@[@"nv27 Self Test"] forKey:NSURLTagNamesKey error:&error]) {
+		SelfTestLog(@"finder tags: couldn't tag %@: %@", path, error); return;
+	}
+	NSNumber *inodeBefore = [[[NSFileManager defaultManager] attributesOfItemAtPath:path error:nil] objectForKey:NSFileSystemFileNumber];
+	BOOL wrote = [currentNote writeUsingCurrentFileFormat];
+	NSURL *freshURL = [NSURL fileURLWithPath:[currentNote noteFilePath]];
+	NSArray *tags = nil;
+	[freshURL getResourceValue:&tags forKey:NSURLTagNamesKey error:nil];
+	NSNumber *inodeAfter = [[[NSFileManager defaultManager] attributesOfItemAtPath:[freshURL path] error:nil] objectForKey:NSFileSystemFileNumber];
+	SelfTestLog(@"finder tags: wrote=%d fileReplaced=%d tagsAfterSave=%@ kept=%d noteTags=\"%@\"", wrote, ![inodeBefore isEqual:inodeAfter],
+				[tags componentsJoinedByString:@","], [tags containsObject:@"nv27 Self Test"], [[currentNote orderedLabelTitles] componentsJoinedByString:@","]);
+	[freshURL setResourceValue:@[] forKey:NSURLTagNamesKey error:nil];
+}
+
 - (void)_selfTestClicks {
 	//simulated clicks only reach the editor in the key window; give activation a few tries (CI runners can be slow)
 	for (int attempt = 0; attempt < 6 && ![window isKeyWindow]; attempt++) {
@@ -142,6 +162,7 @@ static NSString *ResponderName(NSResponder *responder) {
 		[window makeKeyAndOrderFront:nil];
 		[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.5]];
 	}
+	[self _selfTestFinderTagsSurviveSave];
 	SelfTestLog(@"window key before clicks=%d", [window isKeyWindow]);
 	[window makeFirstResponder:textView];
 	[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.5]];
