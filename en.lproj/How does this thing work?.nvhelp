@@ -4,16 +4,16 @@
 \margl1440\margr1440\vieww9000\viewh8400\viewkind0
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
 
-\f0\fs24 \cf0 Always begin typing in the search field at the top of the window. While you type, nv27 searches for notes whose title or body contains your words. If nothing matches, press Return to add a new note with what you typed as its title. Naming a note and searching always happen at the same time.\
+\f0\fs24 \cf0 Always begin typing in the search field at the top of the window. While you type, NV searches for notes whose title or body contains your words. If nothing matches, press Return to add a new note with what you typed as its title. Naming a note and searching always happen at the same time.\
 \
-When you select one of the notes found (for example with the up and down arrow keys, or \uc0\u8984 J and \u8984 K), nv27 shows its body in the note area: what you're reading now.\
+When you select one of the notes found (for example with the up and down arrow keys, or \uc0\u8984 J and \u8984 K), NV shows its body in the note area: what you're reading now.\
 \
-If you type the beginning of a note's title, nv27 selects that note automatically.\
+If you type the beginning of a note's title, NV selects that note automatically.\
 \
 To create another note, just start typing in the search field again (press \uc0\u8984 L to get there from the keyboard). Don't worry, you won't rename your note\u8212 for that, double-click its title in the notes list or press \u8984 R.\
 \
 
-\i But nv27 won't let me save my changes!
+\i But NV won't let me save my changes!
 \i0 \
-nv27 writes your changes to disk as you create and edit notes, so there's no need to "Save" anything.\
+NV writes your changes to disk as you create and edit notes, so there's no need to "Save" anything.\
 }

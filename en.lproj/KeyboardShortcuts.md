@@ -106,4 +106,4 @@ In the order of most to least useful:
 
 ## Anywhere
 
-| Your hotkey | Bring nv27 to the front. Set it in Settings › General. |
+| Your hotkey | Bring NV to the front. Set it in Settings › General. |

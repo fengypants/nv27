@@ -12,5 +12,6 @@
 }
 
 + (ShortcutsWindowController*)sharedController;
++ (NSString*)shortcutsMarkdown;
 
 @end

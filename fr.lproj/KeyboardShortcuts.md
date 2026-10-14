@@ -98,4 +98,4 @@ Du plus utile au moins utile :
 
 ## Partout
 
-| Votre raccourci | Met nv27 au premier plan. À définir dans Préférences › Général. |
+| Votre raccourci | Met NV au premier plan. À définir dans Préférences › Général. |

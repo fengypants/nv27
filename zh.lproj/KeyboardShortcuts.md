@@ -98,4 +98,4 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 
 ## 任何时候
 
-| 你的快捷键 | 将 nv27 调到最前面。在“偏好设置 › 常规”中设置。 |
+| 你的快捷键 | 将 NV 调到最前面。在“偏好设置 › 常规”中设置。 |

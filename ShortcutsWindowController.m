@@ -105,11 +105,56 @@ static NSTextTableBlock *CellBlock(NSTextTable *table, NSInteger row, NSInteger 
 }
 #endif
 
-//the list in the user's language (one of the app's localizations), or in the given one
-- (NSAttributedString*)shortcutsTextForLocalization:(NSString*)localization {
+//KeyboardShortcuts.md in the user's language (one of the app's localizations), or in the given one
+static NSString *ShortcutsSource(NSString *localization) {
 	NSString *path = localization ? [[NSBundle mainBundle] pathForResource:@"KeyboardShortcuts" ofType:@"md" inDirectory:nil forLocalization:localization] :
 									[[NSBundle mainBundle] pathForResource:@"KeyboardShortcuts" ofType:@"md"];
-	NSString *source = path ? [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:NULL] : nil;
+	return path ? [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:NULL] : nil;
+}
+
+//the non-empty cells of a "| keys | what they do |" row
+static NSArray *RowCells(NSString *row) {
+	NSMutableArray *cells = [NSMutableArray array];
+	for (NSString *cell in [row componentsSeparatedByString:@"|"]) {
+		NSString *cellText = [cell stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+		if ([cellText length]) [cells addObject:cellText];
+	}
+	return cells;
+}
+
+//the list as plain Markdown text, for the shortcuts note a new notes folder starts with:
+//headings, notes and paragraphs stay as they are, and each row becomes a list item ("- ⌘L — ...")
++ (NSString*)shortcutsMarkdown {
+	NSString *source = ShortcutsSource(nil);
+	if (!source) return nil;
+
+	NSMutableString *text = [NSMutableString string];
+	BOOL inComment = NO, blankLinePending = NO;
+	for (NSString *line in [source componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]]) {
+		NSString *trimmed = [line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+		if (inComment || [trimmed hasPrefix:@"<!--"]) {
+			inComment = [trimmed rangeOfString:@"-->"].location == NSNotFound;
+			continue;
+		}
+		if (![trimmed length]) {
+			blankLinePending = [text length] > 0;
+			continue;
+		}
+		if ([trimmed hasPrefix:@"|"]) {
+			NSArray *cells = RowCells(trimmed);
+			if ([cells count] < 2) continue;
+			trimmed = [NSString stringWithFormat:@"- %@ \u2014 %@", [cells objectAtIndex:0], [cells objectAtIndex:1]];
+		}
+		if (blankLinePending) [text appendString:@"\n"];
+		blankLinePending = NO;
+		[text appendFormat:@"%@\n", trimmed];
+	}
+	return text;
+}
+
+//the list in the user's language (one of the app's localizations), or in the given one
+- (NSAttributedString*)shortcutsTextForLocalization:(NSString*)localization {
+	NSString *source = ShortcutsSource(localization);
 	NSMutableAttributedString *text = [[[NSMutableAttributedString alloc] init] autorelease];
 	if (!source) return text;
 
@@ -148,11 +193,7 @@ static NSTextTableBlock *CellBlock(NSTextTable *table, NSInteger row, NSInteger 
 			[text appendAttributedString:StyledLine([trimmed substringFromIndex:3], headingFont, [NSColor labelColor],
 													ParagraphStyle(first ? 0.0 : 18.0, 6.0, nil))];
 		} else if (isRow) {
-			NSMutableArray *cells = [NSMutableArray array];
-			for (NSString *cell in [trimmed componentsSeparatedByString:@"|"]) {
-				NSString *cellText = [cell stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-				if ([cellText length]) [cells addObject:cellText];
-			}
+			NSArray *cells = RowCells(trimmed);
 			if ([cells count] < 2) continue;
 			if (!table) {
 				table = [[[NSTextTable alloc] init] autorelease];

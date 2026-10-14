@@ -98,4 +98,4 @@ In der Reihenfolge vom nützlichsten zum weniger nützlichen Tastenkürzel:
 
 ## Überall
 
-| Ihr Tastenkürzel | nv27 in den Vordergrund holen. Festlegen unter Einstellungen › Allgemeines. |
+| Ihr Tastenkürzel | NV in den Vordergrund holen. Festlegen unter Einstellungen › Allgemeines. |

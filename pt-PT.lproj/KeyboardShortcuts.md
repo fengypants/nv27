@@ -98,4 +98,4 @@ Por ordem de utilidade, da mais à menos útil:
 
 ## Em qualquer lado
 
-| O seu atalho | Traz o nv27 para a frente. Defina-o em Preferências › Geral. |
+| O seu atalho | Traz o NV para a frente. Defina-o em Preferências › Geral. |

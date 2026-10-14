@@ -28,6 +28,7 @@
 #import "NSFileManager_NV.h"
 #import "NotationPrefs.h"
 #import "NotationController.h"
+#import "ShortcutsWindowController.h"
 #import "NoteObject.h"
 
 NSString *ShouldImportCreationDates = @"ShouldImportCreationDates";
@@ -65,6 +66,15 @@ NSString *ShouldImportCreationDates = @"ShouldImportCreationDates";
 			//add localized RTF help notes (how do we handle initializing a new NV copy when the owner just wants to re-sync from web? they will get new help notes each time?)
 			NSArray *paths = [[NSBundle mainBundle] pathsForResourcesOfType:@"nvhelp" inDirectory:nil];
 			NSArray *helpNotes = [[[[AlienNoteImporter alloc] initWithStoragePaths:paths] autorelease] importedNotes];
+			//and the keyboard shortcuts, from the same list as Help > Keyboard Shortcuts so the two never disagree
+			NSString *shortcuts = [ShortcutsWindowController shortcutsMarkdown];
+			if ([shortcuts length]) {
+				NSMutableAttributedString *body = [[[NSMutableAttributedString alloc] initWithString:shortcuts
+																						  attributes:[prefsController noteBodyAttributes]] autorelease];
+				NoteObject *shortcutsNote = [[[NoteObject alloc] initWithNoteBody:body title:@"Excruciatingly Useful Shortcuts"
+																		 delegate:nil format:SingleDatabaseFormat labels:nil] autorelease];
+				if (shortcutsNote) helpNotes = [[NSArray arrayWithObject:shortcutsNote] arrayByAddingObjectsFromArray:helpNotes ? helpNotes : [NSArray array]];
+			}
 			if ([helpNotes count] > 0) {
 				[notation addNotes:helpNotes];
 				[[notation delegate] notation:notation revealNote:[helpNotes lastObject] options:NVEditNoteToReveal];

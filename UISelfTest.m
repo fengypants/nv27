@@ -99,6 +99,13 @@ static NSString *ResponderName(NSResponder *responder) {
 	SelfTestLog(@"state: key=%d visible=%d windowFrame=%@ notes=%ld currentNote=%@ editorHidden=%d firstResponder=%@",
 				[window isKeyWindow], [window isVisible], NSStringFromRect([window frame]), (long)[notesTableView numberOfRows],
 				currentNote ? titleOfNote(currentNote) : @"(none)", [textView isHidden], ResponderName([window firstResponder]));
+	//the notes a new notes folder starts with, line by line
+	for (NSInteger i = 0; i < [notesTableView numberOfRows]; i++) {
+		NoteObject *note = [notationController noteObjectAtFilteredIndex:i];
+		SelfTestLog(@"note \"%@\":", titleOfNote(note));
+		for (NSString *line in [[[note contentString] string] componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]])
+			SelfTestLog(@"  | %@", line);
+	}
 	[self performSelector:@selector(_selfTestClicks) withObject:nil afterDelay:1.0];
 }
 

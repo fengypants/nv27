@@ -4,11 +4,11 @@
 \margl1440\margr1440\vieww7880\viewh10300\viewkind0
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
 
-\f0\fs24 \cf0 Beginne die Eingabe eines Textes immer im oberen Suchfeld. Dr\'fccke die Eingabgetaste um eine neue Notiz mit dem jeweiligen Titel anzulegen. W\'e4hrend der Eingabe sucht nv27 nach bereits vorhandenen Notizen, deren Titel oder Inhalt deinen gerade eingegebenen Text enthalten. Beachte also, dass die Vergabe eines Notiztitels sowie die Suche immer zeitgleich verlaufen.\
+\f0\fs24 \cf0 Beginne die Eingabe eines Textes immer im oberen Suchfeld. Dr\'fccke die Eingabgetaste um eine neue Notiz mit dem jeweiligen Titel anzulegen. W\'e4hrend der Eingabe sucht NV nach bereits vorhandenen Notizen, deren Titel oder Inhalt deinen gerade eingegebenen Text enthalten. Beachte also, dass die Vergabe eines Notiztitels sowie die Suche immer zeitgleich verlaufen.\
 \
-Wenn du eine der gefundenen Notizen ausw\'e4hlst (z.B. durch Nutzen der Hoch/Runter Pfeiltasten), zeigt nv27 den Inhalt dieser im unteren Feld an (das was du hier gerade liest).\
+Wenn du eine der gefundenen Notizen ausw\'e4hlst (z.B. durch Nutzen der Hoch/Runter Pfeiltasten), zeigt NV den Inhalt dieser im unteren Feld an (das was du hier gerade liest).\
 \
-Falls du den Beginn einer Notiz eingegeben hast, hat nv27 diese Notiz bereits automatisch ausgew\'e4hlt.\
+Falls du den Beginn einer Notiz eingegeben hast, hat NV diese Notiz bereits automatisch ausgew\'e4hlt.\
 \
 Um eine weitere Notiz anzulegen, musst du einfach erneut im oberen Suchfeld die Texteingabe starten (dr\'fccke 
 \f1 \uc0\u8984
@@ -18,7 +18,7 @@ Um eine weitere Notiz anzulegen, musst du einfach erneut im oberen Suchfeld die 
 \
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
 
-\f0\i \cf0 Aber nv27 l\'e4sst mich meine \'c4nderungen gar nicht speichern!
+\f0\i \cf0 Aber NV l\'e4sst mich meine \'c4nderungen gar nicht speichern!
 \f0\i0 \
-nv27 speichert deine \'c4nderungen beim Anlegen oder Editieren der Notizen st\'e4ndig selbst\'e4ndig, so dass ein manuelles "Speichern" entf\'e4llt. Toll, oder?\
+NV speichert deine \'c4nderungen beim Anlegen oder Editieren der Notizen st\'e4ndig selbst\'e4ndig, so dass ein manuelles "Speichern" entf\'e4llt. Toll, oder?\
 }

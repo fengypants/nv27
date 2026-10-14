@@ -98,4 +98,4 @@ In ordine di utilità decrescente:
 
 ## Ovunque
 
-| La tua scorciatoia | Porta nv27 in primo piano. Si imposta in Preferenze › Generali. |
+| La tua scorciatoia | Porta NV in primo piano. Si imposta in Preferenze › Generali. |
