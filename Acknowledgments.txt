@@ -641,3 +641,11 @@ MultiMarkdown changes Copyright (c) 2005-2009 Fletcher T. Penney
     liability, whether in contract, strict liability, or tort (including
     negligence or otherwise) arising in any way out of the use of this
     software, even if advised of the possibility of such damage.
+
+--
+
+ODBEditor
+
+http://gusmueller.com/odb/
+
+This work is hereby released into the Public Domain. To view a copy of the public domain dedication, visit http://creativecommons.org/licenses/publicdomain/ or send a letter to Creative Commons, 559 Nathan Abbott Way, Stanford, California 94305, USA.
