@@ -4,23 +4,21 @@
 \margl1440\margr1440\vieww9000\viewh8400\viewkind0
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
 
-\f0\fs24 \cf0 \CocoaLigature0 Bem-vindo ao Notational Velocity!\
+\f0\fs24 \cf0 \CocoaLigature0 Bem-vindo ao nv27!\
 \
-Este \'e9 o corpo de texto de uma nota. Suas notas podem ser t\'e3o longas ou curtas quanto voc\'ea desejar, e voc\'ea pode colocar seus textos em
+Este \'e9 o corpo de texto de uma nota. Suas notas podem ser t\'e3o longas ou curtas quanto voc\'ea desejar, e voc\'ea pode colocar seus textos em 
 \b negrito
-\b0 ,
+\b0 , 
 \i it\'e1lico
 \i0 , ou \strike \strikec0 tachado\strike0\striked0 .\
 \
-Crie links entre notas: [[Como funciona isso?]]\
+Crie links entre notas: [[How does this thing work?]]\
 \
-Voc\'ea pode criar quantas notas desejar - o NV pode armazenar milhares delas, e funciona melhor quando a informa\'e7\'e3o est\'e1 distribu\'edda em v\'e1rias notas.\
-\
-Se voc\'ea habilitar a criptografia (Prefer\'eancias > Notas > Seguran\'e7a), poder\'e1 at\'e9 mesmo armazenar senhas e outras informa\'e7\'f5es sens\'edveis sem precisar se preocupar com o acesso indevido a estes dados.\
+Voc\'ea pode criar quantas notas desejar - o nv27 pode armazenar milhares delas, e funciona melhor quando a informa\'e7\'e3o est\'e1 distribu\'edda em v\'e1rias notas.\
 \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
 
-\i \cf0 Estas notas foram inclu\'eddas para familiariz\'e1-lo com o Notational Velocity.\
+\i \cf0 Estas notas foram inclu\'eddas para familiariz\'e1-lo com o nv27.\
 Voc\'ea pode remov\'ea-las quando desejar.
 \i0 \
 }

@@ -4,19 +4,19 @@
 \margl1440\margr1440\vieww9000\viewh8400\viewkind0
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
 
-\f0\fs24 \cf0 \CocoaLigature0 Welcome to Notational Velocity!\
+\f0\fs24 \cf0 \CocoaLigature0 Welcome to nv27!\
 \
-This is the body of a note. Your notes can be as long or as short as you want, and you can 
-\b embolden
-\b0 , 
-\i italicize
-\i0 , or \strike \strikec0 strike\strike0\striked0  them.\
+This is the body of a note. Your notes can be as long or as short as you want.\
+\
+Each note is a plain text file in your notes folder, which you can change in Settings \uc0\u8250  Notes. You can also add, edit, rename or delete notes in Finder or any other app, and nv27 picks up the change.\
+\
+Write in Markdown and press \uc0\u8963 \u8984 P to see the preview.\
 \
 Create links between notes: [[How does this thing work?]].\
 \
-You can create as many notes as you want--NV can hold thousands of them and works best when content is distributed.\
+You can create as many notes as you want\uc0\u8212 nv27 can hold thousands of them and works best when content is distributed.\
 \
-If you enable encryption (Preferences > Notes > Security) you can even store passwords and other sensitive information without giving a second thought to computer forensics laboratories.\
+For every keyboard shortcut, choose Help \uc0\u8250  Keyboard Shortcuts.\
 \
 
-\i These notes were included to get you started with Notational Velocity. You may delete them at any time.}
+\i These notes were included to get you started with nv27. You may delete them at any time.}
