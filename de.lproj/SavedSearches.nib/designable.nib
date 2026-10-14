@@ -541,7 +541,7 @@
 						<object class="IBToolTipAttribute" key="NS.object.0">
 							<string key="name">ToolTip</string>
 							<reference key="object" ref="239321130"/>
-							<string key="toolTip">Create an account.</string>
+							<string key="toolTip">Ausgewählte Notiz als Lesezeichen hinzufügen</string>
 						</object>
 					</object>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -550,7 +550,7 @@
 						<object class="IBToolTipAttribute" key="NS.object.0">
 							<string key="name">ToolTip</string>
 							<reference key="object" ref="65138097"/>
-							<string key="toolTip">Remove an account.</string>
+							<string key="toolTip">Ausgewähltes Lesezeichen entfernen</string>
 						</object>
 					</object>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
