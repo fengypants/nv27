@@ -2,7 +2,7 @@
 
 ## 1.0
 
-The first release of nv27: nvALT rebuilt for Apple silicon and current macOS, running side by side with the original. See the [README](README.markdown) for the full story of what changed and why.
+The first release of nv27, a simple, modern nvALT: stripped down to the essentials — fast search, plain text files in a folder, the keyboard — and rebuilt for Apple silicon and current macOS. It runs side by side with the original nvALT. See the [README](README.markdown) for the full story of what changed and why.
 
 ### Install
 

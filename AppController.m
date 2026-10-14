@@ -2057,7 +2057,7 @@ terminateApp:
 								centered, NSParagraphStyleAttributeName, nil];
 	
 	NSString *repository = @"github.com/fengypants/nv27";
-	NSString *text = [NSString stringWithFormat:@"A modernized nvALT for Apple silicon.\n\n"
+	NSString *text = [NSString stringWithFormat:@"A simple, modern nvALT: stripped down and rebuilt for Apple silicon.\n\n"
 					  @"Based on nvALT by Brett Terpstra and David Halter, and Notational Velocity by Zachary Schneirov. "
 					  @"Markdown preview by cmark-gfm.\n\n%@", repository];
 	NSMutableAttributedString *credits = [[[NSMutableAttributedString alloc] initWithString:text attributes:attributes] autorelease];
