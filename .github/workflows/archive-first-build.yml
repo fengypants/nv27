@@ -26,7 +26,7 @@ jobs:
           gh release delete first-build-2026-10-13 --yes --cleanup-tag || true
           gh release create first-build-2026-10-13 nvALT-arm64-first-build-2026-10-13.zip \
             --prerelease \
-            --target cbf13cfb07cf8bf2b811b0393d77d4c7f57f0d66 \
+            --target "$GITHUB_SHA" \
             --title "First Apple silicon build (Oct 13, 2026), for comparison" \
             --notes "The first build provided on Oct 13, 2026 (commit cbf13cf), before the app was renamed nv27.
 
