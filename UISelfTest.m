@@ -313,6 +313,19 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 	[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1.0]];
 	[shortcutsWindow display];
 	PrintSnapshotOfWindow(shortcutsWindow, @"shortcuts-dark");
+	[NSApp setAppearance:nil];
+	//each translation, top and end (the keys column widens for longer key names)
+	for (NSString *localization in [NSArray arrayWithObjects:@"de", @"fr", @"it", @"pt-PT", @"zh", nil]) {
+		[[ShortcutsWindowController sharedController] performSelector:@selector(_selfTestShowLocalization:) withObject:localization];
+		[shortcutsText scrollRangeToVisible:NSMakeRange(0, 0)];
+		[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.3]];
+		[shortcutsWindow display];
+		SelfTestLog(@"keyboard shortcuts %@: characters=%lu", localization, (unsigned long)[[shortcutsText string] length]);
+		PrintSnapshotOfWindow(shortcutsWindow, [@"shortcuts-" stringByAppendingString:localization]);
+		[shortcutsText scrollRangeToVisible:NSMakeRange([[shortcutsText string] length], 0)];
+		[shortcutsWindow display];
+		PrintSnapshotOfWindow(shortcutsWindow, [NSString stringWithFormat:@"shortcuts-%@-end", localization]);
+	}
 	[shortcutsText release];
 	SelfTestLog(@"done");
 	exit(0);

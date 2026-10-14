@@ -6,52 +6,59 @@ Update it whenever a shortcut changes. Format, one item per line:
   > a note
   any other line is a paragraph; **bold** works within a line.
 Write keys in the standard macOS order: ⌃ Control, ⌥ Option, ⇧ Shift, ⌘ Command.
+The other languages' copies (de, fr, it, pt-PT, zh .lproj folders) list the same rows in the same order;
+change them too when a shortcut changes.
 -->
+
+In the order of most to least useful:
+
+| ⌘L | Place the insertion point in the search/title area |
+| Esc | Clear the current search |
+| Return | Begin editing the note, creating it if necessary |
+| Tab | Move the insertion point between text areas |
+| ⌘K | Select the previous note in the list |
+| ⌘J | Select the next note in the list |
+| ⌘D | Deselect the current note, restoring the search text |
+| ⇧⌘V | Paste the clipboard as a new note |
+| ⌘R | Rename the selected note |
+| ⌘⌫ | Delete the selected note(s) |
+| ⇧⌘T | Tag the selected note |
+| ⌘G | Find the next occurrence of the search text |
+| ⇧⌘G | Find the previous occurrence of the search text |
+| ⌘Return | Open the URL under the insertion point |
+| ⌘← | Move to title editing when at the start of the note body |
+| ⌘→ | Move to the note body when at the end of a title |
+| ⇧⌘D | Bookmark the selected note |
+| ⌘P | Print the selected note(s) |
+| ⌘E | Export the selected note(s) to other formats |
 
 ## Searching and creating notes
 
-| ⌘L | Go to the search field |
-| Return | In the search field: edit the selected note, or create a note titled with the search text |
-| Esc | Clear the search |
 | ↑ ↓ | In the search field: move through the notes list |
-| ⌘J | Next note |
-| ⌘K | Previous note |
 | ⌘↑ ⌘↓ | First or last note in the list |
-| ⌘D | Deselect the note and return to the search text |
-| Tab | Move from the search field to the note |
 | ⇧⌘N | Show the main window |
 
 ## Notes
 
-| ⌘R | Rename |
-| ⌘← | Rename, when the insertion point is at the start of the note |
-| ⇧⌘T | Tag |
-| ⌘⌫ | Delete the selected notes (from the notes list or search field) |
-| ⇧⌘V | Paste as a new note |
 | ⌥⌘C | Copy the note's link |
-| ⌘E | Export |
 | ⇧⌘R | Show in Finder |
 | ⇧⌘P | Page Setup |
-| ⌘P | Print |
 
 ## Bookmarks
 
-| ⇧⌘D | Add to Bookmarks |
 | ⌘0 | Show Bookmarks |
 | ⌘1 – ⌘9 | Go to a bookmark |
 
 ## Editing
 
-| ⌘Return | Open the link at the insertion point; elsewhere, start a new line below |
+| ⌘Return | Away from a link: start a new line below |
 | ⇧⌘Return | Start a new line above |
-| ⌘⌫ | Delete to the start of the line |
-| Tab | Move to the next field, or indent, depending on the Tab Key setting |
+| ⌘⌫ | In a note: delete to the start of the line |
+| Tab | In a note: indent, or move to the next field, depending on the Tab Key setting |
 | ⌥Tab | Indent |
 | ⌥⌘V | Paste the copied URL as a Markdown link |
 | ⌘F | Find |
 | ⌥⌘F | Find and Replace |
-| ⌘G | Find Next |
-| ⇧⌘G | Find Previous |
 | ⌥⌘E | Use Selection for Find |
 | ⌥⌘J | Jump to Selection |
 | ⌘: | Show Spelling and Grammar |

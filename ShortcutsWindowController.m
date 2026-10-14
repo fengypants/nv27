@@ -9,8 +9,6 @@
 
 #import "ShortcutsWindowController.h"
 
-#define KEYS_COLUMN_WIDTH 112.0
-
 @implementation ShortcutsWindowController
 
 static ShortcutsWindowController *sharedController = nil;
@@ -50,7 +48,7 @@ static ShortcutsWindowController *sharedController = nil;
 		[textView setUsesFindBar:YES];
 		[textView setDrawsBackground:YES];
 		[textView setBackgroundColor:[NSColor textBackgroundColor]];
-		[[textView textStorage] setAttributedString:[self shortcutsText]];
+		[[textView textStorage] setAttributedString:[self shortcutsTextForLocalization:nil]];
 
 		[scrollView setDocumentView:textView];
 		[aWindow setContentView:scrollView];
@@ -89,19 +87,28 @@ static NSAttributedString *StyledLine(NSString *line, NSFont *font, NSColor *col
 }
 
 //one cell of a two-column table row: padded, with a hairline under it like a standard table's row separators
-static NSTextTableBlock *CellBlock(NSTextTable *table, NSInteger row, NSInteger column) {
+static NSTextTableBlock *CellBlock(NSTextTable *table, NSInteger row, NSInteger column, CGFloat keysWidth) {
 	NSTextTableBlock *block = [[[NSTextTableBlock alloc] initWithTable:table startingRow:row rowSpan:1 startingColumn:column columnSpan:1] autorelease];
 	[block setWidth:5.0 type:NSTextBlockAbsoluteValueType forLayer:NSTextBlockPadding edge:NSMinYEdge];
 	[block setWidth:5.0 type:NSTextBlockAbsoluteValueType forLayer:NSTextBlockPadding edge:NSMaxYEdge];
 	[block setWidth:column ? 8.0 : 0.0 type:NSTextBlockAbsoluteValueType forLayer:NSTextBlockPadding edge:NSMinXEdge];
 	[block setWidth:1.0 type:NSTextBlockAbsoluteValueType forLayer:NSTextBlockBorder edge:NSMaxYEdge];
 	[block setBorderColor:[NSColor separatorColor] forEdge:NSMaxYEdge];
-	if (!column) [block setValue:KEYS_COLUMN_WIDTH type:NSTextBlockAbsoluteValueType forDimension:NSTextBlockWidth];
+	if (!column) [block setValue:keysWidth type:NSTextBlockAbsoluteValueType forDimension:NSTextBlockWidth];
 	return block;
 }
 
-- (NSAttributedString*)shortcutsText {
-	NSString *path = [[NSBundle mainBundle] pathForResource:@"KeyboardShortcuts" ofType:@"md"];
+#if DEBUG
+//lets the UI self-test show each language's list, whatever the system language
+- (void)_selfTestShowLocalization:(NSString*)localization {
+	[[textView textStorage] setAttributedString:[self shortcutsTextForLocalization:localization]];
+}
+#endif
+
+//the list in the user's language (one of the app's localizations), or in the given one
+- (NSAttributedString*)shortcutsTextForLocalization:(NSString*)localization {
+	NSString *path = localization ? [[NSBundle mainBundle] pathForResource:@"KeyboardShortcuts" ofType:@"md" inDirectory:nil forLocalization:localization] :
+									[[NSBundle mainBundle] pathForResource:@"KeyboardShortcuts" ofType:@"md"];
 	NSString *source = path ? [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:NULL] : nil;
 	NSMutableAttributedString *text = [[[NSMutableAttributedString alloc] init] autorelease];
 	if (!source) return text;
@@ -110,11 +117,24 @@ static NSTextTableBlock *CellBlock(NSTextTable *table, NSInteger row, NSInteger 
 	NSFont *headingFont = [NSFont systemFontOfSize:15.0 weight:NSFontWeightSemibold];
 	NSFont *noteFont = [NSFont systemFontOfSize:12.0];
 
+	NSArray *lines = [source componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+
+	//the keys column fits its widest entry (key names are longer in some languages, e.g. "Zeilenschalter")
+	CGFloat keysWidth = 90.0;
+	for (NSString *line in lines) {
+		NSArray *cells = [line componentsSeparatedByString:@"|"];
+		if ([line hasPrefix:@"|"] && [cells count] > 2) {
+			NSString *keys = [[cells objectAtIndex:1] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+			keysWidth = MAX(keysWidth, [keys sizeWithAttributes:[NSDictionary dictionaryWithObject:bodyFont forKey:NSFontAttributeName]].width + 24.0);
+		}
+	}
+	keysWidth = ceil(MIN(keysWidth, 200.0));
+
 	NSTextTable *table = nil;
 	NSInteger row = 0;
 	BOOL inComment = NO, first = YES;
 
-	for (NSString *line in [source componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]]) {
+	for (NSString *line in lines) {
 		NSString *trimmed = [line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
 		if (inComment || [trimmed hasPrefix:@"<!--"]) {
 			inComment = [trimmed rangeOfString:@"-->"].location == NSNotFound;
@@ -142,7 +162,7 @@ static NSTextTableBlock *CellBlock(NSTextTable *table, NSInteger row, NSInteger 
 				row = 0;
 			}
 			for (NSInteger column = 0; column < 2; column++) {
-				NSParagraphStyle *style = ParagraphStyle(0.0, 0.0, [NSArray arrayWithObject:CellBlock(table, row, column)]);
+				NSParagraphStyle *style = ParagraphStyle(0.0, 0.0, [NSArray arrayWithObject:CellBlock(table, row, column, keysWidth)]);
 				[text appendAttributedString:StyledLine([cells objectAtIndex:column], bodyFont, [NSColor labelColor], style)];
 			}
 			row++;
