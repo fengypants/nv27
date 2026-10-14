@@ -258,6 +258,30 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 	}
 	[settingsWindow orderOut:nil];
 	
+	//the About panel, and how wide candidate lines for its first credits line are next to its text area
+	[self showAboutPanel:nil];
+	[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1.0]];
+	for (NSWindow *aWindow in [NSApp windows]) {
+		if (aWindow == window || ![aWindow isVisible] || [aWindow toolbar]) continue;
+		NSMutableArray *stack = [NSMutableArray arrayWithObject:[aWindow contentView]];
+		while ([stack count]) {
+			NSView *view = [stack lastObject]; [stack removeLastObject];
+			[stack addObjectsFromArray:[view subviews]];
+			if ([view isKindOfClass:[NSTextView class]]) {
+				NSTextView *tv = (NSTextView*)view;
+				CGFloat available = [[tv textContainer] size].width - 2 * [[tv textContainer] lineFragmentPadding];
+				NSDictionary *attrs = [NSDictionary dictionaryWithObject:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]] forKey:NSFontAttributeName];
+				for (NSString *line in [NSArray arrayWithObjects:@"A modernized, simplified nvALT for Apple silicon",
+										@"A modernized, simplified nvALT for Apple silicon.",
+										@"A modernized nvALT: stripped down and rebuilt for Apple silicon.", nil])
+					SelfTestLog(@"about line \"%@\": %.1f pt wide, text area %.1f pt (fits=%d)", line,
+								[line sizeWithAttributes:attrs].width, available, [line sizeWithAttributes:attrs].width <= available);
+			}
+		}
+		PrintSnapshotOfWindow(aWindow, @"about");
+		[aWindow orderOut:nil];
+	}
+	
 	[window makeKeyAndOrderFront:nil];
 	[self togglePreview:nil];
 	[self performSelector:@selector(_selfTestSnapshotPreview) withObject:nil afterDelay:2.0];
