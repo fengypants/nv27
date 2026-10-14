@@ -6,6 +6,8 @@ Update it whenever a shortcut changes. Format, one item per line:
   > a note
   any other line is a paragraph; **bold** works within a line.
 Write keys in the standard macOS order: ⌃ Control, ⌥ Option, ⇧ Shift, ⌘ Command.
+The other languages' copies (de, fr, it, pt-PT, zh .lproj folders) list the same rows in the same order;
+change them too when a shortcut changes.
 -->
 
 In the order of most to least useful:
