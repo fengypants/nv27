@@ -605,6 +605,7 @@ static NSTextField *FormSmallLabel(NSString *text, CGFloat width) {
 //a checkbox with its title on the right, as checkboxes normally are (some had a label-style title on the left)
 static NSButton *FormCheckbox(NSButton *button, NSString *title) {
 	if (title) [button setTitle:title];
+	[button setFont:[NSFont systemFontOfSize:[NSFont systemFontSize]]];
 	[button setImagePosition:NSImageLeading];
 	[button setAlignment:NSTextAlignmentNatural];
 	return button;
@@ -691,7 +692,8 @@ static NSArray *FormHelpFields(NSView *pane) {
 	NSArray *helpFields = FormHelpFields(editingView);
 	[tabKeyRadioMatrix sizeToCells];
 	FormFixSize(tabKeyRadioMatrix, NSWidth([tabKeyRadioMatrix frame]), NSHeight([tabKeyRadioMatrix frame]));
-	FormCheckbox(autoPairButton, NSLocalizedString(@"Match opening characters with closing characters", @"Settings: auto-pairing checkbox"));
+	FormCheckbox(autoPairButton, NSLocalizedString(@"Close brackets and quotes automatically", @"Settings: auto-pairing checkbox"));
+	FormCheckbox(rtlButton, NSLocalizedString(@"Right-to-left text", @"Settings: right-to-left writing direction checkbox"));
 	
 	NSMutableArray *rows = [NSMutableArray array];
 	[rows addObject:FormRow(NSLocalizedString(@"Styled text:", nil), styledTextButton, 0, FormAlignBaseline)];
@@ -702,7 +704,7 @@ static NSArray *FormHelpFields(NSView *pane) {
 	[rows addObject:FormRow(NSLocalizedString(@"Links:", nil), makeURLsClickable, 12, FormAlignBaseline)];
 	[rows addObject:FormRow(nil, autoSuggestLinksButton, 0, FormAlignBaseline)];
 	[rows addObject:FormRow(NSLocalizedString(@"Auto-pair:", nil), autoPairButton, 12, FormAlignBaseline)];
-	[rows addObject:FormRow(nil, FormIndented(FormHelp(nil, NSLocalizedString(@"For example, typing a left bracket also adds a right bracket.", nil))), 0, FormAlignBaseline)];
+	[rows addObject:FormRow(nil, FormIndented(FormHelp(nil, NSLocalizedString(@"Typing ( [ { or \" also adds its closing character.", nil))), 0, FormAlignBaseline)];
 	[rows addObject:FormRow(NSLocalizedString(@"Direction:", nil), rtlButton, 12, FormAlignBaseline)];
 	[rows addObject:FormRow(NSLocalizedString(@"External editor:", nil), externalEditorMenuButton, 12, FormAlignBaseline)];
 	[self layOutPane:editingView rows:rows];

@@ -688,8 +688,6 @@
 "Tab key:" = "Tabulatortaste:";
 "Links:" = "Links:";
 "Auto-pair:" = "Automatisch schließen:";
-"Match opening characters with closing characters" = "Öffnende Zeichen mit schließenden ergänzen";
-"For example, typing a left bracket also adds a right bracket." = "Beispiel: Eine öffnende Klammer fügt auch die schließende ein.";
 "Direction:" = "Richtung:";
 "External editor:" = "Externer Editor:";
 "Note font:" = "Schrift für Notizen:";
@@ -706,3 +704,6 @@
 "Note width:" = "Notizbreite:";
 "Keep note text width readable" = "Textbreite gut lesbar halten";
 "Maximum:" = "Maximal:";
+"Close brackets and quotes automatically" = "Klammern und Anführungszeichen automatisch schließen";
+"Typing ( [ { or \" also adds its closing character." = "Zu ( [ { oder \" wird das schließende Zeichen ergänzt.";
+"Right-to-left text" = "Text von rechts nach links";

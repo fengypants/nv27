@@ -675,8 +675,6 @@
 "Tab key:" = "Tecla Tab:";
 "Links:" = "Ligações:";
 "Auto-pair:" = "Fecho automático:";
-"Match opening characters with closing characters" = "Completar caracteres de abertura com os de fecho";
-"For example, typing a left bracket also adds a right bracket." = "Por exemplo, escrever um parêntese de abertura adiciona também o de fecho.";
 "Direction:" = "Direção:";
 "External editor:" = "Editor externo:";
 "Note font:" = "Tipo de letra das notas:";
@@ -693,3 +691,6 @@
 "Note width:" = "Largura das notas:";
 "Keep note text width readable" = "Manter a largura do texto legível";
 "Maximum:" = "Máximo:";
+"Close brackets and quotes automatically" = "Fechar automaticamente parênteses e aspas";
+"Typing ( [ { or \" also adds its closing character." = "Escrever ( [ { ou \" adiciona também o caráter de fecho.";
+"Right-to-left text" = "Texto da direita para a esquerda";

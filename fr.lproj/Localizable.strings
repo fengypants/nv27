@@ -675,8 +675,6 @@
 "Tab key:" = "Touche Tab :";
 "Links:" = "Liens :";
 "Auto-pair:" = "Fermeture auto :";
-"Match opening characters with closing characters" = "Fermer automatiquement les caractères ouvrants";
-"For example, typing a left bracket also adds a right bracket." = "Par exemple, taper un crochet ouvrant ajoute aussi le crochet fermant.";
 "Direction:" = "Sens :";
 "External editor:" = "Éditeur externe :";
 "Note font:" = "Police des notes :";
@@ -693,3 +691,6 @@
 "Note width:" = "Largeur des notes :";
 "Keep note text width readable" = "Limiter la largeur du texte pour la lisibilité";
 "Maximum:" = "Maximum :";
+"Close brackets and quotes automatically" = "Fermer automatiquement parenthèses et guillemets";
+"Typing ( [ { or \" also adds its closing character." = "Taper ( [ { ou \" ajoute aussi le caractère fermant.";
+"Right-to-left text" = "Texte de droite à gauche";

@@ -676,8 +676,6 @@
 "Tab key:" = "Tab 键：";
 "Links:" = "链接：";
 "Auto-pair:" = "自动配对：";
-"Match opening characters with closing characters" = "为左侧字符自动补全右侧字符";
-"For example, typing a left bracket also adds a right bracket." = "例如，输入左括号时会同时添加右括号。";
 "Direction:" = "方向：";
 "External editor:" = "外部编辑器：";
 "Note font:" = "笔记字体：";
@@ -694,3 +692,6 @@
 "Note width:" = "笔记宽度：";
 "Keep note text width readable" = "限制文字宽度以便阅读";
 "Maximum:" = "最大：";
+"Close brackets and quotes automatically" = "自动补全括号和引号";
+"Typing ( [ { or \" also adds its closing character." = "输入 ( [ { 或 \" 时会同时添加对应的闭合字符。";
+"Right-to-left text" = "从右到左的文字";

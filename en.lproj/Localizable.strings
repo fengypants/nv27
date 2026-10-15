@@ -676,8 +676,6 @@
 "Tab key:" = "Tab key:";
 "Links:" = "Links:";
 "Auto-pair:" = "Auto-pair:";
-"Match opening characters with closing characters" = "Match opening characters with closing characters";
-"For example, typing a left bracket also adds a right bracket." = "For example, typing a left bracket also adds a right bracket.";
 "Direction:" = "Direction:";
 "External editor:" = "External editor:";
 "Note font:" = "Note font:";
@@ -694,3 +692,6 @@
 "Note width:" = "Note width:";
 "Keep note text width readable" = "Keep note text width readable";
 "Maximum:" = "Maximum:";
+"Close brackets and quotes automatically" = "Close brackets and quotes automatically";
+"Typing ( [ { or \" also adds its closing character." = "Typing ( [ { or \" also adds its closing character.";
+"Right-to-left text" = "Right-to-left text";
