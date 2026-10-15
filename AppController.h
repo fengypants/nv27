@@ -81,7 +81,6 @@
     IBOutlet NotesTableView *notesTableView;
     IBOutlet LinkingEditor *textView;
 	IBOutlet EmptyView *editorStatusView;
-	IBOutlet NSMenuItem *sparkleUpdateItem;
     IBOutlet NSWindow *window;
 	NSToolbar *toolbar;
 	NSToolbarItem *dualFieldItem;

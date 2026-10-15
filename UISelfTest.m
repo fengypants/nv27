@@ -109,7 +109,24 @@ static NSString *ResponderName(NSResponder *responder) {
 		for (NSString *line in [[[note contentString] string] componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]])
 			SelfTestLog(@"  | %@", line);
 	}
+	[self _selfTestBookmarks];
 	[self performSelector:@selector(_selfTestClicks) withObject:nil afterDelay:1.0];
+}
+
+//bookmarking a selected note with nothing typed in the search field saved the bookmark without its note's UUID,
+//and loading that saved entry raised an exception partway through the next launch (no main window): a bookmark
+//made that way must keep its UUID, and unreadable saved entries must be skipped
+- (void)_selfTestBookmarks {
+	@try {
+		NoteBookmark *bookmark = [[[NoteBookmark alloc] initWithNoteObject:currentNote searchString:nil] autorelease];
+		NSDictionary *saved = [bookmark dictionaryRep];
+		NSArray *stored = [NSArray arrayWithObjects:[NSDictionary dictionary], saved, @"not a bookmark", nil];
+		BookmarksController *loaded = [[[BookmarksController alloc] initWithBookmarks:stored] autorelease];
+		SelfTestLog(@"bookmarks: saved without search text keeps UUID=%d; loading 3 stored entries (1 empty, 1 junk) kept %lu, no exception",
+					[[saved objectForKey:@"NoteUUIDString"] length] > 0, (unsigned long)[[loaded dictionaryReps] count]);
+	} @catch (NSException *exception) {
+		SelfTestLog(@"bookmarks: EXCEPTION %@: %@", [exception name], [exception reason]);
+	}
 }
 
 - (NSPoint)_selfTestPointInEditorAtFraction:(NSPoint)fraction {
