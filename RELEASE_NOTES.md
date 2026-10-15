@@ -1,5 +1,15 @@
 # nv27 release notes
 
+## 1.0.1
+
+Fixes for problems found after 1.0. To update, quit nv27 and replace nv27.app in Applications with the one from **nv27-arm64.zip**; your notes and settings are kept.
+
+### Fixed
+
+- **nv27 could start without showing its window**, with an empty notes list, after you bookmarked a note while nothing was typed in the search field (for example after clicking a note or using ⌘J/⌘K). The bookmark was saved without the note it points to, and loading it stopped nv27's startup, whichever notes folder you chose. Bookmarks now always save their note, and nv27 skips any bookmark it can't read, including ones saved broken by 1.0; re-create those bookmarks. (This bug came from nvALT.)
+- **"Check for Updates…" no longer appears** in the nv27 menu. It was left over from nvALT's updater and showed, grayed out, when startup failed.
+- **A new install now uses TextEdit as the external editor** (Note › Edit With) until you choose another in Settings › Editing. It used to pick one of the other editors installed on your Mac, such as Byword or BBEdit, seemingly at random.
+
 ## 1.0
 
 The first release of nv27, a simple, modern nvALT: stripped down to the essentials — fast search, plain text files in a folder, the keyboard — and rebuilt for Apple silicon and current macOS. It runs side by side with the original nvALT. See the [README](README.markdown) for the full story of what changed and why.
