@@ -20,7 +20,6 @@
 #import "NSCollection_utils.h"
 #import "GlobalPrefs.h"
 #import "NSString_NV.h"
-#import <AutoHyperlinks/AutoHyperlinks.h>
 
 
 NSString *NVHiddenDoneTagAttributeName = @"NVDoneTag";
@@ -206,28 +205,34 @@ static BOOL _StringWithRangeIsProbablyObjC(NSString *string, NSRange blockRange)
 	if (!changedRange.length)
 		return;
 	
-	//lazily loads Adium's BSD-licensed Auto-Hyperlinks:
-	//http://trac.adium.im/wiki/AutoHyperlinksFramework
+	//NSDataDetector finds web URLs, bare domains and email addresses; the regex additionally catches
+	//app-specific schemes (e.g., nvalt://, x-devonthink-item://) that the detector does not recognize
+	static NSDataDetector *linkDetector = nil;
+	static NSRegularExpression *schemeURLExpression = nil;
+	static dispatch_once_t onceToken;
+	dispatch_once(&onceToken, ^{
+		linkDetector = [[NSDataDetector alloc] initWithTypes:NSTextCheckingTypeLink error:NULL];
+		schemeURLExpression = [[NSRegularExpression alloc] initWithPattern:@"\\b[a-zA-Z][a-zA-Z0-9+.-]{1,31}://[^\\s<>\"]+[^\\s<>\".,;:!?)\\]}'’”]"
+																	options:0 error:NULL];
+	});
 	
-	static Class AHHyperlinkScanner = Nil;
-	static Class AHMarkedHyperlink = Nil;
-	if (!AHHyperlinkScanner || !AHMarkedHyperlink) {
-		if (![[NSBundle bundleWithPath:[[[NSBundle mainBundle] privateFrameworksPath] stringByAppendingPathComponent:@"AutoHyperlinks.framework"]] load]) {
-			NSLog(@"Could not load AutoHyperlinks framework");
-			return;
+	NSString *string = [self string];
+	NSMutableIndexSet *linkedIndexes = [NSMutableIndexSet indexSet];
+	
+	for (NSTextCheckingResult *result in [linkDetector matchesInString:string options:0 range:changedRange]) {
+		NSURL *markedLinkURL = [result URL];
+		if (markedLinkURL && !([markedLinkURL isFileURL] && [[markedLinkURL absoluteString] 
+															  rangeOfString:@"/.file/" options:NSLiteralSearch].location != NSNotFound)) {
+			[self addAttribute:NSLinkAttributeName value:markedLinkURL range:[result range]];
+			[linkedIndexes addIndexesInRange:[result range]];
 		}
-		AHHyperlinkScanner = NSClassFromString(@"AHHyperlinkScanner");
-		AHMarkedHyperlink = NSClassFromString(@"AHMarkedHyperlink");
 	}
-	
-	id scanner = [AHHyperlinkScanner hyperlinkScannerWithString:[[self string] substringWithRange:changedRange]];
-	id markedLink = nil;
-	while ((markedLink = [scanner nextURI])) {
-		NSURL *markedLinkURL = nil;
-		if ((markedLinkURL = [markedLink URL]) && !([markedLinkURL isFileURL] && [[markedLinkURL absoluteString] 
-																				  rangeOfString:@"/.file/" options:NSLiteralSearch].location != NSNotFound)) {
-			[self addAttribute:NSLinkAttributeName value:markedLinkURL 
-						 range:NSMakeRange([markedLink range].location + changedRange.location, [markedLink range].length)];
+	for (NSTextCheckingResult *result in [schemeURLExpression matchesInString:string options:0 range:changedRange]) {
+		if ([linkedIndexes intersectsIndexesInRange:[result range]])
+			continue;
+		NSURL *markedLinkURL = [NSURL URLWithString:[string substringWithRange:[result range]]];
+		if (markedLinkURL) {
+			[self addAttribute:NSLinkAttributeName value:markedLinkURL range:[result range]];
 		}
 	}
 
@@ -279,7 +284,7 @@ static BOOL _StringWithRangeIsProbablyObjC(NSString *string, NSRange blockRange)
 		if (![antiInteriorSet characterIsMember:[string characterAtIndex:NSMaxRange(blockRange) - 1]] && !_StringWithRangeIsProbablyObjC(string, blockRange)) {
 			
 			[self addAttribute:NSLinkAttributeName value:
-			 [NSURL URLWithString:[@"nvalt://find/" stringByAppendingString:[[string substringWithRange:blockRange] stringWithPercentEscapes]]] range:blockRange];
+			 [NSURL URLWithString:[[kNVURLScheme stringByAppendingString:@"://find/"] stringByAppendingString:[[string substringWithRange:blockRange] stringWithPercentEscapes]]] range:blockRange];
 		}
 		//continue the scan starting at the end of the current block
 		nextScanLoc = NSMaxRange(blockRange) + 2;

@@ -25,32 +25,20 @@
 @class NotationPrefs;
 
 @interface TemporaryFileCachePreparer : NSObject {
-	NSString *cachePath;
-	
 	id delegate;
-
-	NotationPrefs *notationPrefs;	
-	BOOL startedPreparing;
-	NSTask *mountTask, *newfsTask, *attachTask;
-	NSString *deviceName, *preparedCachePath;
+	NSString *preparedCachePath;
 }
 
 - (void)prepEditingSpaceIfNecessaryForNotationPrefs:(NotationPrefs*)prefs;
-- (void)_attachRAMDiskOfCapacity:(NSUInteger)numberOfMegabytes;
-- (void)_buildHFSFileSystemOnDevice:(NSString*)aDeviceName;
-- (void)_mountHFSFileSystemOnDevice:(NSString*)aDeviceName;
-
 - (BOOL)_createFolderAtPath:(NSString*)path;
-
-- (BOOL)isPreparing;
 - (void)_finishPreparationWithPath:(NSString*)aPath;
 - (void)_stopPreparation;
 - (NSString*)preparedCachePath;
+
 - (void)setDelegate:(id)aDelegate;
 - (id)delegate;
 
 @end
-
 
 @interface NSObject (TemporaryFileCachePreparerDelegate)
 

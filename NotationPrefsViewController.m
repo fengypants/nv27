@@ -18,14 +18,9 @@
 
 #import "GlobalPrefs.h"
 #import "NotationPrefsViewController.h"
-#import "InvocationRecorder.h"
 #import "NotationPrefs.h"
 #import "NSString_NV.h"
 #import "NSCollection_utils.h"
-#import "SyncResponseFetcher.h"
-#import "SimplenoteSession.h"
-#import "PassphrasePicker.h"
-#import "PassphraseChanger.h"
 #import "NSFileManager_NV.h"
 //#import "AppController.h"
 
@@ -40,7 +35,6 @@
 }
 @end
 
-enum {VERIFY_NOT_ATTEMPTED, VERIFY_FAILED, VERIFY_IN_PROGRESS, VERIFY_SUCCESS};
 
 @implementation NotationPrefsViewController
 
@@ -61,8 +55,6 @@ enum {VERIFY_NOT_ATTEMPTED, VERIFY_FAILED, VERIFY_IN_PROGRESS, VERIFY_SUCCESS};
 		didAwakeFromNib = NO;
 		notationPrefs = [[[GlobalPrefs defaultPrefs] notationPrefs] retain];
 		
-		disableEncryptionString = NSLocalizedString(@"Turn Off Note Encryption...",nil);
-		enableEncryptionString = NSLocalizedString(@"Turn On Note Encryption...",nil);
 	
 		[[GlobalPrefs defaultPrefs] registerForSettingChange:@selector(setNotationPrefs:sender:) withTarget:self];
     
@@ -71,10 +63,8 @@ enum {VERIFY_NOT_ATTEMPTED, VERIFY_FAILED, VERIFY_IN_PROGRESS, VERIFY_SUCCESS};
 	return nil;
 }
 - (void)dealloc {
-	[picker release];
-	[changer release];
 	[notationPrefs release];
-	[postStorageFormatInvocation release];
+	[extensionButtons release];
 	
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 	
@@ -89,13 +79,12 @@ enum {VERIFY_NOT_ATTEMPTED, VERIFY_FAILED, VERIFY_IN_PROGRESS, VERIFY_SUCCESS};
     [allowedTypesTable setDelegate:self];
 	
 	
-	//this additional management for sync prefs, plus the need for per-service settings and externally triggering updates really demands its own class
+	[self removeStorageFormatFootnote];
+	[self removeSynchronizationTab];
+	[self removeEncryptionControls];
+	[self useStandardExtensionList];
+	
 	NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
-	if (syncAccountField) [center addObserver:self selector:@selector(syncCredentialsDidChange:) name:NSControlTextDidChangeNotification object:syncAccountField];
-	if (syncPasswordField) {
-		[center addObserver:self selector:@selector(syncCredentialsDidChange:) name:NSControlTextDidChangeNotification object:syncPasswordField];
-		[center addObserver:self selector:@selector(syncEditingDidEnd:) name:NSControlTextDidEndEditingNotification object:syncPasswordField];
-	}
 	[center addObserver:self selector:@selector(initializeControls) name:NotationPrefsDidChangeNotification object:nil];
 
     [self initializeControls];
@@ -114,6 +103,7 @@ enum {VERIFY_NOT_ATTEMPTED, VERIFY_FAILED, VERIFY_IN_PROGRESS, VERIFY_SUCCESS};
 	if (tv == allowedExtensionsTable) {
 		[removeExtensionButton setEnabled:isRowSelected];
 		[makeDefaultExtensionButton setEnabled:isRowSelected];
+		[self updateExtensionButtons];
 	} else if (tv == allowedTypesTable) {
 		[removeTypeButton setEnabled:isRowSelected];
 	}
@@ -123,10 +113,6 @@ enum {VERIFY_NOT_ATTEMPTED, VERIFY_FAILED, VERIFY_IN_PROGRESS, VERIFY_SUCCESS};
 	
 	
 	if ([selectorString isEqualToString:SEL_STR(setNotationPrefs:sender:)]) {
-		
-		//force these objects to re-init with the new notationprefs
-		[changer release]; changer = nil;
-		[picker release]; picker = nil;
 		
 		[notationPrefs release];
 		notationPrefs = [[[GlobalPrefs defaultPrefs] notationPrefs] retain];
@@ -140,68 +126,234 @@ enum {VERIFY_NOT_ATTEMPTED, VERIFY_FAILED, VERIFY_IN_PROGRESS, VERIFY_SUCCESS};
     //set up outlets to reflect new settings
     if (notationPrefs) {
 		
-		[keyLengthField setIntValue:[notationPrefs keyLengthInBits]];
-		[keyLengthStepper setIntValue:[notationPrefs keyLengthInBits]];
-		[self setEncryptionControlsState:[notationPrefs doesEncryption]];
 		[self setSeparateFileControlsState:[notationPrefs notesStorageFormat]];
-		[self updateRemoveKeychainItemStatus];
 		[confirmFileDeletionButton setState:[notationPrefs confirmFileDeletion]];
-		
-		[enabledSyncButton setState:[notationPrefs syncServiceIsEnabled:SimplenoteServiceName]];
-		NSString *username = [[notationPrefs syncAccountForServiceName:SimplenoteServiceName] objectForKey:@"username"];
-		NSString *password = [notationPrefs syncPasswordForServiceName:SimplenoteServiceName];
-		[syncAccountField setStringValue:username ? username : @""];
-		[syncPasswordField setStringValue:password ? password : @""];
-		
-		[syncingFrequency selectItemWithTag:[notationPrefs syncFrequencyInMinutesForServiceName:SimplenoteServiceName]];
-		
-		[self setSyncControlsState:[notationPrefs syncServiceIsEnabled:SimplenoteServiceName]];
-		
-		[secureTextEntryButton setState:[notationPrefs secureTextEntry]];
 		
 		[allowedTypesTable reloadData];
 		[allowedExtensionsTable reloadData];
-        if (!IsMavericksOrLater||([notationPrefs notesStorageFormat]==SingleDatabaseFormat)) {
-            [useFinderTaggingButton setHidden:YES];
-        }
+		//tags stay OpenMeta tags, separate from Finder's; the old switch to Finder tags isn't offered
+		[useFinderTaggingButton setHidden:YES];
+
     }
 }
 
-- (void)setSyncControlsState:(BOOL)syncState {
-	
-	if (syncState) {
-		[self startLoginVerifier];
-	} else {
-		[self cancelLoginVerifier];
+//drop the tab holding `view` from whichever tab view contains it (the compiled nib still has tabs for removed
+//features, and outlets to their controls, which is why those ivars remain declared)
+- (void)removeTabContainingView:(NSView*)view {
+	//only the selected tab's view is inside the tab view, so look for it from a control on each tab
+	NSTabView *tabView = nil;
+	NSArray *controls = [NSArray arrayWithObjects:storageFormatPopupButton, enabledSyncButton, secureTextEntryButton, nil];
+	for (NSView *control in controls) {
+		NSView *ancestor = [control superview];
+		while (ancestor && ![ancestor isKindOfClass:[NSTabView class]])
+			ancestor = [ancestor superview];
+		if ((tabView = (NSTabView*)ancestor)) break;
 	}
-	[self setVerificationStatus:VERIFY_NOT_ATTEMPTED withString:@""];
-	[syncingFrequency setEnabled:syncState];
-	[syncAccountField setEnabled:syncState];
-	[syncPasswordField setEnabled:syncState];
-	[syncEncAlertView setHidden:!syncState || ![notationPrefs doesEncryption]];
-	[syncEncAlertField setHidden:!syncState || ![notationPrefs doesEncryption]];
+	
+	for (NSTabViewItem *item in [[[tabView tabViewItems] copy] autorelease]) {
+		if ([view isDescendantOf:[item view]]) {
+			[tabView removeTabViewItem:item];
+			break;
+		}
+	}
+	//a single remaining tab needs no tab strip
+	if ([tabView numberOfTabViewItems] == 1) {
+		[tabView selectTabViewItemAtIndex:0];
+		[tabView setTabViewType:NSNoTabsNoBorder];
+		[self closeGapAboveTabView:tabView];
+	}
 }
 
-- (void)setEncryptionControlsState:(BOOL)encryptionState {
-    [enableEncryptionButton setTitle:(encryptionState ? disableEncryptionString : enableEncryptionString)];
-    [changePasswordButton setEnabled:encryptionState];
-	[passwordSettingsMatrix setEnabled:encryptionState];
+//without its tab strip the remaining tab's controls sit well below the top of this view; trim the empty space
+//(the Settings window's Notes pane fits itself to this view's height, see -[PrefsWindowController databaseView])
+- (void)closeGapAboveTabView:(NSTabView*)tabView {
+	NSView *root = [tabView superview];
+	NSView *content = [[tabView selectedTabViewItem] view];
+	if (!root || !content || [root isFlipped]) return;
 	
-	[passwordSettingsMatrix setState:[notationPrefs storesPasswordInKeychain] atRow:0 column:0];
-	[passwordSettingsMatrix setState:![notationPrefs storesPasswordInKeychain] atRow:1 column:0];
+	CGFloat contentTop = -CGFLOAT_MAX, contentBottom = CGFLOAT_MAX;
+	for (NSView *control in [content subviews]) {
+		if (![control isHidden]) {
+			NSRect frame = [content convertRect:[control frame] toView:root];
+			contentTop = MAX(contentTop, NSMaxY(frame));
+			contentBottom = MIN(contentBottom, NSMinY(frame));
+		}
+	}
+	//likewise below: keep a standard 20pt margin under the lowest control
+	CGFloat bottomTrim = contentBottom - 20.0;
+	if (contentBottom != CGFLOAT_MAX && bottomTrim > 0.0) {
+		[tabView setFrameOrigin:NSMakePoint(NSMinX([tabView frame]), NSMinY([tabView frame]) - bottomTrim)];
+		contentTop -= bottomTrim;
+	}
+	for (NSView *sibling in [root subviews]) {
+		if (sibling != tabView && ![sibling isHidden])
+			contentTop = MAX(contentTop, NSMaxY([sibling frame]));
+	}
+	CGFloat newHeight = ceil(contentTop) + 4.0;
+	if (contentTop == -CGFLOAT_MAX || newHeight >= NSHeight([root frame])) return;
 	
-    [keyLengthField setEnabled:encryptionState];
-    [keyLengthStepper setEnabled:encryptionState];
+	BOOL autoresizes = [root autoresizesSubviews];
+	[root setAutoresizesSubviews:NO];
+	[root setFrameSize:NSMakeSize(NSWidth([root frame]), newHeight)];
+	[root setAutoresizesSubviews:autoresizes];
+}
+
+//Simplenote syncing, note encryption and Secure Text Entry were removed: drop the "Synchronization" and
+//"Security" tabs (encryption and Secure Text Entry shared the latter)
+- (void)removeSynchronizationTab {
+	[self removeTabContainingView:enabledSyncButton];
+}
+
+- (void)removeEncryptionControls {
+	[self removeTabContainingView:secureTextEntryButton];
 	
-	BOOL syncState = [notationPrefs syncServiceIsEnabled:SimplenoteServiceName];
-	[syncEncAlertView setHidden:!syncState || !encryptionState];
-	[syncEncAlertField setHidden:!syncState || !encryptionState];
+	//notes are only stored as separate files, so the single-database choice is gone
+	NSMenuItem *databaseItem = [[storageFormatPopupButton menu] itemWithTag:SingleDatabaseFormat];
+	if (databaseItem)
+		[[storageFormatPopupButton menu] removeItem:databaseItem];
+}
+
+//the compiled nib lays out two header-topped lists (extensions and old HFS file type codes) with loose buttons
+//below; show one standard list instead: the extensions in a bordered list with +/- attached to its bottom edge
+//and "Set as Default" in its contextual menu (the default extension is shown in bold). File type codes are
+//something macOS no longer sets, so that list is hidden.
+- (void)useStandardExtensionList {
+	NSScrollView *extensionsScrollView = [allowedExtensionsTable enclosingScrollView];
+	NSScrollView *typesScrollView = [allowedTypesTable enclosingScrollView];
+	NSView *container = [extensionsScrollView superview];
+	if (!extensionsScrollView || !container) return;
+	
+	for (NSView *view in [NSArray arrayWithObjects:typesScrollView, newTypeButton, removeTypeButton,
+						  newExtensionButton, removeExtensionButton, makeDefaultExtensionButton, nil])
+		[view setHidden:YES];
+	
+	[fileAttributesHelpText setStringValue:NSLocalizedString(@"Recognize files with these extensions:", @"label above the list of note file extensions")];
+	
+	NSRect listFrame = [extensionsScrollView frame];
+	CGFloat left = [fileAttributesHelpText superview] == container ? NSMinX([fileAttributesHelpText frame]) + 2.0 : NSMinX(listFrame);
+	CGFloat right = typesScrollView && [typesScrollView superview] == container ? NSMaxX([typesScrollView frame]) : NSMaxX(listFrame);
+	listFrame = NSMakeRect(left, NSMinY(listFrame), right - left, NSHeight(listFrame));
+	[extensionsScrollView setFrame:listFrame];
+	[extensionsScrollView setBorderType:NSBezelBorder];
+	[allowedExtensionsTable setHeaderView:nil];
+	[allowedExtensionsTable setCornerView:nil];
+	[allowedExtensionsTable setColumnAutoresizingStyle:NSTableViewUniformColumnAutoresizingStyle];
+	[allowedExtensionsTable sizeLastColumnToFit];
+	[extensionsScrollView tile];
+	
+	NSMenu *menu = [[[NSMenu alloc] initWithTitle:@""] autorelease];
+	NSMenuItem *defaultItem = [menu addItemWithTitle:NSLocalizedString(@"Set as Default", @"contextual menu item in the note file extensions list")
+											  action:@selector(makeClickedExtensionDefault:) keyEquivalent:@""];
+	[defaultItem setTarget:self];
+	[allowedExtensionsTable setMenu:menu];
+	
+	extensionButtons = [[NSSegmentedControl alloc] initWithFrame:NSZeroRect];
+	[extensionButtons setSegmentStyle:NSSegmentStyleSmallSquare];
+	[extensionButtons setTrackingMode:NSSegmentSwitchTrackingMomentary];
+	[extensionButtons setSegmentCount:2];
+	[extensionButtons setImage:[NSImage imageWithSystemSymbolName:@"plus" accessibilityDescription:NSLocalizedString(@"Add", nil)] forSegment:0];
+	[extensionButtons setImage:[NSImage imageWithSystemSymbolName:@"minus" accessibilityDescription:NSLocalizedString(@"Remove", nil)] forSegment:1];
+	[extensionButtons setWidth:24.0 forSegment:0];
+	[extensionButtons setWidth:24.0 forSegment:1];
+	[extensionButtons setTarget:self];
+	[extensionButtons setAction:@selector(clickedExtensionButtons:)];
+	[extensionButtons sizeToFit];
+	//attached to the list's bottom edge, sharing its border line
+	NSRect buttonsFrame = [extensionButtons frame];
+	buttonsFrame.origin.x = NSMinX(listFrame);
+	buttonsFrame.origin.y = [container isFlipped] ? NSMaxY(listFrame) - 1.0 : NSMinY(listFrame) - NSHeight(buttonsFrame) + 1.0;
+	[extensionButtons setFrame:buttonsFrame];
+	[extensionButtons setAutoresizingMask:[extensionsScrollView autoresizingMask] & (NSViewMinYMargin | NSViewMaxYMargin)];
+	[container addSubview:extensionButtons];
+	[self updateExtensionButtons];
+}
+
+- (NSPopUpButton*)storageFormatPopUp {
+	return storageFormatPopupButton;
+}
+
+- (NSScrollView*)extensionsListView {
+	return [allowedExtensionsTable enclosingScrollView];
+}
+
+- (NSSegmentedControl*)extensionButtons {
+	return extensionButtons;
+}
+
+- (NSButton*)confirmFileDeletionCheckbox {
+	return confirmFileDeletionButton;
+}
+
+- (void)updateExtensionButtons {
+	[extensionButtons setEnabled:[newExtensionButton isEnabled] forSegment:0];
+	[extensionButtons setEnabled:[removeExtensionButton isEnabled] forSegment:1];
+}
+
+- (void)clickedExtensionButtons:(id)sender {
+	if ([sender selectedSegment] == 0)
+		[self addedExtension:sender];
+	else
+		[self removedExtension:sender];
+	[self updateExtensionButtons];
+}
+
+- (void)makeClickedExtensionDefault:(id)sender {
+	NSInteger row = [allowedExtensionsTable clickedRow];
+	if (row < 0) return;
+	[allowedExtensionsTable selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+	[self makeDefaultExtension:sender];
+}
+
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
+	if ([menuItem action] == @selector(makeClickedExtensionDefault:))
+		return [allowedExtensionsTable clickedRow] >= 0 && [allowedExtensionsTable isEnabled];
+	return YES;
+}
+
+//the storage format menu marked the file formats with "*" for a footnote comparing them with the single-database
+//format ("Using separate files allows Spotlight integration…"); notes are always files now, so drop both and close
+//the space the footnote took
+- (void)removeStorageFormatFootnote {
+	for (NSMenuItem *item in [storageFormatPopupButton itemArray]) {
+		NSString *title = [item title];
+		NSString *trimmed = [title stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"* \u00a0"]];
+		if ([trimmed length] && ![trimmed isEqualToString:title]) [item setTitle:trimmed];
+	}
+	[storageFormatPopupButton synchronizeTitleAndSelectedItem];
+	
+	NSView *container = [storageFormatPopupButton superview];
+	NSTextField *footnote = nil;
+	for (NSView *view in [container subviews]) {
+		if ([view isKindOfClass:[NSTextField class]] && [[[(NSTextField*)view stringValue] stringByTrimmingCharactersInSet:
+																[NSCharacterSet whitespaceAndNewlineCharacterSet]] hasPrefix:@"*"])
+			footnote = (NSTextField*)view;
+	}
+	if (!footnote || [container isFlipped]) return;
+	[footnote setHidden:YES];
+	
+	NSRect noteFrame = [footnote frame];
+	CGFloat aboveBottom = CGFLOAT_MAX, belowTop = -CGFLOAT_MAX;
+	NSMutableArray *above = [NSMutableArray array];
+	for (NSView *view in [container subviews]) {
+		if (view == footnote || [view isHidden]) continue;
+		if (NSMinY([view frame]) >= NSMaxY(noteFrame) - 1.0) {
+			[above addObject:view];
+			aboveBottom = MIN(aboveBottom, NSMinY([view frame]));
+		} else if (NSMaxY([view frame]) <= NSMinY(noteFrame) + 1.0) {
+			belowTop = MAX(belowTop, NSMaxY([view frame]));
+		}
+	}
+	CGFloat shift = aboveBottom - belowTop - 14.0;
+	if (![above count] || belowTop == -CGFLOAT_MAX || shift <= 0.0) return;
+	for (NSView *view in above)
+		[view setFrameOrigin:NSMakePoint(NSMinX([view frame]), NSMinY([view frame]) - shift)];
 }
 
 - (void)setSeparateFileControlsState:(BOOL)separateFileControlsState {
 	[newExtensionButton setEnabled:separateFileControlsState];
 	[removeExtensionButton setEnabled:separateFileControlsState && [allowedExtensionsTable selectedRow] > -1];
 	[makeDefaultExtensionButton setEnabled:separateFileControlsState && [allowedExtensionsTable selectedRow] > -1];
+	[self updateExtensionButtons];
 	[newTypeButton setEnabled:separateFileControlsState];
 	[removeTypeButton setEnabled:separateFileControlsState && [allowedTypesTable selectedRow] > -1];
 	
@@ -213,18 +365,6 @@ enum {VERIFY_NOT_ATTEMPTED, VERIFY_FAILED, VERIFY_IN_PROGRESS, VERIFY_SUCCESS};
 	[storageFormatPopupButton selectItemWithTag:[notationPrefs notesStorageFormat]];
 	
 	[fileAttributesHelpText setTextColor: separateFileControlsState ? [NSColor controlTextColor] : [NSColor grayColor]];	
-}
-
-- (void)updateRemoveKeychainItemStatus {
-	
-	if (![removeFromKeychainButton isHidden]) {
-		SecKeychainItemRef itemRef = [notationPrefs currentKeychainItem];
-		
-		[removeFromKeychainButton setEnabled:(itemRef != NULL)];
-		
-		if (itemRef)
-			CFRelease(itemRef);
-	}
 }
 
 - (void)tableView:(NSTableView *)aTableView setObjectValue:(id)anObject 
@@ -285,40 +425,12 @@ enum {VERIFY_NOT_ATTEMPTED, VERIFY_FAILED, VERIFY_IN_PROGRESS, VERIFY_SUCCESS};
 
 }
 
-- (IBAction)changedKeyLength:(id)sender {
-    
-    int bits = [keyLengthStepper intValue];
-    [keyLengthField setIntValue:bits];
-    [notationPrefs setKeyLengthInBits:bits];
-}
-
-- (IBAction)changedKeychainSettings:(id)sender {
-	//matrix does not change until the next runloop iteration, apparently
-	if (sender != self)
-		[self performSelector:@selector(changedKeychainSettings:) withObject:self afterDelay:0.0];
-	else
-		[notationPrefs setStoresPasswordInKeychain:[[passwordSettingsMatrix cellAtRow:0 column:0] state]];
-		
-}
-
 - (IBAction)changedFileDeletionWarningSettings:(id)sender {
     [notationPrefs setConfirmsFileDeletion:[confirmFileDeletionButton state]];
 }
 
-- (IBAction)removeFromKeychain:(id)sender {
-	[notationPrefs removeKeychainData];
-
-	[self updateRemoveKeychainItemStatus];
-}
-
 - (NSInteger)notesStorageFormatInProgress {
 	return notesStorageFormatInProgress;
-}
-
-- (void)runQueuedStorageFormatChangeInvocation {
-	[postStorageFormatInvocation performSelector:@selector(invoke) withObject:nil afterDelay:0.0];
-	[postStorageFormatInvocation release];
-	postStorageFormatInvocation = nil;
 }
 
 - (void)notesStorageFormatDidChange {
@@ -330,170 +442,17 @@ enum {VERIFY_NOT_ATTEMPTED, VERIFY_FAILED, VERIFY_IN_PROGRESS, VERIFY_SUCCESS};
 }
 
 - (IBAction)changedFileStorageFormat:(id)sender {
-    NSInteger storageTag = [storageFormatPopupButton selectedTag];
-	if (storageTag != SingleDatabaseFormat && [notationPrefs doesEncryption]) {
-		if (NSRunAlertPanel(NSLocalizedString(@"Encryption is currently on, but storing notes individually requires it to be off. Disable encryption?",nil),
-							NSLocalizedString(@"Warning: Your notes will be written to disk in clear text.",nil), NSLocalizedString(@"Disable Encryption",nil), 
-							NSLocalizedString(@"Cancel",nil), NULL) == NSAlertDefaultReturn) {
-			
-			//disable encryption
-			[self disableEncryptionWithWarning:NO];
-		} else {
-			//cancelled
-			[self notesStorageFormatDidChange];
-			return;
-		}
-	}
+	//notes are always stored as separate files (plain text, rich text or HTML); just switch the file format
+	notesStorageFormatInProgress = [storageFormatPopupButton selectedTag];
+	[notationPrefs setNotesStorageFormat:notesStorageFormatInProgress];
+	[self notesStorageFormatDidChange];
 	
-	notesStorageFormatInProgress = storageTag;
-	
-	//if we're changing to a database format from a non-database-format, ask to trash existing files
-    if ([notationPrefs shouldDisplaySheetForProposedFormat:notesStorageFormatInProgress]) {
-		
-		NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Individual files remain in the notes directory. Leave them alone or move them to the Trash?",nil) 
-										 defaultButton:NSLocalizedString(@"Keep Files", @"button title for not discarding note files") 
-									   alternateButton:NSLocalizedString(@"Cancel",nil) otherButton:NSLocalizedString(@"Move to Trash", @"button title for trashing notes")
-							 informativeTextWithFormat:NSLocalizedString(@"When notes are stored in a single database individual files become redundant.",nil)];
-		
-		[alert beginSheetModalForWindow:[view window] modalDelegate:notationPrefs 
-						 didEndSelector:@selector(noteFilesCleanupSheetDidEnd:returnCode:contextInfo:) contextInfo:self];
-		//will ultimately call -notesStorageFormatDidChange
-	} else {
-		//just call setNotesStorageFormat straight-out
-		[notationPrefs setNotesStorageFormat:notesStorageFormatInProgress];
-		[self notesStorageFormatDidChange];
-		
-		//sheet ending will not do this for us--there is no sheet
-		[self runQueuedStorageFormatChangeInvocation];
-	}
-	
-	
-	if ([[storageFormatPopupButton objectValue] intValue]==0) {
-		[[NSUserDefaults standardUserDefaults] setObject:nil forKey:@"TextEditor"];
-		[[NSUserDefaults standardUserDefaults] synchronize];
-	}else {
-		[[NSUserDefaults standardUserDefaults] setObject:@"Default" forKey:@"TextEditor"];
-		[[NSUserDefaults standardUserDefaults] synchronize];
-//		if ( [[NSApp delegate] respondsToSelector: @selector(updateTextApp:)] ) {
-//			[[NSApp delegate] updateTextApp:self];
-//		}
-	}
-
-	
+	//notes are files, so they can always be opened in an external editor
+	[[NSUserDefaults standardUserDefaults] setObject:@"Default" forKey:@"TextEditor"];
 }
 
-- (IBAction)toggledSyncing:(id)sender {
-	[notationPrefs setSyncEnabled:[enabledSyncButton state] forService:SimplenoteServiceName];
-	[self setSyncControlsState:[enabledSyncButton state]];
-}
-
-- (IBAction)syncFrequencyChange:(id)sender {
-	if (sender) {
-		[self performSelector:_cmd withObject:nil afterDelay:0.0];
-	} else {
-		[notationPrefs setSyncFrequency:[syncingFrequency selectedTag] forService:SimplenoteServiceName];
-	}
-}
-
-- (void)syncEditingDidEnd:(NSNotification *)aNotification {
-	if (!verificationAttempted) {
-		[self cancelLoginVerifier];
-		[self startLoginVerifier];
-	}
-}
-
-- (void)syncCredentialsDidChange:(NSNotification *)aNotification {
-	
-	if ([aNotification object] == syncAccountField) {
-		[notationPrefs removeSyncPasswordForService:SimplenoteServiceName];
-		[notationPrefs setSyncUsername:[syncAccountField stringValue] forService:SimplenoteServiceName];
-		
-		[self startVerifyingAfterDelay];
-	} else if ([aNotification object] == syncPasswordField) {
-		[self startVerifyingAfterDelay];
-	}
-}
-
-
-- (void)setVerificationStatus:(int)status withString:(NSString*)aString {
-	
-	switch (status) {
-		case VERIFY_NOT_ATTEMPTED:
-			verificationAttempted = NO;
-			[verifyStatusImageView setImage:nil];
-			break;
-		case VERIFY_FAILED:
-			verificationAttempted = YES;
-			[verifyStatusImageView setImage:[NSImage imageNamed:@"statusError"]];
-			break;
-		case VERIFY_IN_PROGRESS:
-			[verifyStatusImageView setImage:[NSImage imageNamed:@"statusInProgress"]];
-			break;
-		case VERIFY_SUCCESS:
-			verificationAttempted = YES;
-			[verifyStatusImageView setImage:[NSImage imageNamed:@"statusValidated"]];
-			break;
-	}
-	[verifyStatusImageView setHidden: VERIFY_NOT_ATTEMPTED == status];
-	[verifyStatusField setStringValue: aString ? aString : @""];
-}
-
-- (void)startVerifyingAfterDelay {
-	[self cancelLoginVerifier];
-	
-	[self performSelector:@selector(startLoginVerifier) withObject:nil afterDelay:1.5];
-}
-
-- (void)cancelLoginVerifier {
-	[loginVerifier cancel];
-	[loginVerifier autorelease];
-	loginVerifier = nil;
-	[self setVerificationStatus:VERIFY_NOT_ATTEMPTED withString:@""];
-	
-	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(startLoginVerifier) object:nil];
-}
-
-- (void)startLoginVerifier {
-	if (!loginVerifier && [[syncAccountField stringValue] length] && [[syncPasswordField stringValue] length]) {
-		NSURL *loginURL = [SimplenoteSession authURLWithPath:@"/authorize/" parameters:nil];
-		NSDictionary *headers = [NSDictionary dictionaryWithObject:kSimperiumAPIKey forKey:@"X-Simperium-API-Key"];
-		NSDictionary *login = [NSDictionary dictionaryWithObjectsAndKeys:
-							   [syncAccountField stringValue], @"username", [syncPasswordField stringValue], @"password", nil];
-
-		loginVerifier = [[SyncResponseFetcher alloc] initWithURL:loginURL POSTData:[[login jsonStringValue] dataUsingEncoding:NSUTF8StringEncoding] headers:headers contentType:@"application/json" delegate:self];
-
-		[loginVerifier start];
-		[self setVerificationStatus:VERIFY_IN_PROGRESS withString:@""];
-	}
-}
-
-- (void)syncResponseFetcher:(SyncResponseFetcher*)fetcher receivedData:(NSData*)data returningError:(NSString*)errString {
-	BOOL authFailed = errString || [fetcher statusCode] >= 400;
-	
-	[self setVerificationStatus:authFailed ? VERIFY_FAILED : VERIFY_SUCCESS withString:
-	 authFailed ? NSLocalizedString(@"Incorrect login and password", @"sync status menu msg") : errString];
-	
-	if (authFailed) {
-		[notationPrefs removeSyncPasswordForService:SimplenoteServiceName];
-	} else {
-		[notationPrefs setSyncPassword:[syncPasswordField stringValue] forService:SimplenoteServiceName];
-	}
-}
-
+//still connected in the compiled nib; the control is no longer shown
 - (IBAction)changedSecureTextEntry:(id)sender {
-	[notationPrefs setSecureTextEntry:[secureTextEntryButton state]];
-}
-
-- (IBAction)changePassphrase:(id)sender {
-	
-	NSAssert([notationPrefs doesEncryption], @"Encryption must be on before the password can be changed.");
-	
-	if (!changer) changer = [[PassphraseChanger alloc] initWithNotationPrefs:notationPrefs];
-	[changer showAroundWindow:[view window]];
-}
-
-- (IBAction)visitSimplenoteSite:(id)sender {
-    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://simplenote.com/"]];
 }
 
 - (IBAction)makeDefaultExtension:(id)sender {
@@ -525,99 +484,6 @@ enum {VERIFY_NOT_ATTEMPTED, VERIFY_FAILED, VERIFY_IN_PROGRESS, VERIFY_SUCCESS};
 	
 	[allowedTypesTable reloadData];
 }
-
-- (void)passphrasePicker:(PassphrasePicker*)picker choseAPassphrase:(BOOL)success {
-	
-	[self setEncryptionControlsState:success];
-	[notationPrefs setDoesEncryption:success];
-	[self updateRemoveKeychainItemStatus];
-}
-
-- (void)encryptionFormatMismatchSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-	if (returnCode == NSAlertDefaultReturn) {
-		//switching to single DB
-		[storageFormatPopupButton selectItemWithTag:SingleDatabaseFormat];
-		
-		[self performSelector:@selector(changedFileStorageFormat:) withObject:storageFormatPopupButton afterDelay:0.0];
-		
-		//need to show PW picker dialog after this ->
-		
-		//[picker showAroundWindow:[view window] resultDelegate:self];
-		
-		[postStorageFormatInvocation release];
-		
-		//so queue it up:
-		InvocationRecorder *invRecorder = [InvocationRecorder invocationRecorder];
-		[[invRecorder prepareWithInvocationTarget:picker] showAroundWindow:[view window] resultDelegate:self];
-		postStorageFormatInvocation = [[invRecorder invocation] retain];
-	}
-}
-
-- (void)enableEncryption {
-	if (!picker) picker = [[PassphrasePicker alloc] initWithNotationPrefs:notationPrefs];
-	
-	NSInteger format = [notationPrefs notesStorageFormat];
-	if (format == SingleDatabaseFormat) {
-		
-		[picker showAroundWindow:[view window] resultDelegate:self];
-	} else {
-		NSString *formatStrings[] = { NSLocalizedString(@"(WHAT??)",@"user shouldn't see this"), 
-			NSLocalizedString(@"plain text",nil), NSLocalizedString(@"rich text",nil), NSLocalizedString(@"HTML",nil) };
-		NSAlert *alert = [NSAlert alertWithMessageText:[NSString stringWithFormat:NSLocalizedString(@"Your notes are currently stored as %@ files on disk, but encryption requires a single database. Switch to a database format?",nil), formatStrings[format]]
-										 defaultButton:NSLocalizedString(@"Use a single database file",nil) alternateButton:NSLocalizedString(@"Cancel",nil) otherButton:nil
-							 informativeTextWithFormat:NSLocalizedString(@"Notational Velocity supports encryption only for notes stored in a database file.",nil)];
-		
-		[alert beginSheetModalForWindow:[view window] modalDelegate:self 
-						 didEndSelector:@selector(encryptionFormatMismatchSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
-	}
-}
-
-- (void)disableEncryptionWarningSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-	if (returnCode == NSAlertDefaultReturn) {
-		[self _disableEncryption];
-	}
-}
-
-- (void)_disableEncryption {
-	[self setEncryptionControlsState:NO];
-	[notationPrefs setDoesEncryption:NO];
-	[self updateRemoveKeychainItemStatus];
-	
-	[picker release]; picker = nil;		
-}
-
-- (void)disableEncryptionWithWarning:(BOOL)warning {
-	if ([notationPrefs doesEncryption]) {
-		if (warning) {
-			NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Disable note encryption now?",nil)
-											 defaultButton:NSLocalizedString(@"Disable Encryption",@"button title for disabling note encryption") 
-										   alternateButton:NSLocalizedString(@"Cancel",nil) otherButton:nil
-								 informativeTextWithFormat:NSLocalizedString(@"Warning: Your notes will be written to disk in clear text.",nil)];
-			
-			[alert beginSheetModalForWindow:[view window] modalDelegate:self 
-							 didEndSelector:@selector(disableEncryptionWarningSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
-			
-		} else {
-			[self _disableEncryption];
-		}
-		
-	} else {
-		NSLog(@"Not disabling encryption because it is already off.");
-	}
-}
-
-- (IBAction)toggledEncryption:(id)sender {
-	BOOL encryptionOn = ![notationPrefs doesEncryption];
-	
-	if (encryptionOn) {
-		[self enableEncryption];
-	} else {
-		[self disableEncryptionWithWarning:YES];
-	}
-}
-
-
-#pragma mark nvALT Finder tagging
 
 - (IBAction)switchToFinderTags:(id)sender{
     if (IsMavericksOrLater) {

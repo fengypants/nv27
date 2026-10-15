@@ -19,9 +19,6 @@
 #import <Cocoa/Cocoa.h>
 
 @class NotationPrefs;
-@class PassphrasePicker;
-@class PassphraseChanger;
-@class SyncResponseFetcher;
 
 @interface FileKindListView : NSTableView {
     IBOutlet NSPopUpButton *storageFormatPopupButton;
@@ -35,90 +32,68 @@
 {
     IBOutlet NSTableView *allowedExtensionsTable;
     IBOutlet NSTableView *allowedTypesTable;
-	IBOutlet NSButton *enableEncryptionButton;
-    IBOutlet NSButton *changePasswordButton;
-    IBOutlet NSStepper *keyLengthStepper;
-    IBOutlet NSTextField *keyLengthField, *fileAttributesHelpText;
+    IBOutlet NSTextField *fileAttributesHelpText;
     IBOutlet NSButton *newExtensionButton;
     IBOutlet NSButton *newTypeButton;
-    IBOutlet NSTextField *syncAccountField;
-    IBOutlet NSTextField *syncPasswordField;
 	IBOutlet NSButton *makeDefaultExtensionButton;
     IBOutlet NSButton *removeExtensionButton;
     IBOutlet NSButton *removeTypeButton;
     IBOutlet NSButton *confirmFileDeletionButton;
 	IBOutlet NSButton *secureTextEntryButton;
-	IBOutlet NSButton *removeFromKeychainButton;
     IBOutlet NSPopUpButton *storageFormatPopupButton;
-    IBOutlet NSMatrix *passwordSettingsMatrix;
     IBOutlet NSWindow *webOptionsWindow;
+	
+	//controls of the removed Simplenote "Synchronization" tab; still connected in NotationPrefsView.nib
 	IBOutlet NSButton *enabledSyncButton;
-	IBOutlet NSImageView *verifyStatusImageView;
-	IBOutlet NSTextField *verifyStatusField;
-	IBOutlet NSPopUpButton *syncingFrequency;
-	IBOutlet NSImageView *syncEncAlertView;
+	IBOutlet NSTextField *syncAccountField, *syncPasswordField, *verifyStatusField;
+	IBOutlet NSImageView *verifyStatusImageView, *syncEncAlertView;
 	IBOutlet NSTextField *syncEncAlertField;
+	IBOutlet NSPopUpButton *syncingFrequency;
+	
+	//controls of the removed note encryption feature (in the "Security" tab); still connected in NotationPrefsView.nib
+	IBOutlet NSButton *enableEncryptionButton, *changePasswordButton, *removeFromKeychainButton;
+	IBOutlet NSStepper *keyLengthStepper;
+	IBOutlet NSTextField *keyLengthField;
+	IBOutlet NSMatrix *passwordSettingsMatrix;
     
     IBOutlet NSView *view;
+	NSSegmentedControl *extensionButtons;
 
 	BOOL didAwakeFromNib;
     
-	NSInvocation *postStorageFormatInvocation;
 	NSInteger notesStorageFormatInProgress;
     NotationPrefs *notationPrefs;
-	
-	PassphrasePicker *picker;
-	PassphraseChanger *changer;
 
-	BOOL verificationAttempted;
-	SyncResponseFetcher *loginVerifier;
-	
-	NSString *disableEncryptionString, *enableEncryptionString;
     
 #pragma mark nvALT Finder tagging
     IBOutlet NSButton *useFinderTaggingButton;
 }
 
 - (NSView*)view;
-- (void)setSyncControlsState:(BOOL)syncState;
-- (void)setEncryptionControlsState:(BOOL)encryptionState;
+- (void)removeSynchronizationTab;
+- (void)removeEncryptionControls;
 - (void)setSeparateFileControlsState:(BOOL)separateFileControlsState;
 - (void)initializeControls;
 
 - (IBAction)addedExtension:(id)sender;
 - (IBAction)addedType:(id)sender;
-- (IBAction)changedKeyLength:(id)sender;
-- (IBAction)changedKeychainSettings:(id)sender;
 - (IBAction)changedFileDeletionWarningSettings:(id)sender;
 - (IBAction)changedFileStorageFormat:(id)sender;
-- (IBAction)changePassphrase:(id)sender;
 - (IBAction)changedSecureTextEntry:(id)sender;
-- (IBAction)removeFromKeychain:(id)sender;
-- (void)updateRemoveKeychainItemStatus;
 - (void)notesStorageFormatDidChange;
 - (NSInteger)notesStorageFormatInProgress;
-- (void)runQueuedStorageFormatChangeInvocation;
-- (IBAction)visitSimplenoteSite:(id)sender;
 - (IBAction)makeDefaultExtension:(id)sender;
 - (IBAction)removedExtension:(id)sender;
 - (IBAction)removedType:(id)sender;
 
-- (IBAction)toggledSyncing:(id)sender;
-- (IBAction)syncFrequencyChange:(id)sender;
-
-- (void)startVerifyingAfterDelay;
-- (void)startLoginVerifier;
-- (void)cancelLoginVerifier;
-- (void)setVerificationStatus:(int)status withString:(NSString*)aString;
-
-- (void)encryptionFormatMismatchSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode 
-								contextInfo:(void *)contextInfo;
-- (IBAction)toggledEncryption:(id)sender;
-- (void)enableEncryption;
-- (void)_disableEncryption;
-- (void)disableEncryptionWithWarning:(BOOL)warning;
 
 #pragma mark nvALT Finder tagging
 - (IBAction)switchToFinderTags:(id)sender;
+
+//the Notes pane's controls, which the Settings window lays out in its own form (see -[PrefsWindowController layOutNotesPane])
+- (NSPopUpButton*)storageFormatPopUp;
+- (NSScrollView*)extensionsListView;
+- (NSSegmentedControl*)extensionButtons;
+- (NSButton*)confirmFileDeletionCheckbox;
 
 @end

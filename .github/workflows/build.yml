@@ -1,0 +1,118 @@
+name: Build (Apple silicon)
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+# publishing the app to the "latest-build" release needs write access to the repo contents
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - scheme: Notation Develop
+            configuration: Development
+          - scheme: Notation Release
+            configuration: ForBuilding
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: |
+          uname -m
+          sw_vers
+          xcodebuild -version
+          xcrun --show-sdk-version
+
+      - name: Build
+        run: |
+          set -o pipefail
+          # report every compile error in one run instead of stopping at the first
+          defaults write com.apple.dt.Xcode IDEBuildingContinueBuildingAfterErrors -bool YES
+          defaults write com.apple.dt.xcodebuild IDEBuildingContinueBuildingAfterErrors -bool YES
+          # macOS has no timeout(1); perl's alarm kills xcodebuild if it hangs so the log still gets printed
+          perl -e 'alarm shift; exec @ARGV' 900 xcodebuild build \
+            -project Notation.xcodeproj \
+            -scheme "${{ matrix.scheme }}" \
+            -configuration "${{ matrix.configuration }}" \
+            -derivedDataPath build/DerivedData \
+            -destination 'generic/platform=macOS' \
+            CODE_SIGN_IDENTITY=- \
+            CODE_SIGNING_REQUIRED=NO \
+            -IDEBuildingContinueBuildingAfterErrors=YES \
+            > build.log 2>&1 || true
+          grep -E ": (fatal )?error: |error: |BUILD (SUCCEEDED|FAILED)" build.log | grep -v "warning:" | sort -u | head -300 || true
+          # linker failures ("Undefined symbols" plus the symbol lines that follow)
+          grep -A12 -E "^Undefined symbols|^ld: " build.log | head -120 || true
+          echo "---- last lines of build.log ----"
+          tail -40 build.log
+          grep -q "BUILD SUCCEEDED" build.log
+
+      - name: Verify architecture
+        run: |
+          APP="build/DerivedData/Build/Products/${{ matrix.configuration }}/nv27.app"
+          file "$APP/Contents/MacOS/nv27"
+          lipo -archs "$APP/Contents/MacOS/nv27" | grep -qx arm64
+          # Every Mach-O in the bundle must be arm64-only (no Rosetta dependency).
+          find "$APP" -type f -perm -u+x -print0 | xargs -0 file | grep Mach-O | tee macho.txt
+          ! grep -v "arm64" macho.txt | grep -q .
+          ! grep -E "x86_64|i386|ppc" macho.txt
+
+      - name: UI self-test
+        # debug builds only: launches the app with NV27_UI_SELFTEST set (see UISelfTest.m), which reports
+        # how clicks in the note editor are routed and prints a PNG snapshot of the window as base64
+        if: matrix.configuration == 'Development'
+        continue-on-error: true
+        run: |
+          APP="build/DerivedData/Build/Products/Development/nv27.app"
+          NV27_UI_SELFTEST=1 "$APP/Contents/MacOS/nv27" > selftest.log 2>&1 &
+          PID=$!
+          for i in $(seq 1 60); do kill -0 $PID 2>/dev/null || break; sleep 1; done
+          kill $PID 2>/dev/null || true
+          grep "^SELFTEST " selftest.log || { echo "no self-test output"; tail -60 selftest.log; }
+          echo "---- snapshot ($(grep -c "^SELFTEST-PNG" selftest.log) lines) ----"
+          grep "^SELFTEST-PNG" selftest.log || true
+
+      - name: Package app
+        if: matrix.configuration == 'ForBuilding'
+        # ditto keeps the signature, symlinks and resource names intact (the bundle has files the
+        # artifact uploader can't take directly, e.g. "How does this thing work?.nvhelp")
+        run: ditto -c -k --keepParent build/DerivedData/Build/Products/ForBuilding/nv27.app nv27-arm64.zip
+
+      - name: Upload app
+        if: matrix.configuration == 'ForBuilding'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nv27-arm64
+          path: nv27-arm64.zip
+
+      - name: Publish to the "latest-build" release
+        # one stable download link for the newest build of a push (pull requests only build)
+        if: matrix.configuration == 'ForBuilding' && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete latest-build --yes --cleanup-tag || true
+          gh release create latest-build nv27-arm64.zip \
+            --prerelease \
+            --target "$GITHUB_SHA" \
+            --title "nv27 (nvALT for Apple silicon), latest build" \
+            --notes "Built from ${GITHUB_REF_NAME} at ${GITHUB_SHA::7}.
+
+          To install: download nv27-arm64.zip, double-click it to unzip, and drag nv27.app into Applications.
+          The first time, macOS will refuse to open it because it isn't signed with an Apple Developer ID:
+          click Done, then go to System Settings > Privacy & Security, scroll down and click Open Anyway."
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log-${{ matrix.configuration }}
+          path: build.log

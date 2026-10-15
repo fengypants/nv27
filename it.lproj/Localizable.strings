@@ -624,8 +624,8 @@
 "Now editing this note; rename it with %@-R" = "Modifica della nota; rinominala con %@-R";
 
 
-/* default files name */
-"Excruciatingly Useful Shortcuts" = "Scorciatoie terribilmente utili";
+/* title of the keyboard shortcuts window */
+"Keyboard Shortcuts" = "Scorciatoie di tastiera";
 "Contact Information" = "Contatti";
 "This is the title of a note" = "Questo è il titolo di una nota";
 "How does this thing work?" = "Come funziona questa cosa?";
@@ -639,7 +639,6 @@
 "Switch to Horizontal Layout" = "Passa alla disposizione orizzontale";
 
 /* for warning about incompatibility with TextExpander, Typinator, etc. */
-"Secure Text Entry will prevent %@, which is currently installed on this computer, from working in Notational Velocity." = "L'opzione Inserimento sicuro del testo impedisce a %@, attualmente installato su questo computer, di funzionare su Notational Velocity.";
 
 /* Status message after downloading a URL */
 "Importing content..." = "Importo contenuto…";
@@ -659,3 +658,40 @@
 /* Menu Item for Use Selection for Find */
 "Use Selection for Find" = "Use Selection for Find";
 
+/* Settings window form labels */
+"Appearance:" = "Aspetto:";
+"List text size:" = "Dimensione testo elenco:";
+"Hotkey:" = "Scorciatoia:";
+"Brings nv27 to the front from any app." = "Porta nv27 in primo piano da qualsiasi app.";
+"Behavior:" = "Comportamento:";
+"Show icon in:" = "Mostra icona in:";
+"Dock" = "Dock";
+"Menu bar" = "Barra dei menu";
+"Notes folder:" = "Cartella note:";
+"Store notes as:" = "Salva le note come:";
+"File extensions:" = "Estensioni file:";
+"Files with these extensions are read as notes. Right-click one to make it the default for new notes." = "I file con queste estensioni vengono letti come note. Fai clic con il tasto destro su un’estensione per renderla predefinita per le nuove note.";
+"Styled text:" = "Testo con stile:";
+"Spelling:" = "Ortografia:";
+"Tab key:" = "Tasto Tab:";
+"Links:" = "Link:";
+"Auto-pair:" = "Chiusura automatica:";
+"Direction:" = "Direzione:";
+"External editor:" = "Editor esterno:";
+"Note font:" = "Font delle note:";
+"Search terms:" = "Termini di ricerca:";
+"Highlight in notes" = "Evidenzia nelle note";
+"Light" = "Chiaro";
+"Dark" = "Scuro";
+"Text color:" = "Colore testo:";
+"Background:" = "Sfondo:";
+"Used by the User Scheme (⌥⌘3)." = "Usati dallo schema dell’utente (⌥⌘3).";
+"Notes list:" = "Elenco note:";
+"Always show grid lines" = "Mostra sempre la griglia";
+"Alternating row colors" = "Colori alternati delle righe";
+"Note width:" = "Larghezza note:";
+"Keep note text width readable" = "Mantieni leggibile la larghezza del testo";
+"Maximum:" = "Massimo:";
+"Close brackets and quotes automatically" = "Chiudi automaticamente parentesi e virgolette";
+"Typing ( [ { or \" also adds its closing character." = "Digitando ( [ { o \" viene aggiunto anche il carattere di chiusura.";
+"Right-to-left text" = "Testo da destra a sinistra";

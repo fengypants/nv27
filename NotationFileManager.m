@@ -27,7 +27,8 @@
 #include <sys/mount.h>
 
 #import <Foundation/Foundation.h>
-#include <openssl/md5.h>
+#include <CommonCrypto/CommonDigest.h>
+#include "FSExchangeObjectsCompat.h"
 
 NSString *NotesDatabaseFileName = @"Notes & Settings";
 
@@ -117,12 +118,15 @@ static void uuid_create_md5_from_name(unsigned char result_uuid[16], const void 
 		0x97, 0xA4, 0x00, 0x30, 0x65, 0x43, 0xEC, 0xAC
 	};
 	
-    MD5_CTX c;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    CC_MD5_CTX c;
 	
-    MD5_Init(&c);
-    MD5_Update(&c, FSUUIDNamespaceSHA1, sizeof(FSUUIDNamespaceSHA1));
-    MD5_Update(&c, name, namelen);
-    MD5_Final(result_uuid, &c);
+    CC_MD5_Init(&c);
+    CC_MD5_Update(&c, FSUUIDNamespaceSHA1, sizeof(FSUUIDNamespaceSHA1));
+    CC_MD5_Update(&c, name, namelen);
+    CC_MD5_Final(result_uuid, &c);
+#pragma clang diagnostic pop
 	
     result_uuid[6] = (result_uuid[6] & 0x0F) | 0x30;
     result_uuid[8] = (result_uuid[8] & 0x3F) | 0x80;
@@ -396,8 +400,11 @@ terminate:
 	NSLog(@"Unable to locate or create an Application Support directory: %d", err);
 	return err;
     } else {
-	//now try to get Notational Database directory
-	if ((err = CreateDirectoryIfNotPresent(&appSupportFoundRef, (CFStringRef)@"Notational Data", notesDir)) != noErr) {
+	//now try to get the notes directory: Application Support/nv27/Notes, so that this app never opens
+	//the original nvALT's default database ("Notational Data") while that app may be using it
+	FSRef appFolderRef;
+	if ((err = CreateDirectoryIfNotPresent(&appSupportFoundRef, (CFStringRef)@"nv27", &appFolderRef)) != noErr ||
+		(err = CreateDirectoryIfNotPresent(&appFolderRef, (CFStringRef)@"Notes", notesDir)) != noErr) {
 	    
 	    return err;
 	}

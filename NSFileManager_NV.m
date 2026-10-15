@@ -17,6 +17,7 @@
 
 
 #import "NSFileManager_NV.h"
+#include <sys/xattr.h>
 
 
 @implementation NSFileManager (NV)
@@ -57,16 +58,11 @@
     }
 }
 
+//nv27 keeps note tags in OpenMeta extended attributes, separate from Finder tags (so they don't join the system's
+//tag list in Finder); Finder tags are never read or written
 - (id)getTagsAtFSPath:(const char*)path
 {
-	if ([[NSUserDefaults standardUserDefaults] boolForKey:@"UseFinderTags"])
-	{
-		return [self getFinderTagsAtFSPath:path];
-	}
-	else
-	{
-		return [self getOpenMetaTagsAtFSPath:path];
-	}
+	return [self getOpenMetaTagsAtFSPath:path];
 }
 
 - (id)getFinderTagsAtFSPath:(const char*)path
@@ -129,14 +125,7 @@
 
 
 - (BOOL)setTags:(id)plistObject atFSPath:(const char*)path {
-	if ([[NSUserDefaults standardUserDefaults] boolForKey:@"UseFinderTags"])
-	{
-		return [self setFinderTags:plistObject atFSPath:path];
-	}
-	else
-	{
-		return [self setOpenMetaTags:plistObject atFSPath:path];
-	}
+	return [self setOpenMetaTags:plistObject atFSPath:path];
 }
 
 - (BOOL)setFinderTags:(id)plistObject atFSPath:(const char*)path

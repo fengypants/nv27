@@ -17,7 +17,6 @@
 
 
 #import "FrozenNotation.h"
-#import "PassphraseRetriever.h"
 #import "NSData_transformations.h"
 #import "NotationPrefs.h"
 
@@ -66,20 +65,6 @@
 		notesData = [[notesData compressedData] retain];
 		[oldNotesData release];
 		
-		//ostensibly to create more entropy in the first blocks, relying on CBC dependency to crack
-		//[notesData reverseBytes];
-		
-		if ([somePrefs doesEncryption]) {
-			//compress?, reverse?, encrypt notesData based on notationprefs
-			//we also want to have the salt reset here, but that requires knowing the original password
-			
-			if (![prefs encryptDataInNewSession:notesData]) {
-				NSLog(@"Couldn't encrypt data!");
-                [self dealloc];
-				return nil;
-			}
-		}
-		
 		if (![notesData length]) {
 			NSLog(@"%@: empty notesData; returning nil", NSStringFromSelector(_cmd));
             [self dealloc];
@@ -115,19 +100,16 @@
 
 - (NSMutableArray*)unpackedNotesWithPrefs:(NotationPrefs*)somePrefs returningError:(OSStatus*)err {
 	
-	//decrypt notesData if necessary, then unarchive
+	//decompress notesData, then unarchive
 	
 	*err = noErr;
 	
+	if ([somePrefs databaseIsEncrypted]) {
+		*err = kEncryptedDatabaseErr;
+		return nil;
+	}
+	
 	@try {
-		if ([somePrefs doesEncryption]) {
-			if (![somePrefs decryptDataWithCurrentSettings:notesData]) {
-				NSLog(@"Error decrypting data!");
-				*err = kNoAuthErr;
-				return nil;
-			}
-		}
-		
 		NSMutableData *oldNotesData = notesData;
 		notesData = [[notesData uncompressedData] retain];
 		[oldNotesData autorelease];
@@ -153,39 +135,19 @@
 
 - (NSMutableArray*)unpackedNotesReturningError:(OSStatus*)err {
 	
-	//decrypt notesData, grabbing password from from keychain or user as necessary, then unarchive
+	//decompress notesData, then unarchive
 	
 	*err = noErr;
 	
 	if (!allNotes) {
 		
+		//encrypted by an earlier version; refuse rather than misread (the caller will not save over it)
+		if ([prefs databaseIsEncrypted]) {
+			*err = kEncryptedDatabaseErr;
+			return nil;
+		}
+		
 		@try {
-			if ([prefs doesEncryption]) {
-				BOOL keychainGood = YES;
-				if (![prefs storesPasswordInKeychain] || !(keychainGood = [prefs canLoadPassphraseData:[prefs passwordDataFromKeychain]])) {
-					
-					if (!keychainGood) {
-						//reset keychain identifier in case database file was duplicated and password was changed, and this is the old DB
-						[prefs forgetKeychainIdentifier];
-					}
-					int result = [[PassphraseRetriever retrieverWithNotationPrefs:prefs] loadedUserPassphraseData];
-					
-					if (!result) {
-						//must have clicked cancel or equivalent
-						*err = kPassCanceledErr;
-						return (nil);
-					}
-					//if result is 1, passphrase should already be loaded
-				}
-				if (![prefs decryptDataWithCurrentSettings:notesData]) {
-					NSLog(@"Error decrypting data!");
-					*err = kNoAuthErr;
-					return(nil);
-				}
-			}
-			
-			//[notesData reverseBytes];
-			
 			NSMutableData *oldNotesData = notesData;
 			notesData = [[notesData uncompressedData] retain];
 			[oldNotesData autorelease];

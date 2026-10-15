@@ -1,4 +1,4 @@
-Portions of Notational Velocity contain the following copyrighted materials, the use of which is hereby acknowledged.
+Portions of nv27 (and of Notational Velocity and nvALT, on which it is based) contain the following copyrighted materials, the use of which is hereby acknowledged.
 
 --
 
@@ -9,31 +9,6 @@ Copyright (c) 2011 Taylor Carrigan. All rights reserved.
 http://taylorcarrigan.com/
 
 This icon may not be used for commercial purposes.
-
---
-
-Sparkle Framework
-
-Copyright (c) 2006 Andy Matuschak
- 
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be included
-in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 --
 
@@ -119,30 +94,6 @@ distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations
 under the License.
-
---
-
-BSJSONAdditions
-
-Created by Blake Seely on 2009/03/24.
-Copyright 2006 Blake Seely - http://www.blakeseely.com  All rights reserved.
-Permission to use this code:
-
-Feel free to use this code in your software, either as-is or 
-in a modified form. Either way, please include a credit in 
-your software's "About" box or similar, mentioning at least 
-my name (Blake Seely).
-
-Permission to redistribute this code:
-
-You can redistribute this code, as long as you keep these 
-comments. You can also redistribute modified versions of the 
-code, as long as you add comments to say that you've made 
-modifications (keeping these original comments too).
-
-If you do use or redistribute this code, an email would be 
-appreciated, just to let me know that people are finding my 
-code useful. You can reach me at blakeseely@mac.com
 
 --
 
@@ -347,55 +298,6 @@ This is the standard "new" BSD license:
 http://www.opensource.org/licenses/bsd-license.php
 
 --
-
-AutoHyperlinks framework
-
-(c) 2004-2008 by the following:
-
-Colin Barrett
-Graham Booker
-Jorge Salvador Caffarena
-Evan Schoenberg
-Augie Fackler
-Stephen Holt
-Peter Hosey
-Adam Iser
-Jeffrey Melloy
-Toby Peterson
-Eric Richie
-David Smith
-
-/*
- * The AutoHyperlinks Framework is the legal property of its developers (DEVELOPERS), whose names are listed in the
- * copyright file included with this source distribution.
- *
- * Copyright (c) 2004-2008
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the AutoHyperlinks Framework nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY ITS DEVELOPERS ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL ITS DEVELOPERS BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
-
---
 Elasticthreads's contributions, including (but not limited to) the fullscreen mode, color scheming, the status bar icon, and the ability to open notes in other text editors are released under the "new" BSD license:
 
 http://elasticthreads.tumblr.com/nv/
@@ -430,26 +332,38 @@ This is the standard "new" BSD license:
 http://www.opensource.org/licenses/bsd-license.php
 
 --
-Some UI elements (the scrollers, and also the buttons in the markdown preview) are from BWToolkit.
+The markdown preview is based on code from Christian Tietze
 
-BWToolKit
-http://www.brandonwalkin.com/bwtoolkit/
+--
 
-Copyright (c) 2010, Brandon Walkin
+ODBEditor
+
+http://gusmueller.com/odb/
+
+This work is hereby released into the Public Domain. To view a copy of the public domain dedication, visit http://creativecommons.org/licenses/publicdomain/ or send a letter to Creative Commons, 559 Nathan Abbott Way, Stanford, California 94305, USA.
+
+--
+
+cmark-gfm (swift-cmark), used to render the Markdown preview
+
+https://github.com/swiftlang/swift-cmark
+
+Copyright (c) 2014, John MacFarlane
+
 All rights reserved.
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-•	Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-•	Redistributions in binary form must reproduce the above copyright
-notice, this list of conditions and the following disclaimer in the
-documentation and/or other materials provided with the distribution.
-•	Neither the name of the Brandon Walkin nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
@@ -461,183 +375,78 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-This is the standard "new" BSD license:
-http://www.opensource.org/licenses/bsd-license.php
+-----
 
---
+houdini.h, houdini_href_e.c, houdini_html_e.c, houdini_html_u.c
 
-ETTransparentScroller
-The main window uses a scroller class are based on the BWTransparentScroller from BWToolKit
-http://www.brandonwalkin.com/bwtoolkit/
-(modifications by Elasticthreads on 10/19/2010)
+derive from https://github.com/vmg/houdini (with some modifications)
 
-see BWToolkit above
---
+Copyright (C) 2012 Vicent Martí
 
-BTTransparentScroller
-The Markdown preview pane uses a scroller class are based on the BWTransparentScroller from BWToolKit
-http://www.brandonwalkin.com/bwtoolkit/
-(but modified by Brett Terpstra on 12/8/10 and again by Elasticthreads on 03/10/11)
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
 
-see BWToolkit above
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
---
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
-The markdown preview uses a popover type window MAAttachedWindow.m
-Which was created by Matt Gemmell
+-----
 
+buffer.h, buffer.c, chunk.h
 
---
-The markdown preview is based on code from Christian Tietze
+are derived from code (C) 2012 Github, Inc.
 
---
-Beautiful Soup
-Elixir and Tonic
-"The Screen-Scraper's Friend"
-http://www.crummy.com/software/BeautifulSoup/
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
 
-Beautiful Soup parses a (possibly invalid) XML or HTML document into a
-tree representation. It provides methods and Pythonic idioms that make
-it easy to navigate, search, and modify the tree.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-A well-formed XML/HTML document yields a well-formed data
-structure. An ill-formed XML/HTML document yields a correspondingly
-ill-formed data structure. If your document is only locally
-well-formed, you can use this library to find and process the
-well-formed part of it.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
-Beautiful Soup works with Python 2.2 and up. It has no external
-dependencies, but you'll have more success at converting data to UTF-8
-if you also install these three packages:
+-----
 
-* chardet, for auto-detecting character encodings
-  http://chardet.feedparser.org/
-* cjkcodecs and iconv_codec, which add more encodings to the ones supported
-  by stock Python.
-  http://cjkpython.i18n.org/
+utf8.c and utf8.c
 
-Beautiful Soup defines classes for two main parsing strategies:
+are derived from utf8proc
+(<http://www.public-software-group.org/utf8proc>),
+(C) 2009 Public Software Group e. V., Berlin, Germany.
 
- * BeautifulStoneSoup, for parsing XML, SGML, or your domain-specific
-   language that kind of looks like XML.
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
 
- * BeautifulSoup, for parsing run-of-the-mill HTML code, be it valid
-   or invalid. This class has web browser-like heuristics for
-   obtaining a sensible parse tree in the face of common HTML errors.
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
 
-Beautiful Soup also defines a class (UnicodeDammit) for autodetecting
-the encoding of an HTML or XML document, and converting it to
-Unicode. Much of this code is taken from Mark Pilgrim's Universal Feed Parser.
-
-For more than you ever wanted to know about Beautiful Soup, see the
-documentation:
-http://www.crummy.com/software/BeautifulSoup/documentation.html
-
-Here, have some legalese:
-
-Copyright (c) 2004-2009, Leonard Richardson
-
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-  * Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-  * Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
-
-  * Neither the name of the the Beautiful Soup Consortium and All
-    Night Kosher Bakery nor the names of its contributors may be
-    used to endorse or promote products derived from this software
-    without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
-CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE, DAMMIT.
-
---
-
-html2text: Turn HTML into equivalent Markdown-structured text.
-__version__ = "2.39"
-__author__ = "Aaron Swartz (me@aaronsw.com)"
-__copyright__ = "(C) 2004-2008 Aaron Swartz. GNU GPL 3."
-__contributors__ = ["Martin 'Joey' Schulze", "Ricardo Reyes", "Kevin Jay North"]
-
---
-
-Markdown is
-Copyright (c) 2004, John Gruber  
-<http://daringfireball.net/>  
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-* Redistributions of source code must retain the above copyright notice,
-  this list of conditions and the following disclaimer.
-
-* Redistributions in binary form must reproduce the above copyright
-  notice, this list of conditions and the following disclaimer in the
-  documentation and/or other materials provided with the distribution.
-
-* Neither the name "Markdown" nor the names of its contributors may
-  be used to endorse or promote products derived from this software
-  without specific prior written permission.
-
-This software is provided by the copyright holders and contributors "as
-is" and any express or implied warranties, including, but not limited
-to, the implied warranties of merchantability and fitness for a
-particular purpose are disclaimed. In no event shall the copyright owner
-or contributors be liable for any direct, indirect, incidental, special,
-exemplary, or consequential damages (including, but not limited to,
-procurement of substitute goods or services; loss of use, data, or
-profits; or business interruption) however caused and on any theory of
-liability, whether in contract, strict liability, or tort (including
-negligence or otherwise) arising in any way out of the use of this
-software, even if advised of the possibility of such damage.
-
---
-
-MultiMarkdown changes Copyright (c) 2005-2009 Fletcher T. Penney
-    <http://fletcherpenney.net/> All rights reserved.
-
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions are
-    met:
-
-    * Redistributions of source code must retain the above copyright notice,
-    this list of conditions and the following disclaimer.
-
-    * Redistributions in binary form must reproduce the above copyright
-    notice, this list of conditions and the following disclaimer in the
-    documentation and/or other materials provided with the distribution.
-
-    * Neither the name "Markdown" nor the names of its contributors may be
-    used to endorse or promote products derived from this software without
-    specific prior written permission.
-
-    This software is provided by the copyright holders and contributors "as
-    is" and any express or implied warranties, including, but not limited
-    to, the implied warranties of merchantability and fitness for a
-    particular purpose are disclaimed. In no event shall the copyright owner
-    or contributors be liable for any direct, indirect, incidental, special,
-    exemplary, or consequential damages (including, but not limited to,
-    procurement of substitute goods or services; loss of use, data, or
-    profits; or business interruption) however caused and on any theory of
-    liability, whether in contract, strict liability, or tort (including
-    negligence or otherwise) arising in any way out of the use of this
-    software, even if advised of the possibility of such damage.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.

@@ -162,5 +162,7 @@
 	<string>you have exceeded your disk quota</string>
 	<key>-5000</key>
 	<string>your account lacks permission to access the directory</string>
+	<key>-826</key>
+	<string>its notes are encrypted, and this version of nvALT no longer supports encryption (turn encryption off in the previous version of nvALT first, or choose a different folder)</string>
 </dict>
 </plist>

@@ -1,16 +1,11 @@
-# Compiled source #
-###################
-*.com
-*.class
-*.dll
-*.exe
+# Build products
+build/
+DerivedData/
 *.o
-*.so
+*.dSYM/
+*.dSYM.zip
 
-# Packages #
-############
-# it's better to unpack these files and commit the raw source
-# git has its own built in compression methods
+# Archives
 *.7z
 *.dmg
 *.gz
@@ -20,38 +15,19 @@
 *.tar
 *.zip
 
-# Logs and databases #
-######################
+# Logs
 *.log
-*.sql
-*.sqlite
-*.pbxproj
-*.xcworkspace
-*.xcuserdatad
+
+# Xcode per-user state (shared schemes and Package.resolved are kept)
+xcuserdata/
 *.xcuserstate
-
-# OS generated files #
-######################
-.DS_Store?
-thumbs.db
-Icon?
-Thumbs.db
-Notation.xcodeproj/xcuserdata/*
 Notation.xcodeproj/project.xcworkspace/*
-Loren.*
-ttscoff.*
-UserInterfaceState.xcuserstate
+!Notation.xcodeproj/project.xcworkspace/xcshareddata/
+Notation.xcodeproj/project.xcworkspace/xcshareddata/*
+!Notation.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+
+# macOS
 .DS_Store
-build/*
-*.pbxproj
-*.xcscheme
-<<<<<<< HEAD
-=======
+Icon?
 
->>>>>>> another gitignore
-SimperiumConfig.h
-
-*.pbxproj
 nvalt.taskpaper
-
-*.pbxproj

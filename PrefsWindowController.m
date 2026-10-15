@@ -21,6 +21,7 @@
 #import "NSBezierPath_NV.h"
 #import "NotationPrefs.h"
 #import "GlobalPrefs.h"
+#include "BufferUtils.h"
 
 #define SYSTEM_LIST_FONT_SIZE 12.0f
 
@@ -125,33 +126,11 @@
 }
 
 - (void)previewNoteBodyFont {
-
-	if (!centerStyle) {
-		centerStyle = [[NSMutableParagraphStyle alloc] init];
-		[centerStyle setAlignment:NSCenterTextAlignment];
-	}
-
+	//the font's name and size, in the field's own (system) font, as font settings elsewhere in macOS show it
 	NSFont *font = [prefsController noteBodyFont];
-    CGFloat lh=[font pointSize];
-    if (lh<27.0) {
-        lh=floorf(27.0-((27.0-lh)/2));
-    }
-    [centerStyle setMaximumLineHeight:lh];
-	NSDictionary *attributes = [NSDictionary dictionaryWithObjectsAndKeys:font ? font : [NSFont systemFontOfSize:12.0],
-		NSFontAttributeName, [NSColor blackColor], NSForegroundColorAttributeName, centerStyle, NSParagraphStyleAttributeName, nil];
-
-	NSString *fontNameAndSize = font ? [NSString stringWithFormat:@"%@ %g", [font fontName], [font pointSize]] : @"Unknown";
-	NSAttributedString *attributedString = [[NSAttributedString alloc] initWithString:fontNameAndSize attributes:attributes];
-	
-	[[bodyTextFontField cell] setAttributedStringValue:attributedString];
-    [bodyTextFontField updateCell:[bodyTextFontField cell]];
-	
-	[attributedString autorelease];
-	
-}
-
-- (IBAction)changedUseETScrollbarsOnLion:(id)sender{
-    [prefsController setUseETScrollbarsOnLion:[useETScrollbarsOnLionButton state] sender:self];
+	NSString *fontNameAndSize = font ? [NSString stringWithFormat:@"%@ %g", [font displayName], [font pointSize]] : @"Unknown";
+	[bodyTextFontField setStringValue:fontNameAndSize];
+	[bodyTextFontField setToolTip:fontNameAndSize];
 }
 
 - (IBAction)changedBackgroundTextColorWell:(id)sender {
@@ -159,6 +138,13 @@
 }
 - (IBAction)changedForegroundTextColorWell:(id)sender {
 	[prefsController setForegroundTextColor:[foregroundColorWell color] sender:self];
+}
+//the User Scheme's dark-mode colors
+- (IBAction)changedForegroundTextColorWellDark:(id)sender {
+	[prefsController setForegroundTextColorDark:[foregroundColorWellDark color] sender:self];
+}
+- (IBAction)changedBackgroundTextColorWellDark:(id)sender {
+	[prefsController setBackgroundTextColorDark:[backgroundColorWellDark color] sender:self];
 }
 - (IBAction)changedSearchHighlightColorWell:(id)sender {
 	[prefsController setSearchTermHighlightColor:[searchHighlightColorWell color] sender:self];
@@ -301,9 +287,6 @@
 			
 			if ((aliasData = [NSData aliasDataForFSRef:&notesDirectoryRef])) {
 				[prefsController setAliasDataForDefaultDirectory:aliasData sender:self];
-				
-				//check for potential synchronization problems; (e.g., simplenote w/ dropbox or writeroom):
-				[[prefsController notationPrefs] checkForKnownRedundantSyncConduitsAtPath:directoryPath];
 			}
 		} else {
 			NSLog(@"This folder is already chosen!");
@@ -378,8 +361,10 @@
 }
 
 - (NSView*)databaseView {
-    if (![notationPrefsView subviews] || ![[notationPrefsView subviews] count])
+    if (![notationPrefsView subviews] || ![[notationPrefsView subviews] count]) {
 		[notationPrefsView addSubview:[[self notationPrefsViewController] view]];
+		[self layOutNotesPane];
+	}
 	
     return databaseView;
 }
@@ -391,7 +376,11 @@
     [item setPaletteLabel:localizedTitle];
     [item setLabel:localizedTitle];
     //[item setToolTip:@"General settings: appearance and behavior"];
-    [item setImage:[[[NSImage alloc] initWithContentsOfFile:[[NSBundle mainBundle] pathForResource:name ofType:@"tiff"]] autorelease]];
+    //standard SF Symbols for each settings pane
+    NSDictionary *symbolNames = [NSDictionary dictionaryWithObjectsAndKeys:
+                                 @"gearshape", @"General", @"note.text", @"Notes",
+                                 @"pencil.line", @"Editing", @"textformat", @"Fonts & Colors", nil];
+    [item setImage:[NSImage imageWithSystemSymbolName:[symbolNames objectForKey:name] accessibilityDescription:localizedTitle]];
     [item setTarget:self];
     [item setAction:@selector(switchViews:)];
     [items setObject:item forKey:name];
@@ -436,29 +425,17 @@
 	[highlightSearchTermsButton setState:[prefsController highlightSearchTerms]];
 	[foregroundColorWell setColor:[prefsController foregroundTextColor]];
 	[backgroundColorWell setColor:[prefsController backgroundTextColor]];
-    [maxWidthSlider setDoubleValue:[[NSUserDefaults standardUserDefaults] doubleForKey:@"NoteBodyMaxWidth"]];
-	//for elasticthreads' hide dock icon option, check if OS compatible
-	if (IsSnowLeopardOrLater) {
-		[togDockButton setEnabled:YES];
-		
-		if ([[NSUserDefaults standardUserDefaults] boolForKey:@"ShowDockIcon"]) {
-            [togDockButton setTitle:@"Hide Dock Icon"];
-//			[togDockLabel setStringValue:@"This will immediately restart NV"];		
-		}else {
-            [togDockButton setTitle:@"Show Dock Icon"];
-//			[togDockLabel setStringValue:@""];
-		}
-
-	}else {	
-		[togDockButton setEnabled:NO];
-		[togDockButton setHidden:YES];
-//		[togDockLabel setHidden:YES];
-	}
-    //for Brett's Markdownify/Readability import
-	[useMarkdownImportButton setState:[prefsController useMarkdownImport]];
-	[useReadabilityButton setState:[prefsController useReadability]];
-	[useReadabilityButton setEnabled:[useMarkdownImportButton state]];
-	
+	[foregroundColorWellDark setColor:[prefsController foregroundTextColorDark]];
+	[backgroundColorWellDark setColor:[prefsController backgroundTextColorDark]];
+    //maximum note body width: a whole number of points within the stepper's range
+    NSNumberFormatter *widthFormatter = [[[NSNumberFormatter alloc] init] autorelease];
+    [widthFormatter setNumberStyle:NSNumberFormatterNoStyle];
+    [widthFormatter setMinimum:[NSNumber numberWithDouble:[maxWidthStepper minValue]]];
+    [widthFormatter setMaximum:[NSNumber numberWithDouble:[maxWidthStepper maxValue]]];
+    [maxWidthField setFormatter:widthFormatter];
+    [maxWidthField setDoubleValue:[prefsController maxNoteBodyWidth]];
+    [maxWidthStepper setDoubleValue:[prefsController maxNoteBodyWidth]];
+    [appearancePopUp selectItemAtIndex:MIN(MAX([[NSUserDefaults standardUserDefaults] integerForKey:@"AppAppearance"], 0), 2)];
     [altRowsButton setState:[prefsController alternatingRows]];
     [showGridButton setState:[prefsController showGrid]];
     [autoPairButton setState:[prefsController useAutoPairing]];
@@ -475,10 +452,13 @@
     [toolbar setAutosavesConfiguration:NO]; 
     [window setToolbar:toolbar];
     [toolbar release];  //setToolbar retains the toolbar we pass, so release the one we used.
+	//the standard Settings-window toolbar: centered pane icons with labels and a selection highlight
+	[window setToolbarStyle:NSWindowToolbarStylePreference];
 	
 	[window setShowsToolbarButton:NO];
-    [useETScrollbarsOnLionButton setState:[prefsController useETScrollbarsOnLion]];
-    [useETScrollbarsOnLionButton setHidden:!IsLionOrLater];
+	[self layOutGeneralPane];
+	[self layOutEditingPane];
+	[self layOutFontsColorsPane];
     [self switchViews:nil];  //select last selected pane by default
     
 }
@@ -532,6 +512,7 @@
 		[folderLocationsMenuButton setMenu:[self directorySelectionMenu]];
 	
 	NSAssert(prefsView != nil, @"switching to a nil prefs view!");
+	[self matchPaneWidths];
     
 	[[NSFontPanel sharedFontPanel] close];
 	
@@ -558,6 +539,250 @@
     [window setContentView:prefsView];
 }
 
+#pragma mark - form layout
+
+//each pane is laid out as a standard macOS settings form: a column of right-aligned labels and a column of controls,
+//built in a grid view from the pane's existing controls (their actions, bindings and outlets are unchanged);
+//whatever of the old layout isn't reused (its labels) is hidden
+
+#define FORM_MARGIN 20.0
+#define FORM_HELP_WIDTH 250.0
+#define FORM_CHECKBOX_INDENT 20.0
+#define FORM_MIN_PANE_WIDTH 420.0
+
+typedef enum { FormAlignBaseline = 0, FormAlignCenter, FormAlignTop } FormRowAlignment;
+
+//a row: a label (or nil to continue the group above), its content, the space above it and how the label lines up
+static NSDictionary *FormRow(NSString *label, NSView *content, CGFloat spaceAbove, FormRowAlignment alignment) {
+	return [NSDictionary dictionaryWithObjectsAndKeys:label ? (id)label : (id)[NSNull null], @"label", content, @"content",
+			[NSNumber numberWithDouble:spaceAbove], @"space", [NSNumber numberWithInt:alignment], @"align", nil];
+}
+
+static void FormFixSize(NSView *view, CGFloat width, CGFloat height) {
+	[view setTranslatesAutoresizingMaskIntoConstraints:NO];
+	if (width > 0.0) [[[view widthAnchor] constraintEqualToConstant:width] setActive:YES];
+	if (height > 0.0) [[[view heightAnchor] constraintEqualToConstant:height] setActive:YES];
+}
+
+//explanatory text: small, secondary, wrapping to the control column
+static NSTextField *FormHelp(NSTextField *field, NSString *text) {
+	if (!field) field = [NSTextField wrappingLabelWithString:text];
+	else if (text) [field setStringValue:text];
+	[field setFont:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]]];
+	[field setTextColor:[NSColor secondaryLabelColor]];
+	[field setSelectable:NO];
+	[[field cell] setWraps:YES];
+	[field setPreferredMaxLayoutWidth:FORM_HELP_WIDTH];
+	[field setTranslatesAutoresizingMaskIntoConstraints:NO];
+	[[[field widthAnchor] constraintLessThanOrEqualToConstant:FORM_HELP_WIDTH] setActive:YES];
+	return field;
+}
+
+//help text under a checkbox lines up with the checkbox's title
+static NSView *FormIndented(NSView *view) {
+	NSStackView *stack = [NSStackView stackViewWithViews:[NSArray arrayWithObject:view]];
+	[stack setEdgeInsets:NSEdgeInsetsMake(0, FORM_CHECKBOX_INDENT, 0, 0)];
+	return stack;
+}
+
+static NSStackView *FormHStack(NSArray *views) {
+	NSStackView *stack = [NSStackView stackViewWithViews:views];
+	[stack setOrientation:NSUserInterfaceLayoutOrientationHorizontal];
+	[stack setAlignment:NSLayoutAttributeCenterY];
+	[stack setSpacing:8.0];
+	return stack;
+}
+
+static NSTextField *FormSmallLabel(NSString *text, CGFloat width) {
+	NSTextField *label = [NSTextField labelWithString:text];
+	[label setAlignment:NSTextAlignmentCenter];
+	[label setFont:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]]];
+	[label setTextColor:[NSColor secondaryLabelColor]];
+	if (width > 0.0) FormFixSize(label, width, 0.0);
+	return label;
+}
+
+//a checkbox with its title on the right, as checkboxes normally are (some had a label-style title on the left)
+static NSButton *FormCheckbox(NSButton *button, NSString *title) {
+	if (title) [button setTitle:title];
+	[button setFont:[NSFont systemFontOfSize:[NSFont systemFontSize]]];
+	[button setImagePosition:NSImageLeading];
+	[button setAlignment:NSTextAlignmentNatural];
+	return button;
+}
+
+static id FormControlWithAction(NSView *pane, SEL action) {
+	for (NSView *view in [pane subviews])
+		if ([view isKindOfClass:[NSControl class]] && [(NSControl*)view action] == action) return view;
+	return nil;
+}
+
+//the pane's multi-line explanatory texts, top to bottom
+static NSArray *FormHelpFields(NSView *pane) {
+	NSMutableArray *fields = [NSMutableArray array];
+	for (NSView *view in [pane subviews])
+		if ([view isKindOfClass:[NSTextField class]] && ![(NSTextField*)view isEditable] && ![(NSTextField*)view isBezeled] && NSHeight([view frame]) >= 26.0)
+			[fields addObject:view];
+	[fields sortUsingComparator:^NSComparisonResult(NSView *a, NSView *b) {
+		return NSMinY([a frame]) > NSMinY([b frame]) ? NSOrderedAscending : NSOrderedDescending;
+	}];
+	return fields;
+}
+
+- (void)layOutPane:(NSView*)pane rows:(NSArray*)rows {
+	NSMutableArray *cells = [NSMutableArray arrayWithCapacity:[rows count]];
+	for (NSDictionary *row in rows) {
+		id label = [row objectForKey:@"label"];
+		NSView *labelView = label == [NSNull null] ? [NSGridCell emptyContentView] : [NSTextField labelWithString:label];
+		[cells addObject:[NSArray arrayWithObjects:labelView, [row objectForKey:@"content"], nil]];
+	}
+	NSGridView *grid = [NSGridView gridViewWithViews:cells];
+	[grid setRowSpacing:8.0];
+	[grid setColumnSpacing:8.0];
+	[grid setRowAlignment:NSGridRowAlignmentFirstBaseline];
+	[[grid columnAtIndex:0] setXPlacement:NSGridCellPlacementTrailing];
+	[[grid columnAtIndex:1] setXPlacement:NSGridCellPlacementLeading];
+	for (NSUInteger i = 0; i < [rows count]; i++) {
+		NSDictionary *row = [rows objectAtIndex:i];
+		NSGridRow *gridRow = [grid rowAtIndex:i];
+		[gridRow setTopPadding:[[row objectForKey:@"space"] doubleValue]];
+		switch ([[row objectForKey:@"align"] intValue]) {
+			case FormAlignCenter: [gridRow setRowAlignment:NSGridRowAlignmentNone]; [gridRow setYPlacement:NSGridCellPlacementCenter]; break;
+			case FormAlignTop: [gridRow setRowAlignment:NSGridRowAlignmentNone]; [gridRow setYPlacement:NSGridCellPlacementTop]; break;
+			default: break;
+		}
+	}
+	
+	//the old layout's leftovers (its labels) stay in the pane, hidden: some are still referenced
+	for (NSView *view in [pane subviews]) [view setHidden:YES];
+	
+	[grid setTranslatesAutoresizingMaskIntoConstraints:NO];
+	[pane addSubview:grid];
+	NSSize fit = [grid fittingSize];
+	[pane setFrameSize:NSMakeSize(MAX(FORM_MIN_PANE_WIDTH, ceil(fit.width) + 2.0 * FORM_MARGIN), ceil(fit.height) + 2.0 * FORM_MARGIN)];
+	[[[grid centerXAnchor] constraintEqualToAnchor:[pane centerXAnchor]] setActive:YES];
+	[[[grid topAnchor] constraintEqualToAnchor:[pane topAnchor] constant:FORM_MARGIN] setActive:YES];
+}
+
+- (void)layOutGeneralPane {
+	NSButton *setHotkeyButton = FormControlWithAction(generalView, @selector(setAppShortcut:));
+	NSButton *menuBarButton = FormControlWithAction(generalView, @selector(toggleStatusItem:));
+	NSTextField *autoSelectHelp = [FormHelpFields(generalView) firstObject];
+	FormFixSize(appShortcutField, 120.0, 0.0);
+	FormFixSize(tableTextSizeField, 44.0, 0.0);
+	[togDockButton setTitle:NSLocalizedString(@"Dock", @"Settings: show the app icon in the Dock")];
+	[menuBarButton setTitle:NSLocalizedString(@"Menu bar", @"Settings: show the app icon in the menu bar")];
+	
+	NSMutableArray *rows = [NSMutableArray array];
+	[rows addObject:FormRow(NSLocalizedString(@"Appearance:", nil), appearancePopUp, 0, FormAlignBaseline)];
+	[rows addObject:FormRow(NSLocalizedString(@"List text size:", nil), FormHStack([NSArray arrayWithObjects:tableTextMenuButton, tableTextSizeField, nil]), 0, FormAlignCenter)];
+	[rows addObject:FormRow(NSLocalizedString(@"Hotkey:", @"Settings: the hotkey that brings nv27 to the front"),
+							FormHStack([NSArray arrayWithObjects:appShortcutField, setHotkeyButton, nil]), 12, FormAlignCenter)];
+	[rows addObject:FormRow(nil, FormHelp(nil, NSLocalizedString(@"Brings nv27 to the front from any app.", nil)), 0, FormAlignBaseline)];
+	[rows addObject:FormRow(NSLocalizedString(@"Behavior:", nil), completeNoteTitlesButton, 12, FormAlignBaseline)];
+	if (autoSelectHelp) [rows addObject:FormRow(nil, FormIndented(FormHelp(autoSelectHelp, nil)), 0, FormAlignBaseline)];
+	[rows addObject:FormRow(nil, confirmDeletionButton, 0, FormAlignBaseline)];
+	[rows addObject:FormRow(nil, quitWhenClosingButton, 0, FormAlignBaseline)];
+	[rows addObject:FormRow(NSLocalizedString(@"Show icon in:", @"Settings: where the app icon appears (Dock, menu bar)"), togDockButton, 12, FormAlignBaseline)];
+	if (menuBarButton) [rows addObject:FormRow(nil, menuBarButton, 0, FormAlignBaseline)];
+	[self layOutPane:generalView rows:rows];
+}
+
+- (void)layOutEditingPane {
+	NSArray *helpFields = FormHelpFields(editingView);
+	[tabKeyRadioMatrix sizeToCells];
+	FormFixSize(tabKeyRadioMatrix, NSWidth([tabKeyRadioMatrix frame]), NSHeight([tabKeyRadioMatrix frame]));
+	FormCheckbox(autoPairButton, NSLocalizedString(@"Close brackets and quotes automatically", @"Settings: auto-pairing checkbox"));
+	FormCheckbox(rtlButton, NSLocalizedString(@"Right-to-left text", @"Settings: right-to-left writing direction checkbox"));
+	
+	NSMutableArray *rows = [NSMutableArray array];
+	[rows addObject:FormRow(NSLocalizedString(@"Styled text:", nil), styledTextButton, 0, FormAlignBaseline)];
+	[rows addObject:FormRow(NSLocalizedString(@"Spelling:", nil), checkSpellingButton, 0, FormAlignBaseline)];
+	[rows addObject:FormRow(NSLocalizedString(@"Tab key:", nil), tabKeyRadioMatrix, 12, FormAlignTop)];
+	if ([helpFields count]) [rows addObject:FormRow(nil, FormIndented(FormHelp([helpFields objectAtIndex:0], nil)), 0, FormAlignBaseline)];
+	[rows addObject:FormRow(nil, softTabsButton, 0, FormAlignBaseline)];
+	[rows addObject:FormRow(NSLocalizedString(@"Links:", nil), makeURLsClickable, 12, FormAlignBaseline)];
+	[rows addObject:FormRow(nil, autoSuggestLinksButton, 0, FormAlignBaseline)];
+	[rows addObject:FormRow(NSLocalizedString(@"Auto-pair:", nil), autoPairButton, 12, FormAlignBaseline)];
+	[rows addObject:FormRow(nil, FormIndented(FormHelp(nil, NSLocalizedString(@"Typing ( [ { or \" also adds its closing character.", nil))), 0, FormAlignBaseline)];
+	[rows addObject:FormRow(NSLocalizedString(@"Direction:", nil), rtlButton, 12, FormAlignBaseline)];
+	[rows addObject:FormRow(NSLocalizedString(@"External editor:", nil), externalEditorMenuButton, 12, FormAlignBaseline)];
+	[self layOutPane:editingView rows:rows];
+}
+
+- (void)layOutFontsColorsPane {
+	NSButton *selectFontButton = FormControlWithAction(fontsColorsView, @selector(changeBodyFont:));
+	NSButton *keepWidthButton = FormControlWithAction(fontsColorsView, @selector(toggleKeepsTextWidthInWindow:));
+	FormFixSize(bodyTextFontField, 180.0, 0.0);
+	FormFixSize(maxWidthField, 52.0, 0.0);
+	for (NSColorWell *well in [NSArray arrayWithObjects:searchHighlightColorWell, foregroundColorWell, foregroundColorWellDark, backgroundColorWell, backgroundColorWellDark, nil])
+		FormFixSize(well, 52.0, 24.0);
+	FormCheckbox(highlightSearchTermsButton, NSLocalizedString(@"Highlight in notes", @"Settings: highlight search terms in the note text"));
+	FormCheckbox(showGridButton, NSLocalizedString(@"Always show grid lines", nil));
+	FormCheckbox(altRowsButton, NSLocalizedString(@"Alternating row colors", nil));
+	FormCheckbox(keepWidthButton, NSLocalizedString(@"Keep note text width readable", nil));
+	
+	NSMutableArray *rows = [NSMutableArray array];
+	[rows addObject:FormRow(NSLocalizedString(@"Note font:", nil), FormHStack([NSArray arrayWithObjects:bodyTextFontField, selectFontButton, nil]), 0, FormAlignCenter)];
+	[rows addObject:FormRow(NSLocalizedString(@"Search terms:", nil), FormHStack([NSArray arrayWithObjects:highlightSearchTermsButton, searchHighlightColorWell, nil]), 12, FormAlignCenter)];
+	[rows addObject:FormRow(nil, FormHStack([NSArray arrayWithObjects:FormSmallLabel(NSLocalizedString(@"Light", @"Settings: light-mode color column"), 52.0),
+											 FormSmallLabel(NSLocalizedString(@"Dark", @"Settings: dark-mode color column"), 52.0), nil]), 12, FormAlignCenter)];
+	[rows addObject:FormRow(NSLocalizedString(@"Text color:", nil), FormHStack([NSArray arrayWithObjects:foregroundColorWell, foregroundColorWellDark, nil]), 0, FormAlignCenter)];
+	[rows addObject:FormRow(NSLocalizedString(@"Background:", nil), FormHStack([NSArray arrayWithObjects:backgroundColorWell, backgroundColorWellDark, nil]), 0, FormAlignCenter)];
+	[rows addObject:FormRow(nil, FormHelp(nil, NSLocalizedString(@"Used by the User Scheme (⌥⌘3).", nil)), 0, FormAlignBaseline)];
+	[rows addObject:FormRow(NSLocalizedString(@"Notes list:", nil), showGridButton, 12, FormAlignBaseline)];
+	[rows addObject:FormRow(nil, altRowsButton, 0, FormAlignBaseline)];
+	[rows addObject:FormRow(NSLocalizedString(@"Note width:", nil), keepWidthButton, 12, FormAlignBaseline)];
+	[rows addObject:FormRow(nil, FormIndented(FormHStack([NSArray arrayWithObjects:[NSTextField labelWithString:NSLocalizedString(@"Maximum:", @"Settings: maximum note width")],
+																   maxWidthField, maxWidthStepper, [NSTextField labelWithString:@"px"], nil])), 0, FormAlignCenter)];
+	[self layOutPane:fontsColorsView rows:rows];
+}
+
+- (void)layOutNotesPane {
+	NotationPrefsViewController *notesController = [self notationPrefsViewController];
+	NSScrollView *list = [notesController extensionsListView];
+	NSSegmentedControl *listButtons = [notesController extensionButtons];
+	
+	//the extensions list with its +/- buttons attached to its bottom edge
+	CGFloat listWidth = 180.0, listHeight = 96.0, buttonsHeight = NSHeight([listButtons frame]);
+	NSView *listBox = [[[NSView alloc] initWithFrame:NSMakeRect(0, 0, listWidth, listHeight + buttonsHeight - 1.0)] autorelease];
+	[list setAutoresizingMask:NSViewNotSizable];
+	[listButtons setAutoresizingMask:NSViewNotSizable];
+	[list setFrame:NSMakeRect(0, buttonsHeight - 1.0, listWidth, listHeight)];
+	[listButtons setFrameOrigin:NSZeroPoint];
+	[listBox addSubview:list];
+	[listBox addSubview:listButtons];
+	FormFixSize(listBox, listWidth, listHeight + buttonsHeight - 1.0);
+	[[[folderLocationsMenuButton widthAnchor] constraintGreaterThanOrEqualToConstant:180.0] setActive:YES];
+	
+	NSMutableArray *rows = [NSMutableArray array];
+	[rows addObject:FormRow(NSLocalizedString(@"Notes folder:", nil), folderLocationsMenuButton, 0, FormAlignBaseline)];
+	[rows addObject:FormRow(NSLocalizedString(@"Store notes as:", nil), [notesController storageFormatPopUp], 0, FormAlignBaseline)];
+	[rows addObject:FormRow(NSLocalizedString(@"File extensions:", nil), listBox, 12, FormAlignTop)];
+	[rows addObject:FormRow(nil, FormHelp(nil, NSLocalizedString(@"Files with these extensions are read as notes. Right-click one to make it the default for new notes.", nil)), 0, FormAlignBaseline)];
+	[rows addObject:FormRow(nil, [notesController confirmFileDeletionCheckbox], 12, FormAlignBaseline)];
+	[self layOutPane:databaseView rows:rows];
+}
+
+
+//all panes share the widest one's width (Fonts & Colors), so switching panes changes only the window's height,
+//as in the system's own settings windows; each narrower pane's content stays centered in the extra space
+- (void)matchPaneWidths {
+	NSArray *panes = [NSArray arrayWithObjects:generalView, [self databaseView], editingView, fontsColorsView, nil];
+	CGFloat width = 0.0;
+	for (NSView *pane in panes) width = MAX(width, NSWidth([pane frame]));
+	for (NSView *pane in panes) {
+		CGFloat delta = width - NSWidth([pane frame]);
+		if (delta < 1.0) continue;
+		BOOL autoresizes = [pane autoresizesSubviews];
+		[pane setAutoresizesSubviews:NO];
+		[pane setFrameSize:NSMakeSize(width, NSHeight([pane frame]))];
+		for (NSView *subview in [pane subviews])
+			if ([subview translatesAutoresizingMaskIntoConstraints]) [subview setFrameOrigin:NSMakePoint(round(NSMinX([subview frame]) + delta / 2.0), NSMinY([subview frame]))];
+		[pane setAutoresizesSubviews:autoresizes];
+	}
+}
+
 NSRect ScaleRectWithFactor(NSRect rect, float factor) {
 	NSRect newRect = rect;
 	newRect.size.width *= factor;
@@ -572,20 +797,21 @@ NSRect ScaleRectWithFactor(NSRect rect, float factor) {
 
 //elasticwork
 
+//the "Show Dock icon" checkbox (its value is bound to the ShowDockIcon default); without a Dock icon the menu bar
+//icon is the way back to nv27, so it is turned on (and its checkbox disabled) while the Dock icon is hidden
 - (IBAction)toggleHideDockIcon:(id)sender{
     NSUserDefaults *stdDefaults=[NSUserDefaults standardUserDefaults];
-    BOOL showIt=![stdDefaults boolForKey:@"ShowDockIcon"];
-    if (showIt) {
-        [stdDefaults setBool:YES forKey:@"ShowDockIcon"];
-        [togDockButton setTitle:@"Hide Dock Icon"];        
-//        [togDockLabel setStringValue:@"This will immediately restart NV"];	
-    }else{
-        [stdDefaults setBool:YES forKey:@"StatusBarItem"];
-        [stdDefaults setBool:NO forKey:@"ShowDockIcon"];
-        [togDockButton setTitle:@"Show Dock Icon"];
-    }
-    [stdDefaults synchronize];
+    BOOL showIt=[sender state]==NSControlStateValueOn;
+    [stdDefaults setBool:showIt forKey:@"ShowDockIcon"];
+    if (!showIt)
+        [stdDefaults setBool:YES forKey:@"StatusBarItem"]; //the app controller adds the menu bar icon if it's missing
 	[[NSNotificationCenter defaultCenter]postNotificationName:@"AppShouldToggleDockIcon" object:[NSNumber numberWithBool:showIt]];
+}
+
+//Automatic (follow the system), Light or Dark
+- (IBAction)changedAppearance:(id)sender{
+    [[NSUserDefaults standardUserDefaults] setInteger:[sender indexOfSelectedItem] forKey:@"AppAppearance"];
+    [(AppController *)[NSApp delegate] applyAppearancePreference];
 }
 
 - (IBAction)toggleStatusItem:(id)sender{
@@ -609,19 +835,13 @@ NSRect ScaleRectWithFactor(NSRect rect, float factor) {
 }
 
 - (IBAction)setMaxWidth:(id)sender{
-	CGFloat dbWidth = [maxWidthSlider floatValue];	
+	//from either the field or its stepper; keep the two in step
+	CGFloat dbWidth = MIN(MAX([sender floatValue], [maxWidthStepper minValue]), [maxWidthStepper maxValue]);
 	dbWidth = dbWidth - fmod(dbWidth,2.0);
+	[maxWidthField setDoubleValue:dbWidth];
+	[maxWidthStepper setDoubleValue:dbWidth];
 	[prefsController setMaxNoteBodyWidth:dbWidth sender:self];
 //	[[NSApp delegate] setMaxNoteBodyWidth];
-}
-
-- (IBAction)changedUseMarkdownImport:(id)sender {
-	[prefsController setUseMarkdownImport:[useMarkdownImportButton state] sender:self];
-	[useReadabilityButton setEnabled:[useMarkdownImportButton state]];
-}
-
-- (IBAction)changedUseReadability:(id)sender {
-	[prefsController setUseReadability:[useReadabilityButton state] sender:self];
 }
 
 - (IBAction)changedAltRows:(id)sender {

@@ -17,8 +17,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-extern NSString *PasswordWasRetrievedFromKeychainKey;
-extern NSString *RetrievedPasswordKey;
 
 @class NotationController;
 @class NotationPrefs;
@@ -37,7 +35,6 @@ extern NSString *RetrievedPasswordKey;
 	NSMutableDictionary *documentSettings;
 	BOOL shouldGrabCreationDates;
     
-    BOOL shouldUseReadability;
 }
 
 //a directory containing notes, a custom bundle, or custom file format in which more than one note could be expected
@@ -63,12 +60,7 @@ extern NSString *RetrievedPasswordKey;
 - (NSArray*)notesInDirectory:(NSString*)filename;
 - (NSArray*)notesInFile:(NSString*)filename;
 
-- (BOOL)shouldUseReadability;
-- (void)setShouldUseReadability:(BOOL)value;
 
-- (NSString*) contentUsingReadability: (NSString *)htmlFile;
-- (NSString*) markdownFromSource: (NSString *)htmlString;
-- (NSString*) markdownFromHTMLFile: (NSString *)htmlFile;
 @end
 
 @interface AlienNoteImporter (DialogDelegate)

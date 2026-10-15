@@ -33,6 +33,7 @@
 #import "PTHotKeyCenter.h"
 #import "NSString_NV.h"
 #import "AppController.h"
+#include "BufferUtils.h"
 
 #define SEND_CALLBACKS() sendCallbacksForGlobalPrefs(self, _cmd, sender)
 
@@ -59,6 +60,8 @@ static NSString *HighlightSearchTermsKey = @"HighlightSearchTerms";
 static NSString *SearchTermHighlightColorKey = @"SearchTermHighlightColor";
 static NSString *ForegroundTextColorKey = @"ForegroundTextColor";
 static NSString *BackgroundTextColorKey = @"BackgroundTextColor";
+static NSString *ForegroundTextColorDarkKey = @"ForegroundTextColorDark";
+static NSString *BackgroundTextColorDarkKey = @"BackgroundTextColorDark";
 static NSString *UseSoftTabsKey = @"UseSoftTabs";
 static NSString *NumberOfSpacesInTabKey = @"NumberOfSpacesInTab";
 static NSString *MakeURLsClickableKey = @"MakeURLsClickable";
@@ -76,15 +79,12 @@ static NSString	*ShowDockIcon = @"ShowDockIcon";
 static NSString	*KeepsMaxTextWidth = @"KeepsMaxTextWidth";
 static NSString	*NoteBodyMaxWidth = @"NoteBodyMaxWidth";
 static NSString	*ColorScheme = @"ColorScheme";
-static NSString *UseMarkdownImportKey = @"UseMarkdownImport";
-static NSString *UseReadabilityKey = @"UseReadability";
 static NSString *ShowGridKey = @"ShowGrid";
 static NSString *AlternatingRowsKey = @"AlternatingRows";
 static NSString *RTLKey = @"rtl";
 static NSString *ShowWordCount = @"ShowWordCount";
 static NSString *markupPreviewMode = @"markupPreviewMode";
 static NSString *UseAutoPairing = @"UseAutoPairing";
-static NSString *UseETScrollbarsOnLion = @"UseETScrollbarsOnLion";
 static NSString *UsesMarkdownCompletions = @"UsesMarkdownCompletions";
 static NSString *UseFinderTagsKey = @"UseFinderTags";
 static NSString *UseSmartInsertDeleteKey = @"UseSmartInsertDelete";
@@ -107,10 +107,11 @@ NSString *HotKeyAppToFrontName = @"bring Notational Velocity to the foreground";
 @implementation GlobalPrefs
 
 static void sendCallbacksForGlobalPrefs(GlobalPrefs* self, SEL selector, id originalSender) {
-    // FIXME
 	if (originalSender != self) {
-		self->runCallbacksIMP(self, @selector(notifyCallbacksForSelector:excludingSender:), 
-							 selector, originalSender);
+		//IMPs must be called through their exact (non-variadic) prototype: on arm64, variadic
+		//arguments are passed on the stack rather than in registers, so a variadic call would hand the method garbage
+		void (*notifyCallbacks)(id, SEL, SEL, id) = (void (*)(id, SEL, SEL, id))self->runCallbacksIMP;
+		notifyCallbacks(self, @selector(notifyCallbacksForSelector:excludingSender:), selector, originalSender);
 	}
 }
 
@@ -125,15 +126,15 @@ static void sendCallbacksForGlobalPrefs(GlobalPrefs* self, SEL selector, id orig
 		tableColumns = nil;
 
 		[defaults registerDefaults:[NSDictionary dictionaryWithObjectsAndKeys:
-			[NSNumber numberWithBool:NO], UseFinderTagsKey,
+			[NSNumber numberWithBool:NO], UseFinderTagsKey, //nv27 stores tags as OpenMeta tags, not Finder tags
 			[NSNumber numberWithBool:YES], AutoSuggestLinksKey,
 			[NSNumber numberWithBool:YES], AutoFormatsDoneTagKey, 
 			[NSNumber numberWithBool:YES], AutoIndentsNewLinesKey, 
 			[NSNumber numberWithBool:YES], AutoFormatsListBulletsKey,
 			[NSNumber numberWithBool:NO], UseSoftTabsKey,
 			[NSNumber numberWithInteger:4], NumberOfSpacesInTabKey,
-			[NSNumber numberWithBool:YES], PastePreservesStyleKey,
-			[NSNumber numberWithBool:YES], TabKeyIndentsKey,
+			[NSNumber numberWithBool:NO], PastePreservesStyleKey,
+			[NSNumber numberWithBool:NO], TabKeyIndentsKey,
 			[NSNumber numberWithBool:YES], ConfirmNoteDeletionKey,
 			[NSNumber numberWithBool:YES], CheckSpellingInNoteBodyKey, 
             [NSNumber numberWithBool:NO], TextReplacementInNoteBodyKey,
@@ -150,29 +151,29 @@ static void sendCallbacksForGlobalPrefs(GlobalPrefs* self, SEL selector, id orig
 			[NSNumber numberWithBool:NO], StatusBarItem, 
 			[NSNumber numberWithBool:NO], KeepsMaxTextWidth,
 			[NSNumber numberWithFloat:660.0], NoteBodyMaxWidth,
-			[NSNumber numberWithInt:2], ColorScheme,
+			[NSNumber numberWithInt:2], ColorScheme, //the User Scheme, which has light and dark colors
             [NSNumber numberWithBool:YES],ShowDockIcon,
 			[NSNumber numberWithBool:NO], RTLKey,
             [NSNumber numberWithBool:YES], ShowWordCount,
             [NSNumber numberWithInt:MultiMarkdownPreview], markupPreviewMode,
-			[NSNumber numberWithBool:NO], UseMarkdownImportKey,
-			[NSNumber numberWithBool:NO], UseReadabilityKey,
-            [NSNumber numberWithBool:YES], ShowGridKey,
+            [NSNumber numberWithBool:NO], ShowGridKey,
             [NSNumber numberWithBool:NO], AlternatingRowsKey,
             [NSNumber numberWithBool:NO], UseAutoPairing,
-            [NSNumber numberWithBool:NO], UseETScrollbarsOnLion,
             [NSNumber numberWithBool:NO], UsesMarkdownCompletions,
 
 			[NSArchiver archivedDataWithRootObject:
-			 [NSFont fontWithName:@"Helvetica" size:12.0f]], NoteBodyFontKey,
+			 [NSFont fontWithName:@"Helvetica" size:14.0f]], NoteBodyFontKey,
 			
 			[NSArchiver archivedDataWithRootObject:[NSColor blackColor]], ForegroundTextColorKey,
 			[NSArchiver archivedDataWithRootObject:[NSColor whiteColor]], BackgroundTextColorKey,
+			//the User Scheme's dark-mode colors default to those of Low Contrast's dark variant
+			[NSArchiver archivedDataWithRootObject:[NSColor colorWithSRGBRed:0xC2/255.0 green:0xBF/255.0 blue:0xB8/255.0 alpha:1.0]], ForegroundTextColorDarkKey,
+			[NSArchiver archivedDataWithRootObject:[NSColor colorWithSRGBRed:0x26/255.0 green:0x26/255.0 blue:0x24/255.0 alpha:1.0]], BackgroundTextColorDarkKey,
 			
 			[NSArchiver archivedDataWithRootObject:
 			 [NSColor colorWithCalibratedRed:0.945 green:0.702 blue:0.702 alpha:1.0f]], SearchTermHighlightColorKey,
 			
-			[NSNumber numberWithFloat:[NSFont smallSystemFontSize]], TableFontSizeKey, 
+			[NSNumber numberWithFloat:12.0f], TableFontSizeKey, //"Large" in Settings > General 
 			[NSArray arrayWithObjects:NoteTitleColumnString, NoteDateModifiedColumnString, nil], NoteAttributesVisibleKey,
 			NoteDateModifiedColumnString, TableSortColumnKey,
 			[NSNumber numberWithBool:YES], TableIsReverseSortedKey, nil]];
@@ -442,32 +443,8 @@ static void sendCallbacksForGlobalPrefs(GlobalPrefs* self, SEL selector, id orig
 	[defaults setBool:value forKey:ShowWordCount];
 }
 
-- (void)setUseETScrollbarsOnLion:(BOOL)value sender:(id)sender{
-	[defaults setBool:value forKey:UseETScrollbarsOnLion];
-	SEND_CALLBACKS();
-}
-
-- (BOOL)useETScrollbarsOnLion{
-	return [defaults boolForKey:UseETScrollbarsOnLion];
-}
 
 
-- (void)setUseMarkdownImport:(BOOL)value sender:(id)sender {
-	[defaults setBool:value forKey:UseMarkdownImportKey];
-	
-	SEND_CALLBACKS();
-}
-- (BOOL)useMarkdownImport {
-	return [defaults boolForKey:UseMarkdownImportKey];
-}
-- (void)setUseReadability:(BOOL)value sender:(id)sender {
-	[defaults setBool:value forKey:UseReadabilityKey];
-	
-	SEND_CALLBACKS();
-}
-- (BOOL)useReadability {
-	return [defaults boolForKey:UseReadabilityKey];
-}
 
 - (void)setShowGrid:(BOOL)value sender:(id)sender {
 	[defaults setBool:value forKey:ShowGridKey];
@@ -552,10 +529,7 @@ static void sendCallbacksForGlobalPrefs(GlobalPrefs* self, SEL selector, id orig
 
 - (BOOL)useFinderTags
 {
-    if (!IsMavericksOrLater) {
-        return NO;
-    }
-	return [defaults boolForKey:UseFinderTagsKey];
+	return NO; //tags are OpenMeta tags (see -[NSFileManager getTagsAtFSPath:])
 }
 
 - (void)setSoftTabs:(BOOL)value sender:(id)sender {
@@ -764,6 +738,33 @@ BOOL ColorsEqualWith8BitChannels(NSColor *c1, NSColor *c2) {
 	if (theData) return (NSColor *)[NSUnarchiver unarchiveObjectWithData:theData];
 
 	return nil;	
+}
+
+//the User Scheme's colors in dark mode (Settings > Fonts & Colors, the Dark column)
+- (void)setForegroundTextColorDark:(NSColor*)aColor sender:(id)sender {
+	if (aColor) {
+		[defaults setObject:[NSArchiver archivedDataWithRootObject:aColor] forKey:ForegroundTextColorDarkKey];
+		SEND_CALLBACKS();
+	}
+}
+
+- (NSColor*)foregroundTextColorDark {
+	NSData *theData = [defaults dataForKey:ForegroundTextColorDarkKey];
+	if (theData) return (NSColor *)[NSUnarchiver unarchiveObjectWithData:theData];
+	return nil;
+}
+
+- (void)setBackgroundTextColorDark:(NSColor*)aColor sender:(id)sender {
+	if (aColor) {
+		[defaults setObject:[NSArchiver archivedDataWithRootObject:aColor] forKey:BackgroundTextColorDarkKey];
+		SEND_CALLBACKS();
+	}
+}
+
+- (NSColor*)backgroundTextColorDark {
+	NSData *theData = [defaults dataForKey:BackgroundTextColorDarkKey];
+	if (theData) return (NSColor *)[NSUnarchiver unarchiveObjectWithData:theData];
+	return nil;
 }
 
 - (BOOL)tableColumnsShowPreview {

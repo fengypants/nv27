@@ -12,7 +12,7 @@
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
-        <window title="nvALT" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" restorable="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" frameAutosaveName="NotationWindow" animationBehavior="default" id="1220" userLabel="notation">
+        <window title="nv27" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" restorable="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" frameAutosaveName="NotationWindow" animationBehavior="default" id="1220" userLabel="notation">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES" unifiedTitleAndToolbar="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="280" y="392" width="397" height="464"/>
@@ -29,13 +29,13 @@
         </window>
         <menu title="MainMenu" systemMenu="main" id="29" userLabel="MainMenu">
             <items>
-                <menuItem title="nvALT" id="56">
-                    <menu key="submenu" title="nvALT" systemMenu="apple" id="57">
+                <menuItem title="nv27" id="56">
+                    <menu key="submenu" title="nv27" systemMenu="apple" id="57">
                         <items>
-                            <menuItem title="Über nvALT" id="58">
+                            <menuItem title="Über nv27" id="58">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
-                                    <action selector="orderFrontStandardAboutPanel:" target="-2" id="142"/>
+                                    <action selector="showAboutPanel:" target="213" id="142"/>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="196">
@@ -59,7 +59,7 @@
                             <menuItem isSeparatorItem="YES" id="144">
                                 <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                             </menuItem>
-                            <menuItem title="nvALT ausblenden" keyEquivalent="h" id="134">
+                            <menuItem title="nv27 ausblenden" keyEquivalent="h" id="134">
                                 <connections>
                                     <action selector="hide:" target="-2" id="152"/>
                                 </connections>
@@ -78,7 +78,7 @@
                             <menuItem isSeparatorItem="YES" id="149">
                                 <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                             </menuItem>
-                            <menuItem title="nvALT beenden" keyEquivalent="q" id="136">
+                            <menuItem title="nv27 beenden" keyEquivalent="q" id="136">
                                 <connections>
                                     <action selector="terminate:" target="-2" id="139"/>
                                 </connections>
@@ -394,17 +394,20 @@ CA
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Farb-Schemata" id="1163">
                                     <items>
-                                        <menuItem title="Schwarz-weiß" state="on" alternate="YES" keyEquivalent="A" id="1164">
+                                        <menuItem title="Schwarz-weiß" state="on" alternate="YES" keyEquivalent="1" id="1164">
+                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                             <connections>
                                                 <action selector="setBWColorScheme:" target="213" id="1168"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Niedriger Kontrast" alternate="YES" keyEquivalent="S" id="1165">
+                                        <menuItem title="Niedriger Kontrast" alternate="YES" keyEquivalent="2" id="1165">
+                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                             <connections>
                                                 <action selector="setLCColorScheme:" target="213" id="1169"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Nutzer-Farbschema" alternate="YES" keyEquivalent="D" id="1166">
+                                        <menuItem title="Nutzer-Farbschema" alternate="YES" keyEquivalent="3" id="1166">
+                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                             <connections>
                                                 <action selector="setUserColorScheme:" target="213" id="1170"/>
                                             </connections>
@@ -433,11 +436,6 @@ CA
                             <menuItem title="Wortanzahl anzeigen" alternate="YES" keyEquivalent="K" id="1286">
                                 <connections>
                                     <action selector="toggleWordCount:" target="213" id="1290"/>
-                                    <binding destination="1287" name="value" keyPath="values.ShowWordCount" id="1289">
-                                        <dictionary key="options">
-                                            <string key="NSValueTransformerName">NSNegateBoolean</string>
-                                        </dictionary>
-                                    </binding>
                                 </connections>
                             </menuItem>
                             <menuItem title="Notizvorschau in Liste anzeigen" keyEquivalent="p" id="1062">
@@ -559,16 +557,10 @@ CA
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <menu key="submenu" title="Vorschau" id="1265">
                         <items>
-                            <menuItem title="(Multi)Markdown" tag="13372" id="1268">
+                            <menuItem title="MultiMarkdown" tag="13372" id="1268">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="selectPreviewMode:" target="213" id="1272"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Textile" tag="13373" id="1269">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <action selector="selectPreviewMode:" target="213" id="1274"/>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="1267"/>
@@ -665,34 +657,22 @@ CA
                             <menuItem isSeparatorItem="YES" id="1058">
                                 <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                             </menuItem>
-                            <menuItem title="nvALT Home" tag="5" id="1292">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <action selector="showHelpDocument:" target="213" id="1295"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Elasticthreads Webseite" tag="6" id="1293">
+                            <menuItem title="nv27 GitHub" tag="6" id="1293">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="showHelpDocument:" target="213" id="1296"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Brett Terpstra Webseite" tag="7" id="1294">
+                            <menuItem title="nvALT Webseite" tag="5" id="1292">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
-                                    <action selector="showHelpDocument:" target="213" id="1297"/>
+                                    <action selector="showHelpDocument:" target="213" id="1295"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Notational Velocity Webseite" tag="3" id="1053">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="showHelpDocument:" target="213" id="1102"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Entwicklungs- und Projektseite" tag="4" id="1059">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <action selector="showHelpDocument:" target="213" id="1103"/>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="1057">
@@ -724,11 +704,8 @@ CA
                 <outlet property="savePreviewItem" destination="1271" id="1305"/>
                 <outlet property="sparkleUpdateItem" destination="990" id="1052"/>
                 <outlet property="statBarMenu" destination="1124" id="1159"/>
-                <outlet property="syncWaitPanel" destination="1079" id="1085"/>
-                <outlet property="syncWaitSpinner" destination="1082" id="1084"/>
                 <outlet property="textScrollView" destination="1225" id="1284"/>
                 <outlet property="textView" destination="1226" id="1242"/>
-                <outlet property="textilePreview" destination="1269" id="1275"/>
                 <outlet property="window" destination="1220" id="1254"/>
                 <outlet property="wordCounter" destination="1280" id="1283"/>
             </connections>
@@ -786,46 +763,6 @@ CA
                 </tokenField>
             </subviews>
         </customView>
-        <window allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" hidesOnDeactivate="YES" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" id="1079" userLabel="quit waiting" customClass="NSPanel">
-            <windowStyleMask key="styleMask" titled="YES"/>
-            <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-            <rect key="contentRect" x="454" y="633" width="353" height="107"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1440" height="878"/>
-            <value key="minSize" type="size" width="213" height="107"/>
-            <view key="contentView" id="1080">
-                <rect key="frame" x="0.0" y="0.0" width="353" height="107"/>
-                <autoresizingMask key="autoresizingMask"/>
-                <subviews>
-                    <button verticalHuggingPriority="750" id="1081">
-                        <rect key="frame" x="179" y="12" width="160" height="32"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                        <buttonCell key="cell" type="push" title="Jetzt beenden" bezelStyle="rounded" alignment="center" borderStyle="border" inset="2" id="1090">
-                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                            <font key="font" metaFont="system"/>
-                            <string key="keyEquivalent" base64-UTF8="YES">
-DQ
-</string>
-                        </buttonCell>
-                        <connections>
-                            <action selector="syncWaitQuit:" target="213" id="1086"/>
-                        </connections>
-                    </button>
-                    <progressIndicator horizontalHuggingPriority="750" verticalHuggingPriority="750" maxValue="100" bezeled="NO" indeterminate="YES" style="spinning" id="1082">
-                        <rect key="frame" x="20" y="55" width="32" height="32"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </progressIndicator>
-                    <textField verticalHuggingPriority="750" id="1083">
-                        <rect key="frame" x="70" y="48" width="266" height="32"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                        <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Warte auf Hochladen der Änderungen…" id="1091">
-                            <font key="font" metaFont="system"/>
-                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                        </textFieldCell>
-                    </textField>
-                </subviews>
-            </view>
-        </window>
         <menu title="barMenu" id="1124">
             <items>
                 <menuItem title="Lesezeichen" tag="901" id="1199">
@@ -983,17 +920,20 @@ CA
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <menu key="submenu" title="Farb-Schemata" id="1142">
                         <items>
-                            <menuItem title="Schwarz-weiß" state="on" alternate="YES" keyEquivalent="A" id="1145">
+                            <menuItem title="Schwarz-weiß" state="on" alternate="YES" keyEquivalent="1" id="1145">
+                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                 <connections>
                                     <action selector="setBWColorScheme:" target="213" id="1173"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Niedriger Kontrast" alternate="YES" keyEquivalent="S" id="1144">
+                            <menuItem title="Niedriger Kontrast" alternate="YES" keyEquivalent="2" id="1144">
+                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                 <connections>
                                     <action selector="setLCColorScheme:" target="213" id="1174"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Nutzer-Farbschema" alternate="YES" keyEquivalent="D" id="1143">
+                            <menuItem title="Nutzer-Farbschema" alternate="YES" keyEquivalent="3" id="1143">
+                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                 <connections>
                                     <action selector="setUserColorScheme:" target="213" id="1175"/>
                                 </connections>
@@ -1002,10 +942,10 @@ CA
                     </menu>
                 </menuItem>
                 <menuItem isSeparatorItem="YES" id="1138"/>
-                <menuItem title="Über nvALT" id="Eh7-wx-CCX">
+                <menuItem title="Über nv27" id="Eh7-wx-CCX">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
-                        <action selector="orderFrontStandardAboutPanel:" target="-2" id="XZy-fI-t9S"/>
+                        <action selector="showAboutPanel:" target="213" id="XZy-fI-t9S"/>
                     </connections>
                 </menuItem>
                 <menuItem title="Einstellungen…" keyEquivalent="," id="1182">
@@ -1014,7 +954,7 @@ CA
                     </connections>
                 </menuItem>
                 <menuItem title="Auf Aktualisierungen prüfen..." tag="902" id="1184"/>
-                <menuItem title="nvALT beenden" keyEquivalent="q" id="1185">
+                <menuItem title="nv27 beenden" keyEquivalent="q" id="1185">
                     <connections>
                         <action selector="terminate:" target="-2" id="1186"/>
                     </connections>

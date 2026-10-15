@@ -28,10 +28,9 @@
 #import "NSFileManager_NV.h"
 #import "NotationPrefs.h"
 #import "NotationController.h"
+#import "ShortcutsWindowController.h"
 #import "NoteObject.h"
 
-NSString *PasswordWasRetrievedFromKeychainKey = @"PasswordRetrievedFromKeychain";
-NSString *RetrievedPasswordKey = @"RetrievedPassword";
 NSString *ShouldImportCreationDates = @"ShouldImportCreationDates";
 
 @interface AlienNoteImporter (Private)
@@ -60,17 +59,22 @@ NSString *ShouldImportCreationDates = @"ShouldImportCreationDates";
 		AlienNoteImporter *importer = [AlienNoteImporter importerWithPath:[AlienNoteImporter blorPath]];
 		NSArray *noteArray = [importer importedNotes];
 		if ([noteArray count] > 0) {
+			//notes from a Notational Velocity 1.x database are imported unencrypted (note encryption was removed)
 			NSLog(@"importing BLOR");
-			NSData *passData = [[[importer documentSettings] objectForKey:RetrievedPasswordKey] dataUsingEncoding:NSUTF8StringEncoding];
-			BOOL shouldStoreInKeychain = [[[importer documentSettings] objectForKey:PasswordWasRetrievedFromKeychainKey] boolValue];
-			[prefs setPassphraseData:passData inKeychain:shouldStoreInKeychain];
-			[prefs setDoesEncryption:YES];
-			
 			[notation addNotes:noteArray];
 		} else {
 			//add localized RTF help notes (how do we handle initializing a new NV copy when the owner just wants to re-sync from web? they will get new help notes each time?)
 			NSArray *paths = [[NSBundle mainBundle] pathsForResourcesOfType:@"nvhelp" inDirectory:nil];
 			NSArray *helpNotes = [[[[AlienNoteImporter alloc] initWithStoragePaths:paths] autorelease] importedNotes];
+			//and the keyboard shortcuts, from the same list as Help > Keyboard Shortcuts so the two never disagree
+			NSString *shortcuts = [ShortcutsWindowController shortcutsMarkdown];
+			if ([shortcuts length]) {
+				NSMutableAttributedString *body = [[[NSMutableAttributedString alloc] initWithString:shortcuts
+																						  attributes:[prefsController noteBodyAttributes]] autorelease];
+				NoteObject *shortcutsNote = [[[NoteObject alloc] initWithNoteBody:body title:@"Excruciatingly Useful Shortcuts"
+																		 delegate:nil format:SingleDatabaseFormat labels:nil] autorelease];
+				if (shortcutsNote) helpNotes = [[NSArray arrayWithObject:shortcutsNote] arrayByAddingObjectsFromArray:helpNotes ? helpNotes : [NSArray array]];
+			}
 			if ([helpNotes count] > 0) {
 				[notation addNotes:helpNotes];
 				[[notation delegate] notation:notation revealNote:[helpNotes lastObject] options:NVEditNoteToReveal];
@@ -359,19 +363,10 @@ NSString *ShouldImportCreationDates = @"ShouldImportCreationDates";
 	NSMutableAttributedString *attributedStringFromData = nil;
 
 	if (fileType == HTML_TYPE_ID || [extension isEqualToString:@"htm"] || [extension isEqualToString:@"html"] || [extension isEqualToString:@"shtml"]) {
-		//should convert to text with markdown here
-        if ([[GlobalPrefs defaultPrefs] useMarkdownImport]) {
-			if ([[GlobalPrefs defaultPrefs] useReadability] || [self shouldUseReadability]) {
-				attributedStringFromData = [[NSMutableAttributedString alloc] initWithString:[self contentUsingReadability:filename] 
-																				  attributes:[[GlobalPrefs defaultPrefs] noteBodyAttributes]];
-			} else {
-				attributedStringFromData = [[NSMutableAttributedString alloc] initWithString:[self markdownFromHTMLFile:filename] 
-																				  attributes:[[GlobalPrefs defaultPrefs] noteBodyAttributes]];
-			}
-        } else {
-			attributedStringFromData = [[NSMutableAttributedString alloc] initWithHTML:[NSData uncachedDataFromFile:filename] 
-                                                                               options:[NSDictionary optionsDictionaryWithTimeout:10.0] documentAttributes:NULL];
-        }		
+		//HTML-to-Markdown conversion used bundled Python 2 scripts (readability/html2text), and macOS no longer
+		//ships Python 2; HTML is imported as rich text
+		attributedStringFromData = [[NSMutableAttributedString alloc] initWithHTML:[NSData uncachedDataFromFile:filename] 
+																		   options:[NSDictionary optionsDictionaryWithTimeout:10.0] documentAttributes:NULL];
 	} else if (fileType == RTF_TYPE_ID || [extension isEqualToString:@"rtf"] || [extension isEqualToString:@"nvhelp"] || [extension isEqualToString:@"rtx"]) {
 		attributedStringFromData = [[NSMutableAttributedString alloc] initWithRTF:[NSData uncachedDataFromFile:filename] documentAttributes:NULL];
 		
@@ -527,123 +522,6 @@ NSString *ShouldImportCreationDates = @"ShouldImportCreationDates";
 	return nil;
 }
 
-- (NSString *) contentUsingReadability: (NSString *)htmlFile
-{
-    NSBundle *bundle = [NSBundle mainBundle];
-    NSString *readabilityPath = [bundle pathForResource:@"readability" ofType:@"py"];
-//    readabilityPath = [bundle pathForAuxiliaryExecutable: @"readability.py"];
-	
-    NSTask *task = [[NSTask alloc] init];
-    [task setLaunchPath: readabilityPath];
-	
-	NSArray *arguments;
-    arguments = [NSArray arrayWithObjects: htmlFile, nil];
-    [task setArguments: arguments];
-	
-	NSPipe *rpipe;
-    rpipe = [NSPipe pipe];
-    [task setStandardOutput: rpipe];
-	
-    NSFileHandle *file;
-    file = [rpipe fileHandleForReading];
-	
-    [task launch];
-	
-    NSData *data;
-    data = [file readDataToEndOfFile];
-	
-    NSString *string;
-    string = [[[NSString alloc] initWithData: data
-								   encoding: NSUTF8StringEncoding] autorelease];
-    [task release];
-	return [self markdownFromSource:string];
-}
-
-- (NSString *) markdownFromHTMLFile: (NSString *)htmlFile
-{
-    NSBundle *bundle = [NSBundle mainBundle];
-    NSString *readabilityPath = [bundle pathForResource:@"html2text" ofType:@"py"];
-//    readabilityPath = [bundle pathForAuxiliaryExecutable: @"html2text.py"];
-	
-    NSTask *task = [[NSTask alloc] init];
-    [task setLaunchPath: readabilityPath];
-	
-	NSArray *arguments;
-    arguments = [NSArray arrayWithObjects: htmlFile, nil];
-    [task setArguments: arguments];
-	
-	NSPipe *rpipe;
-    rpipe = [NSPipe pipe];
-    [task setStandardOutput: rpipe];
-	
-    NSFileHandle *file;
-    file = [rpipe fileHandleForReading];
-	
-    [task launch];
-	
-    NSData *data;
-    data = [file readDataToEndOfFile];
-	
-    NSString *string;
-    string = [[[NSString alloc] initWithData: data
-								   encoding: NSUTF8StringEncoding] autorelease];
-	[task release];
-	return string;
-}
-
-- (NSString *) markdownFromSource: (NSString *)htmlString
-{
-    NSBundle *bundle = [NSBundle mainBundle];
-    NSString *readabilityPath = [bundle pathForResource:@"html2text" ofType:@"py"];
-//    readabilityPath = [bundle pathForAuxiliaryExecutable: @"html2text.py"];
-
-	
-    NSTask *task = [[NSTask alloc] init];
-    [task setLaunchPath: readabilityPath];
-	
-    NSPipe *readPipe = [NSPipe pipe];
-    NSFileHandle *readHandle = [readPipe fileHandleForReading];
-	
-    NSPipe *writePipe = [NSPipe pipe];
-    NSFileHandle *writeHandle = [writePipe fileHandleForWriting];
-	
-    [task setStandardInput: writePipe];
-    [task setStandardOutput: readPipe];
-	
-    [task launch];
-	
-    [writeHandle writeData: [htmlString dataUsingEncoding: NSUTF8StringEncoding]];
-    [writeHandle closeFile];
-	
-    NSMutableData *data = [[NSMutableData alloc] init];
-    NSData *readData;
-	
-    while ((readData = [readHandle availableData])
-           && [readData length]) {
-        [data appendData: readData];
-    }
-	
-    NSString *strippedString;
-    strippedString = [[NSString alloc]
-					  initWithData: data
-					  encoding: NSUTF8StringEncoding];
-	
-    [task release];
-    [data release];
-    [strippedString autorelease];
-	
-    return (strippedString);
-}
--(BOOL)shouldUseReadability
-{
-    return shouldUseReadability;
-}
-
--(void) setShouldUseReadability:(BOOL)value
-{
-	shouldUseReadability = value;
-}
-
 @end
 
 @implementation AlienNoteImporter (Private)
@@ -706,10 +584,6 @@ NSString *ShouldImportCreationDates = @"ShouldImportCreationDates";
 		NSLog(@"Couldn't get a valid pass-key to decrypt the blor!");
 		return nil;
 	}
-	
-	[documentSettings setObject:[NSNumber numberWithBool:[retriever canRetrieveFromKeychain]]
-						 forKey:PasswordWasRetrievedFromKeychainKey];
-	[documentSettings setObject:[retriever originalPasswordString] forKey:RetrievedPasswordKey];
 	
     NSDictionary *dbAttrs = [[NSFileManager defaultManager]attributesAtPath:filename followLink:YES];
     //[[NSFileManager defaultManager] fileAttributesAtPath:filename traverseLink:YES];

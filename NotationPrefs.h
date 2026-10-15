@@ -20,7 +20,7 @@
 #import "NotationController.h"
 
 /* this class is responsible for managing all preferences specific to a notational database,
-including encryption, file formats, synchronization, passwords management, and others */
+such as file formats and secure text entry */
 
 #define EPOC_ITERATION 4
 
@@ -29,13 +29,7 @@ enum { SingleDatabaseFormat = 0, PlainTextFormat, RTFTextFormat, HTMLFormat, Wor
 extern NSString *NotationPrefsDidChangeNotification;
 
 @interface NotationPrefs : NSObject {
-	BOOL doesEncryption, storesPasswordInKeychain, secureTextEntry;
-	NSString *keychainDatabaseIdentifier;
-	
-	//password(s) stored in keychain or otherwise encrypted using notes password
-	NSMutableDictionary *syncServiceAccounts;
-	
-	unsigned int hashIterationCount, keyLengthInBits;
+	BOOL databaseIsEncrypted;
 	
 	NSColor *foregroundColor;
 	NSFont *baseBodyFont;
@@ -46,21 +40,13 @@ extern NSString *NotationPrefsDidChangeNotification;
     NSMutableArray *typeStrings[4], *pathExtensions[4];
     OSType *allowedTypes;
 	
-	NSData *masterSalt, *dataSessionSalt, *verifierKey;
-	
 	NSMutableArray *seenDiskUUIDEntries;
 	
 	UInt32 epochIteration;
 	BOOL firstTimeUsed;
 	BOOL preferencesChanged;
 	id delegate;
-	
-	@private 
-	//masterKey is not to be stored anywhere
-	NSData *masterKey;
 }
-
-NSMutableDictionary *ServiceAccountDictInit(NotationPrefs *prefs, NSString* serviceName);
 
 + (int)appVersion;
 + (NSMutableArray*)defaultTypeStringsForFormat:(int)formatID;
@@ -71,57 +57,19 @@ NSMutableDictionary *ServiceAccountDictInit(NotationPrefs *prefs, NSString* serv
 - (void)setBaseBodyFont:(NSFont*)aFont;
 - (NSFont*)baseBodyFont;
 
-- (BOOL)storesPasswordInKeychain;
 - (NSInteger)notesStorageFormat;
 - (BOOL)confirmFileDeletion;
-- (BOOL)doesEncryption;
-- (NSDictionary*)syncServiceAccounts;
-- (NSDictionary*)syncServiceAccountsForArchiving;
-- (NSDictionary*)syncAccountForServiceName:(NSString*)serviceName;
-- (NSString*)syncPasswordForServiceName:(NSString*)serviceName;
-- (NSUInteger)syncFrequencyInMinutesForServiceName:(NSString*)serviceName;
-- (BOOL)syncNotesShouldMergeForServiceName:(NSString*)serviceName;
-- (BOOL)syncServiceIsEnabled:(NSString*)serviceName;
-- (unsigned int)keyLengthInBits;
-- (unsigned int)hashIterationCount;
+- (BOOL)databaseIsEncrypted;
 - (UInt32)epochIteration;
 - (BOOL)firstTimeUsed;
-- (BOOL)secureTextEntry;
-
-- (void)forgetKeychainIdentifier;
-- (const char *)setKeychainIdentifier;
-- (SecKeychainItemRef)currentKeychainItem;
-- (NSData*)passwordDataFromKeychain;
-- (void)removeKeychainData;
-- (void)setKeychainData:(NSData*)data;
 
 - (void)setPreferencesAreStored;
-- (void)setStoresPasswordInKeychain:(BOOL)value;
-- (BOOL)canLoadPassphraseData:(NSData*)passData;
-- (BOOL)canLoadPassphrase:(NSString*)pass;
-- (void)setPassphraseData:(NSData*)passData inKeychain:(BOOL)inKeychain;
-- (void)setPassphraseData:(NSData*)passData inKeychain:(BOOL)inKeychain withIterations:(int)iterationCount;
-- (BOOL)encryptDataInNewSession:(NSMutableData*)data;
-- (BOOL)decryptDataWithCurrentSettings:(NSMutableData*)data;
 - (NSData*)WALSessionKey;
 
 - (void)setNotesStorageFormat:(NSInteger)formatID;
-- (BOOL)shouldDisplaySheetForProposedFormat:(NSInteger)proposedFormat;
-- (void)noteFilesCleanupSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)setConfirmsFileDeletion:(BOOL)value;
-- (void)setDoesEncryption:(BOOL)value;
-- (void)setSecureTextEntry:(BOOL)value;
-- (const char*)keychainSyncAccountNameForService:(NSString*)serviceName;
-- (void)setSyncUsername:(NSString*)username forService:(NSString*)serviceName;
-- (void)setSyncPassword:(NSString*)password forService:(NSString*)serviceName;
-- (void)setSyncFrequency:(NSUInteger)frequencyInMinutes forService:(NSString*)serviceName;
-- (void)setSyncEnabled:(BOOL)isEnabled forService:(NSString*)serviceName;
-- (void)setSyncShouldMerge:(BOOL)shouldMerge inCurrentAccountForService:(NSString*)serviceName;
-- (void)removeSyncPasswordForService:(NSString*)serviceName;
-- (void)setKeyLengthInBits:(unsigned int)newLength;
 
 - (NSUInteger)tableIndexOfDiskUUID:(CFUUIDRef)UUIDRef;
-- (void)checkForKnownRedundantSyncConduitsAtPath:(NSString*)dbPath;
 
 + (NSString*)pathExtensionForFormat:(NSInteger)format;
 
@@ -155,8 +103,6 @@ NSMutableDictionary *ServiceAccountDictInit(NotationPrefs *prefs, NSString* serv
 
 @interface NotationPrefs (DelegateMethods)
 
-- (void)databaseEncryptionSettingsChanged;
-- (void)syncSettingsChangedForService:(NSString*)serviceName;
 - (void)databaseSettingsChangedFromOldFormat:(NSInteger)oldFormat;
 
 @end

@@ -16,7 +16,6 @@
 
 #import "NotationController.h"
 #import "NotesTableView.h"
-//#import "Spaces.h"
 
 @class LinkingEditor;
 @class EmptyView;
@@ -26,7 +25,6 @@
 @class DualField;
 @class RBSplitView;
 @class RBSplitSubview;
-@class TitlebarButton;
 @class LinearDividerShader;
 @class TagEditingManager;
 @class DFView;
@@ -45,6 +43,7 @@
 #define MultiMarkdownPreview 13372
 #endif
 
+//no longer offered; kept so a saved Textile preference can be migrated
 #ifndef TextilePreview
 #define TextilePreview 13373
 #endif
@@ -84,13 +83,9 @@
 	IBOutlet EmptyView *editorStatusView;
 	IBOutlet NSMenuItem *sparkleUpdateItem;
     IBOutlet NSWindow *window;
-	IBOutlet NSPanel *syncWaitPanel;
-	IBOutlet NSProgressIndicator *syncWaitSpinner;
 	NSToolbar *toolbar;
 	NSToolbarItem *dualFieldItem;
-	TitlebarButton *titleBarButton;
 	
-	BOOL waitedForUncommittedChanges;
 	
     //	NSImage *verticalDividerImg;
 	LinearDividerShader *dividerShader;
@@ -116,7 +111,6 @@
     PreviewController *previewController;
     // IBOutlet NSMenuItem *markdownPreview;
     IBOutlet NSMenuItem *multiMarkdownPreview;
-    IBOutlet NSMenuItem *textilePreview;
     IBOutlet NSMenuItem *previewToggler;
     IBOutlet NSMenuItem *lockNoteItem;
     IBOutlet NSMenuItem *printPreviewItem;
@@ -136,6 +130,7 @@ void outletObjectAwoke(id sender);
 - (void)runDelayedUIActionsAfterLaunch;
 - (void)updateNoteMenus;
 
+- (IBAction)showAboutPanel:(id)sender;
 - (IBAction)makeActiveAndShowWindow:(id)sender;
 - (IBAction)renameNote:(id)sender;
 - (IBAction)deleteNote:(id)sender;
@@ -166,7 +161,6 @@ void outletObjectAwoke(id sender);
 - (void)restoreListStateUsingPreferences;
 
 - (void)_finishSyncWait;
-- (IBAction)syncWaitQuit:(id)sender;
 
 - (void)setTableAllowsMultipleSelection;
 
@@ -189,6 +183,7 @@ void outletObjectAwoke(id sender);
 - (void)releaseTagEditor:(NSNotification *)note;
 - (void)setDualFieldInToolbar;
 - (void)setDualFieldInView;
+- (void)updateSearchFieldWidth:(NSNotification*)aNotification;
 - (void)setDualFieldIsVisible:(BOOL)isVis;
 //- (void)hideDualFieldView;
 //- (void)showDualFieldView;
@@ -204,6 +199,9 @@ void outletObjectAwoke(id sender);
 - (IBAction)setUserColorScheme:(id)sender;
 - (void)updateFieldAttributes;
 - (void)updateColorScheme;
+- (BOOL)appearanceIsDark;
+- (void)applyAppearancePreference;
+- (void)appearanceDidChange;
 - (void)setBackgrndColor:(NSColor *)inColor;
 - (void)setForegrndColor:(NSColor *)inColor;
 - (NSColor *)backgrndColor;
@@ -231,9 +229,6 @@ void outletObjectAwoke(id sender);
 - (void)updateModifier:(NSTimer*)theTimer;
 #pragma mark toggling dock icon
 - (void)togDockIcon:(NSNotification *)notification;
-- (void)hideDockIconAfterDelay;
-- (void)hideDockIcon;
-- (void)showDockIcon;
 - (void)reActivate:(id)sender;
 - (void)toggleStatusItem:(NSNotification *)notification;
 - (void)setUpStatusBarItem;

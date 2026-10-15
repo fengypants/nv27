@@ -493,7 +493,10 @@ static CFStringRef SynchronizedNoteKeyDescription(const void *value) {
 }
 static CFHashCode SynchronizedNoteHash(const void * o) {
 	
-	return CFHashBytes(o, sizeof(CFUUIDBytes));
+	//UUID bytes are already uniformly distributed, so folding the two halves together is a good hash
+	uint64_t halves[2];
+	memcpy(halves, o, sizeof(halves));
+	return (CFHashCode)(halves[0] ^ halves[1]);
 }
 static Boolean SynchronizedNoteIsEqual(const void *o, const void *p) {
 	

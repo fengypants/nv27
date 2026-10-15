@@ -1,0 +1,35 @@
+name: Archive first build
+
+# one-off: attach the first build handed out on Oct 13 2026 (commit cbf13cf, run 38353623534) to its own
+# release, for comparison; that app is still named nvALT and uses nvALT's bundle identifier
+on:
+  push:
+    paths:
+      - .github/workflows/archive-first-build.yml
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download the build and publish it
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh run download 38353623534 --name nvALT-arm64 --dir first-build
+          ls -la first-build
+          mv first-build/nvALT-arm64.zip nvALT-arm64-first-build-2026-10-13.zip
+          gh release delete first-build-2026-10-13 --yes --cleanup-tag || true
+          gh release create first-build-2026-10-13 nvALT-arm64-first-build-2026-10-13.zip \
+            --prerelease \
+            --target "$GITHUB_SHA" \
+            --title "First Apple silicon build (Oct 13, 2026), for comparison" \
+            --notes "The first build provided on Oct 13, 2026 (commit cbf13cf), before the app was renamed nv27.
+
+          This build is still named nvALT and uses nvALT's bundle identifier, so it shares preferences and the
+          default Notational Data notes folder with the original nvALT. Don't run it at the same time as nvALT
+          or nv27 on the same notes folder."

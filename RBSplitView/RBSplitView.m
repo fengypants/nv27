@@ -10,6 +10,9 @@
 #import "RBSplitView.h"
 #import "RBSplitViewPrivateDefines.h"
 
+//defined in AppController.m
+extern void outletObjectAwoke(id sender);
+
 //#import "AppController.h"
 
 // Please don't remove this copyright notice!

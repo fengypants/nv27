@@ -22,7 +22,6 @@
 <NSWindowDelegate, NSToolbarDelegate>
 #endif
 {
-    IBOutlet NSButton *useETScrollbarsOnLionButton;
     IBOutlet NSPopUpButton *folderLocationsMenuButton;
     IBOutlet NSTextField *bodyTextFontField;
     IBOutlet NSMatrix *tabKeyRadioMatrix;
@@ -40,16 +39,15 @@
 	IBOutlet NSButton *makeURLsClickable;
 	IBOutlet NSButton *highlightSearchTermsButton;
 	IBOutlet NSColorWell *searchHighlightColorWell, *foregroundColorWell, *backgroundColorWell;
+	IBOutlet NSColorWell *foregroundColorWellDark, *backgroundColorWellDark;
     IBOutlet NSButton *togDockButton;
-	IBOutlet NSTextField *togDockLabel;
-	IBOutlet NSSlider *maxWidthSlider;	
+    IBOutlet NSPopUpButton *appearancePopUp;
+	IBOutlet NSTextField *maxWidthField;
+	IBOutlet NSStepper *maxWidthStepper;
     IBOutlet NotationPrefsViewController *notationPrefsViewController;
 	IBOutlet NSComboBox *appList;
-    IBOutlet NSButton *useMarkdownImportButton;
-	IBOutlet NSButton *useReadabilityButton;
     IBOutlet NSButton *showGridButton;
     IBOutlet NSButton *altRowsButton;
-	NSMutableParagraphStyle *centerStyle;
 	NSMutableDictionary *items;
 	NSToolbar *toolbar;
 	BOOL fontPanelWasOpen;
@@ -63,9 +61,10 @@
 }
 - (void)showWindow:(id)sender;
 
-- (IBAction)changedUseETScrollbarsOnLion:(id)sender;
 - (IBAction)changedBackgroundTextColorWell:(id)sender;
 - (IBAction)changedForegroundTextColorWell:(id)sender;
+- (IBAction)changedForegroundTextColorWellDark:(id)sender;
+- (IBAction)changedBackgroundTextColorWellDark:(id)sender;
 - (IBAction)changedHighlightSearchTerms:(id)sender;	
 - (IBAction)changedSearchHighlightColorWell:(id)sender;
 - (IBAction)changedMakeURLsClickable:(id)sender;
@@ -84,12 +83,11 @@
 - (IBAction)changedExternalEditorsMenu:(id)sender;
 - (IBAction)changedTitleCompletion:(id)sender;
 - (IBAction)changedSoftTabs:(id)sender;
-- (IBAction)changedUseMarkdownImport:(id)sender;
-- (IBAction)changedUseReadability:(id)sender;
 - (IBAction)changedShowGrid:(id)sender;
 - (IBAction)changedAltRows:(id)sender;
 - (IBAction)changedAutoPairing:(id)sender;
 - (IBAction)toggleStatusItem:(id)sender;
+- (IBAction)changedAppearance:(id)sender;
 - (void)_selectDefaultExternalEditor;
 
 - (NSMenu*)directorySelectionMenu;
@@ -98,6 +96,7 @@
 
 - (NotationPrefsViewController*)notationPrefsViewController;
 - (NSView*)databaseView;
+- (void)matchPaneWidths;
 - (void)addToolbarItemWithName:(NSString*)name;
 - (void)switchViews:(NSToolbarItem *)item;
 	NSRect ScaleRectWithFactor(NSRect rect, float factor);

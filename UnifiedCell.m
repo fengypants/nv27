@@ -116,24 +116,9 @@
 	previewIsHidden = value;
 }
 
+//dates (and other secondary details) in the list use the system's secondary text color, as Mail and Notes do
 + (NSColor*)dateColorForTint {
-	static NSColor *color = nil;
-	static NSControlTint lastTint = -1;
-	
-	NSControlTint tint = [NSColor currentControlTint];
-	
-	if (!color || lastTint != tint) {
-		if (tint == NSBlueControlTint) {
-			color = [NSColor colorWithCalibratedRed:0.31 green:.494 blue:0.765 alpha:1.0];
-		} else if (tint == NSGraphiteControlTint) {
-			color = [NSColor colorWithCalibratedRed:0.498 green:0.525 blue:0.573 alpha:1.0];
-		} else {
-			color = [NSColor grayColor];
-		}
-		lastTint = tint;
-		[color retain];
-	}
-	return color;
+	return [NSColor secondaryLabelColor];
 }
 
 static NSShadow* ShadowForSnowLeopard() {

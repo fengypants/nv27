@@ -626,8 +626,8 @@
 /* date added/created column name */
 "Now editing this note; rename it with %@-R" = "Bearbeitung dieser Notiz; Umbenennen mit %@-R";
 
-/* default files name */
-"Excruciatingly Useful Shortcuts" = "Moglicherweise nutzliche Tastenkurzel";
+/* title of the keyboard shortcuts window */
+"Keyboard Shortcuts" = "Tastenkürzel";
 "Contact Information" = "Kontaktdaten";
 "This is the title of a note" = "Dies ist der Titel einer Notiz";
 "How does this thing work?" = "Wie funktioniert dieses Programm?";
@@ -641,7 +641,6 @@
 "Switch to Horizontal Layout" = "Zu horizontaler Darstellung wechseln";
 
 /* for warning about incompatibility with TextExpander, Typinator, etc. */
-"Secure Text Entry will prevent %@, which is currently installed on this computer, from working in Notational Velocity." = "Die Sichere Texteingabe wird %@, das momentan auf diesem Computer installiert ist, daran hindern, in Notational Velocity zu funktionieren.";
 
 /* Status message after downloading a URL */
 "Importing content..." = "Importiere Inhalt…";
@@ -667,3 +666,44 @@
 /* Menu Item for Use Selection for Find */
 "Use Selection for Find" = "Use Selection for Find";
 
+
+"Show Word Count" = "Wortanzahl anzeigen";
+"Hide Word Count" = "Wortanzahl ausblenden";
+
+/* Settings window form labels */
+"Appearance:" = "Erscheinungsbild:";
+"List text size:" = "Textgröße der Liste:";
+"Hotkey:" = "Tastenkürzel:";
+"Brings nv27 to the front from any app." = "Holt nv27 aus jeder App in den Vordergrund.";
+"Behavior:" = "Verhalten:";
+"Show icon in:" = "Symbol anzeigen in:";
+"Dock" = "Dock";
+"Menu bar" = "Menüleiste";
+"Notes folder:" = "Notizordner:";
+"Store notes as:" = "Notizen speichern als:";
+"File extensions:" = "Dateiendungen:";
+"Files with these extensions are read as notes. Right-click one to make it the default for new notes." = "Dateien mit diesen Endungen werden als Notizen gelesen. Klicke mit der rechten Maustaste auf eine, um sie zum Standard für neue Notizen zu machen.";
+"Styled text:" = "Formatierter Text:";
+"Spelling:" = "Rechtschreibung:";
+"Tab key:" = "Tabulatortaste:";
+"Links:" = "Links:";
+"Auto-pair:" = "Automatisch schließen:";
+"Direction:" = "Richtung:";
+"External editor:" = "Externer Editor:";
+"Note font:" = "Schrift für Notizen:";
+"Search terms:" = "Suchbegriffe:";
+"Highlight in notes" = "In Notizen hervorheben";
+"Light" = "Hell";
+"Dark" = "Dunkel";
+"Text color:" = "Textfarbe:";
+"Background:" = "Hintergrund:";
+"Used by the User Scheme (⌥⌘3)." = "Für das Nutzer-Farbschema (⌥⌘3).";
+"Notes list:" = "Notizliste:";
+"Always show grid lines" = "Gitterlinien immer anzeigen";
+"Alternating row colors" = "Abwechselnde Zeilenfarben";
+"Note width:" = "Notizbreite:";
+"Keep note text width readable" = "Textbreite gut lesbar halten";
+"Maximum:" = "Maximal:";
+"Close brackets and quotes automatically" = "Klammern und Anführungszeichen automatisch schließen";
+"Typing ( [ { or \" also adds its closing character." = "Zu ( [ { oder \" wird das schließende Zeichen ergänzt.";
+"Right-to-left text" = "Text von rechts nach links";

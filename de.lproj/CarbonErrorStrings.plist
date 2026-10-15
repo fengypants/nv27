@@ -162,5 +162,7 @@
 	<string>Deine Festplatte ist voll</string>
 	<key>-5000</key>
 	<string>Dein Account hat keine Bereichtigung um auf das Verzeichnis zuzugreifen</string>
+	<key>-826</key>
+	<string>its notes are encrypted, and this version of nvALT no longer supports encryption (turn encryption off in the previous version of nvALT first, or choose a different folder)</string>
 </dict>
 </plist>

@@ -28,7 +28,6 @@
 #import "UnifiedCell.h"
 #import "HeaderViewWithMenu.h"
 #import "NSString_NV.h"
-#import "NotesTableHeaderCell.h"
 #import "LinkingEditor.h"
 #import "AppController.h"
 //#import "NotesTableCornerView.h"
@@ -53,7 +52,7 @@ static void _CopyItemWithSelectorFromMenu(NSMenu *destMenu, NSMenu *sourceMenu, 
       
 		loadStatusString = NSLocalizedString(@"Loading Notes...",nil);
 		loadStatusAttributes = [[NSDictionary dictionaryWithObjectsAndKeys:
-								 [NSFont fontWithName:@"Helvetica" size:STATUS_STRING_FONT_SIZE], NSFontAttributeName,
+								 [NSFont systemFontOfSize:STATUS_STRING_FONT_SIZE], NSFontAttributeName,
 								 [NSColor colorWithCalibratedRed:0.0f green:0.0f blue:0.0f alpha:0.5f], NSForegroundColorAttributeName, nil] retain];
 		loadStatusStringWidth = [loadStatusString sizeWithAttributes:loadStatusAttributes].width;
 		
@@ -84,7 +83,8 @@ static void _CopyItemWithSelectorFromMenu(NSMenu *destMenu, NSMenu *sourceMenu, 
 		for (i=0; i<sizeof(colStrings)/sizeof(NSString*); i++) {
 			NoteAttributeColumn *column = [[NoteAttributeColumn alloc] initWithIdentifier:colStrings[i]];
 			[column setEditable:(colMutators[i] != NULL)];
-			[column setHeaderCell:[[[NotesTableHeaderCell alloc] initTextCell:[[NSBundle mainBundle] localizedStringForKey:colStrings[i] value:@"" table:nil]] autorelease]];
+			//standard header cells, drawn by AppKit
+			[column setHeaderCell:[[[NSTableHeaderCell alloc] initTextCell:[[NSBundle mainBundle] localizedStringForKey:colStrings[i] value:@"" table:nil]] autorelease]];
 			
 			[column setMutatingSelector:colMutators[i]];
 			[column setDereferencingFunction:colReferencors[i]];
@@ -107,6 +107,10 @@ static void _CopyItemWithSelectorFromMenu(NSMenu *destMenu, NSMenu *sourceMenu, 
 
         [[self cornerView] setFrameOrigin:NSMakePoint(-1000,-1000)];
         [self setCornerView:nil];
+		
+		//columns run edge to edge; the default (automatic) style insets them, which left empty
+		//header segments at both ends of the header row
+		[self setStyle:NSTableViewStyleFullWidth];
 
 		[self setHeaderView:hideHeader ? nil : headerView];
 		
@@ -289,7 +293,8 @@ static void _CopyItemWithSelectorFromMenu(NSMenu *destMenu, NSMenu *sourceMenu, 
         [self setSelectionHighlightStyle:isOneRow ? NSTableViewSelectionHighlightStyleRegular : NSTableViewSelectionHighlightStyleSourceList];
     }
 	NSLayoutManager *lm = [[NSLayoutManager alloc] init];
-	tableFontHeight = [lm defaultLineHeightForFont:font];
+	//whole points, so rows (and the grid lines between them) fall on pixel boundaries
+	tableFontHeight = ceil([lm defaultLineHeightForFont:font]);
 	float h[4] = {(tableFontHeight * 3.0 + 5.0f), (tableFontHeight * 2.0 + 6.0f), (tableFontHeight + 2.0f), tableFontHeight + 2.0f};
 	[self setRowHeight: horiz ? ([globalPrefs tableColumnsShowPreview] ? h[0] : 
 								 (ColumnIsSet(NoteLabelsColumn,[globalPrefs tableColumnsBitmap]) ? h[1] : h[2])) : h[3]];
@@ -1347,17 +1352,26 @@ enum { kNext_Tag = 'j', kPrev_Tag = 'k' };
     }
 }
 
+- (void)viewDidChangeEffectiveAppearance {
+	[super viewDidChangeEffectiveAppearance];
+	[(AppController *)[NSApp delegate] appearanceDidChange];
+}
+
 - (void)drawGridInClipRect:(NSRect)clipRect {
 	//resize cliprect if the view is taller than the amount of actual rows with content
 	if (![self dataSource]) {
 		return;
 	}
     
-    CGFloat newHt=[self rowsInRect:clipRect].length * ([self rowHeight] + [self intercellSpacing].height);
-    if (newHt<clipRect.size.height) {
-        clipRect.size.height=newHt;
+    //...but only by cutting it off at the bottom of the last row: counting the rows inside the clip rect came up
+    //short whenever only part of the list was redrawn, leaving some lines out
+    NSInteger rowCount=[self numberOfRows];
+    CGFloat lastRowBottom=rowCount > 0 ? NSMaxY([self rectOfRow:rowCount-1]) : 0.0;
+    if (NSMaxY(clipRect)>lastRowBottom) {
+        clipRect.size.height=MAX(0.0, lastRowBottom-NSMinY(clipRect));
     }
-    [super drawGridInClipRect:clipRect];
+    if (NSHeight(clipRect)>0.0)
+        [super drawGridInClipRect:clipRect];
 }
 
 + (BOOL)isCompatibleWithResponsiveScrolling{
@@ -1368,7 +1382,6 @@ enum { kNext_Tag = 'j', kPrev_Tag = 'k' };
     [super setBackgroundColor:color];
      
     if (![[color colorSpaceName] isEqualToString:@"NSNamedColorSpace"]) {
-        [NotesTableHeaderCell setBColor:color];
         CGFloat fWhite;
         fWhite = [[color colorUsingColorSpaceName:NSCalibratedWhiteColorSpace] whiteComponent];
         if (fWhite<0.25f) {

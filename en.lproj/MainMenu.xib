@@ -12,7 +12,7 @@
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
-        <window title="nvALT" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" restorable="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" frameAutosaveName="NotationWindow" animationBehavior="default" id="21" userLabel="notation">
+        <window title="nv27" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" restorable="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" frameAutosaveName="NotationWindow" animationBehavior="default" id="21" userLabel="notation">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="280" y="392" width="397" height="464"/>
@@ -32,19 +32,19 @@
         </window>
         <menu title="MainMenu" systemMenu="main" id="29" userLabel="MainMenu">
             <items>
-                <menuItem title="nvALT" id="56">
-                    <menu key="submenu" title="nvALT" systemMenu="apple" id="57">
+                <menuItem title="nv27" id="56">
+                    <menu key="submenu" title="nv27" systemMenu="apple" id="57">
                         <items>
-                            <menuItem title="About nvALT" id="58">
+                            <menuItem title="About nv27" id="58">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
-                                    <action selector="orderFrontStandardAboutPanel:" target="-2" id="1254"/>
+                                    <action selector="showAboutPanel:" target="213" id="1254"/>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="196">
                                 <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                             </menuItem>
-                            <menuItem title="Preferences…" keyEquivalent="," id="129">
+                            <menuItem title="Settings…" keyEquivalent="," id="129">
                                 <connections>
                                     <action selector="showPreferencesWindow:" target="213" id="381"/>
                                 </connections>
@@ -62,7 +62,7 @@
                             <menuItem isSeparatorItem="YES" id="144">
                                 <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                             </menuItem>
-                            <menuItem title="Hide nvALT" keyEquivalent="h" id="134">
+                            <menuItem title="Hide nv27" keyEquivalent="h" id="134">
                                 <connections>
                                     <action selector="hide:" target="-2" id="152"/>
                                 </connections>
@@ -81,7 +81,7 @@
                             <menuItem isSeparatorItem="YES" id="149">
                                 <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                             </menuItem>
-                            <menuItem title="Quit nvALT" keyEquivalent="q" id="136">
+                            <menuItem title="Quit nv27" keyEquivalent="q" id="136">
                                 <connections>
                                     <action selector="terminate:" target="-2" id="139"/>
                                 </connections>
@@ -436,11 +436,6 @@ CA
                             <menuItem title="Show Word Count" alternate="YES" keyEquivalent="K" id="1255">
                                 <connections>
                                     <action selector="toggleWordCount:" target="213" id="1257"/>
-                                    <binding destination="1258" name="value" keyPath="values.ShowWordCount" id="1268">
-                                        <dictionary key="options">
-                                            <string key="NSValueTransformerName">NSNegateBoolean</string>
-                                        </dictionary>
-                                    </binding>
                                 </connections>
                             </menuItem>
                             <menuItem title="Show Note-Previews in List" keyEquivalent="p" id="1062">
@@ -566,16 +561,10 @@ CA
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <menu key="submenu" title="Preview" id="1238">
                         <items>
-                            <menuItem title="(Multi)Markdown" tag="13372" id="1242">
+                            <menuItem title="MultiMarkdown" tag="13372" id="1242">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="selectPreviewMode:" target="213" id="1248"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Textile" tag="13373" id="1241">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <action selector="selectPreviewMode:" target="213" id="1252"/>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="1243"/>
@@ -678,34 +667,22 @@ CA
                             <menuItem isSeparatorItem="YES" id="1058">
                                 <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                             </menuItem>
-                            <menuItem title="nvALT Home" tag="5" id="1284">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <action selector="showHelpDocument:" target="213" id="1289"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Elasticthreads Web Site" tag="6" id="1285">
+                            <menuItem title="nv27 GitHub" tag="6" id="1285">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="showHelpDocument:" target="213" id="1290"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Brett Terpstra Web Site" tag="7" id="1286">
+                            <menuItem title="nvALT Website" tag="5" id="1284">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
-                                    <action selector="showHelpDocument:" target="213" id="1291"/>
+                                    <action selector="showHelpDocument:" target="213" id="1289"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Notational Velocity Web Site" tag="3" id="1053">
+                            <menuItem title="Notational Velocity Website" tag="3" id="1053">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="showHelpDocument:" target="213" id="1091"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Development Web Site" tag="4" id="1087">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <action selector="showHelpDocument:" target="213" id="1090"/>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="1057">
@@ -737,11 +714,8 @@ CA
                 <outlet property="savePreviewItem" destination="1239" id="1378"/>
                 <outlet property="sparkleUpdateItem" destination="990" id="1052"/>
                 <outlet property="statBarMenu" destination="1130" id="1165"/>
-                <outlet property="syncWaitPanel" destination="1079" id="1085"/>
-                <outlet property="syncWaitSpinner" destination="1082" id="1084"/>
                 <outlet property="textScrollView" destination="1016" id="1276"/>
                 <outlet property="textView" destination="1017" id="1030"/>
-                <outlet property="textilePreview" destination="1241" id="1250"/>
                 <outlet property="window" destination="21" id="217"/>
                 <outlet property="wordCounter" destination="1270" id="1272"/>
             </connections>
@@ -802,46 +776,6 @@ CA
                 <outlet property="nextKeyView" destination="1067" id="1306"/>
             </connections>
         </customView>
-        <window allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" hidesOnDeactivate="YES" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" id="1079" userLabel="quit waiting" customClass="NSPanel">
-            <windowStyleMask key="styleMask" titled="YES"/>
-            <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-            <rect key="contentRect" x="454" y="634" width="353" height="106"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1440" height="878"/>
-            <value key="minSize" type="size" width="213" height="107"/>
-            <view key="contentView" id="1080">
-                <rect key="frame" x="0.0" y="0.0" width="353" height="106"/>
-                <autoresizingMask key="autoresizingMask"/>
-                <subviews>
-                    <button verticalHuggingPriority="750" id="1081">
-                        <rect key="frame" x="240" y="12" width="99" height="32"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                        <buttonCell key="cell" type="push" title="Quit Now" bezelStyle="rounded" alignment="center" borderStyle="border" inset="2" id="1104">
-                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                            <font key="font" metaFont="system"/>
-                            <string key="keyEquivalent" base64-UTF8="YES">
-DQ
-</string>
-                        </buttonCell>
-                        <connections>
-                            <action selector="syncWaitQuit:" target="213" id="1086"/>
-                        </connections>
-                    </button>
-                    <progressIndicator horizontalHuggingPriority="750" verticalHuggingPriority="750" maxValue="100" bezeled="NO" indeterminate="YES" style="spinning" id="1082">
-                        <rect key="frame" x="20" y="54" width="32" height="32"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </progressIndicator>
-                    <textField verticalHuggingPriority="750" id="1083">
-                        <rect key="frame" x="70" y="60" width="266" height="20"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                        <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Waiting for changes to finish uploading…" id="1105">
-                            <font key="font" metaFont="system"/>
-                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                        </textFieldCell>
-                    </textField>
-                </subviews>
-            </view>
-        </window>
         <menu title="barMenu" id="1130">
             <items>
                 <menuItem title="Bookmarks" tag="901" id="1203">
@@ -1019,19 +953,19 @@ CA
                     </menu>
                 </menuItem>
                 <menuItem isSeparatorItem="YES" id="1139"/>
-                <menuItem title="About nvALT" id="1545">
+                <menuItem title="About nv27" id="1545">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
-                        <action selector="orderFrontStandardAboutPanel:" target="-2" id="1546"/>
+                        <action selector="showAboutPanel:" target="213" id="1546"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Preferences…" keyEquivalent="," id="1180">
+                <menuItem title="Settings…" keyEquivalent="," id="1180">
                     <connections>
                         <action selector="showPreferencesWindow:" target="213" id="1181"/>
                     </connections>
                 </menuItem>
                 <menuItem title="Check for Updates…" tag="902" id="1206"/>
-                <menuItem title="Quit nvALT" keyEquivalent="q" id="1183">
+                <menuItem title="Quit nv27" keyEquivalent="q" id="1183">
                     <connections>
                         <action selector="terminate:" target="-2" id="1184"/>
                     </connections>

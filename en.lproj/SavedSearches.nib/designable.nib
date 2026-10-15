@@ -78,7 +78,7 @@
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
                     </scrollView>
-                    <button toolTip="Create an account." verticalHuggingPriority="750" id="367">
+                    <button toolTip="Bookmark the selected note" verticalHuggingPriority="750" id="367">
                         <rect key="frame" x="9" y="6" width="25" height="25"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <buttonCell key="cell" type="roundTextured" title="+" bezelStyle="texturedRounded" alignment="center" borderStyle="border" inset="2" id="383">
@@ -90,7 +90,7 @@
                             <outlet property="nextKeyView" destination="368" id="369"/>
                         </connections>
                     </button>
-                    <button toolTip="Remove an account." verticalHuggingPriority="750" id="368">
+                    <button toolTip="Remove the selected bookmark" verticalHuggingPriority="750" id="368">
                         <rect key="frame" x="36" y="6" width="23" height="25"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <buttonCell key="cell" type="roundTextured" title="-" bezelStyle="texturedRounded" alignment="center" enabled="NO" borderStyle="border" inset="2" id="384">

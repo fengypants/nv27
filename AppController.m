@@ -10,7 +10,6 @@
  or promote products derived from this software without specific prior written permission. */
 //ET NV4
 
-//#import "NSTextFinder.h"
 #import "AppController.h"
 #import "NoteObject.h"
 #import "GlobalPrefs.h"
@@ -18,8 +17,8 @@
 #import "AppController_Importing.h"
 #import "NotationPrefs.h"
 #import "PrefsWindowController.h"
+#import "ShortcutsWindowController.h"
 #import "NoteAttributeColumn.h"
-#import "NotationSyncServiceManager.h"
 #import "NotationDirectoryManager.h"
 #import "NotationFileManager.h"
 #import "NSString_NV.h"
@@ -29,19 +28,15 @@
 #import "ExternalEditorListController.h"
 #import "NSData_transformations.h"
 #import "BufferUtils.h"
+#import "NSString_CustomTruncation.h"
 #import "LinkingEditor.h"
 #import "EmptyView.h"
 #import "DualField.h"
-#import "TitlebarButton.h"
 #import "RBSplitView/RBSplitView.h"
 #import "BookmarksController.h"
-#import "SyncSessionController.h"
 #import "MultiplePageView.h"
-#import "InvocationRecorder.h"
 #import "LinearDividerShader.h"
-#import "SecureTextEntryManager.h"
 #import "TagEditingManager.h"
-#import "NotesTableHeaderCell.h"
 #import "DFView.h"
 #import "ETContentView.h"
 #import "PreviewController.h"
@@ -49,7 +44,6 @@
 //#import "ETScrollView.h"
 #import "NSFileManager+DirectoryLocations.h"
 #import "nvaDevConfig.h"
-#import <Sparkle/SUUpdater.h>
 
 #define NSApplicationPresentationAutoHideMenuBar (1 <<  2)
 #define NSApplicationPresentationHideMenuBar (1 <<  3)
@@ -57,12 +51,13 @@
 #define NSApplicationPresentationHideDock (1 <<  1)
 //#define NSApplicationActivationPolicyAccessory
 
-#define kSparkleUpdateFeedForLions @"https://updates.designheresy.com/nvalt/updates.xml"
-#define kSparkleUpdateFeedForSnowLeopard @"http://abyss.designheresy.com/nvalt2/nvalt2snowleopardfeed.xml"
 //http://abyss.designheresy.com/nvalt/betaupdates.xml
 
-#define kSplitViewExpandedDividerThickness 8.0f
-#define kSplitViewCollapsedDividerThickness 5.0f
+//a standard thin divider (like NSSplitViewDividerStyleThin); kSplitViewDividerGrabMargin widens the area that can
+//be dragged on each side of the line
+#define kSplitViewExpandedDividerThickness 1.0f
+#define kSplitViewCollapsedDividerThickness 1.0f
+#define kSplitViewDividerGrabMargin 3.0f
 
 //#define NSTextViewChangedNotification @"TextViewHasChangedContents"
 //#define kDefaultMarkupPreviewMode @"markupPreviewMode"
@@ -103,23 +98,16 @@ BOOL splitViewAwoke;
         
         hasLaunched=NO;
         
+        [self applyAppearancePreference];
+        [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver:self selector:@selector(accessibilityDisplayOptionsDidChange:)
+                                                                   name:NSWorkspaceAccessibilityDisplayOptionsDidChangeNotification object:nil];
+        
         if (![[NSUserDefaults standardUserDefaults] boolForKey:@"ShowDockIcon"]){
-            if (IsLionOrLater) {
-                ProcessSerialNumber psn = { 0, kCurrentProcess };
-                OSStatus returnCode = TransformProcessType(&psn, kProcessTransformToUIElementApplication);
-                if( returnCode != 0) {
-                    NSLog(@"Could not bring the application to front. Error %d", returnCode);
-                }                
-            }
+            //no Dock icon: run as an accessory app, reachable from the menu bar icon
+            [NSApp setActivationPolicy:NSApplicationActivationPolicyAccessory];
             if (![[NSUserDefaults standardUserDefaults] boolForKey:@"StatusBarItem"]) {
                 [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"StatusBarItem"];
             }
-        }else{
-            if (!IsLionOrLater) {
-                enum {NSApplicationActivationPolicyRegular};
-                [[NSApplication sharedApplication] setActivationPolicy:NSApplicationActivationPolicyRegular];
-            }
-        
         }
         
         splitViewAwoke = NO;
@@ -250,13 +238,17 @@ BOOL splitViewAwoke;
 	}
 	
 	currentPreviewMode = [[NSUserDefaults standardUserDefaults] integerForKey:@"markupPreviewMode"];
+    if (currentPreviewMode == TextilePreview) {
+        //Textile support was removed; carry anyone who used it over to MultiMarkdown
+        currentPreviewMode = MultiMarkdownPreview;
+        [[NSUserDefaults standardUserDefaults] setInteger:currentPreviewMode forKey:@"markupPreviewMode"];
+    }
     if (currentPreviewMode == MarkdownPreview) {
         [multiMarkdownPreview setState:NSOnState];
     } else if (currentPreviewMode == MultiMarkdownPreview) {
         [multiMarkdownPreview setState:NSOnState];
-    } else if (currentPreviewMode == TextilePreview) {
-        [textilePreview setState:NSOnState];
     }
+
 	
 	outletObjectAwoke(self);
 }
@@ -346,35 +338,11 @@ void outletObjectAwoke(id sender) {
     [prefsController registerAppActivationKeystrokeWithTarget:self selector:@selector(toggleNVActivation:)];
     [notationController updateLabelConnectionsAfterDecoding];
     [notationController checkIfNotationIsTrashed];
-    [[SecureTextEntryManager sharedInstance] checkForIncompatibleApps];
 
-    //connect sparkle programmatically to avoid loading its framework at nib awake;
-    //    if (!NSClassFromString(@"SUUpdater")) {
-    //        NSLog(@"su:%@ SEL:%@",sparkleUpdateItem.target,sparkleUpdateItem.action);
-    //    }else{
-    NSString *frameworkPath = [[[NSBundle bundleForClass:[self class]] privateFrameworksPath] stringByAppendingPathComponent:@"Sparkle.framework"];
-    if ([[NSBundle bundleWithPath:frameworkPath] load]) {
-        SUUpdater *updater =[SUUpdater sharedUpdater];
-        if (IsLionOrLater) {
-            [updater setFeedURL:[NSURL URLWithString:kSparkleUpdateFeedForLions]];
-        }else{
-            [updater setFeedURL:[NSURL URLWithString:kSparkleUpdateFeedForSnowLeopard]];
-        }
-        [sparkleUpdateItem setTarget:updater];
-        [sparkleUpdateItem setAction:@selector(checkForUpdates:)];
-        NSMenuItem *siSparkle = [statBarMenu itemWithTag:902];
-        [siSparkle setTarget:updater];
-        [siSparkle setAction:@selector(checkForUpdates:)];
-        if (![[prefsController notationPrefs] firstTimeUsed]) {
-            //don't do anything automatically on the first launch; afterwards, check every 4 days, as specified in Info.plist
-            //				SEL checksSEL = @selector(setAutomaticallyChecksForUpdates:);
-            [updater setAutomaticallyChecksForUpdates:YES];
-            //				[updater methodForSelector:checksSEL](updater, checksSEL, YES);
-        }
-    } else {
-        NSLog(@"Could not load %@!", frameworkPath);
-    }
-    //    }
+    //Sparkle (and its update feed, which serves the original Intel-only nvALT) has been removed;
+    //hide the "Check for Updates…" items until an updater for this build is set up
+    [sparkleUpdateItem setHidden:YES];
+    [[statBarMenu itemWithTag:902] setHidden:YES];
     // add elasticthreads' menuitems
     if(IsLeopardOrLater){
         [fsMenuItem setEnabled:YES];
@@ -513,13 +481,14 @@ void outletObjectAwoke(id sender) {
 	 @selector(setNoteBodyFont:sender:),  //when to tell notationcontroller to restyle its notes
 	 @selector(setForegroundTextColor:sender:),  //ditto
 	 @selector(setBackgroundTextColor:sender:),  //ditto
+	 @selector(setForegroundTextColorDark:sender:), @selector(setBackgroundTextColorDark:sender:),  //ditto, for dark mode
 	 @selector(setTableFontSize:sender:),  //when to tell notationcontroller to regenerate the (now potentially too-short) note-body previews
 	 @selector(addTableColumn:sender:),  //ditto
 	 @selector(removeTableColumn:sender:),  //ditto
 	 @selector(setTableColumnsShowPreview:sender:),  //when to tell notationcontroller to generate or disable note-body previews
 	 @selector(setConfirmNoteDeletion:sender:),  //whether "delete note" should have an ellipsis
      @selector(setUseFinderTags:),  //whether nvalt should use findertags
-	 @selector(setAutoCompleteSearches:sender:),@selector(setUseETScrollbarsOnLion:sender:), nil];   //when to tell notationcontroller to build its title-prefix connections
+	 @selector(setAutoCompleteSearches:sender:), nil];   //when to tell notationcontroller to build its title-prefix connections
 	
 	[self performSelector:@selector(runDelayedUIActionsAfterLaunch) withObject:nil afterDelay:0.0];
     
@@ -547,8 +516,6 @@ terminateApp:
     if (newNotation) {
 		if (notationController) {
 			[notationController closeAllResources];
-			[[NSNotificationCenter defaultCenter] removeObserver:self name:SyncSessionsChangedVisibleStatusNotification
-														  object:[notationController syncSessionController]];
 		}
 		
 		NotationController *oldNotation = notationController;
@@ -583,18 +550,6 @@ terminateApp:
 			[self _forceRegeneratePreviewsForTitleColumn];
 			[notesTableView setNeedsDisplay:YES];
 		}
-		[titleBarButton setMenu:[[notationController syncSessionController] syncStatusMenu]];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(syncSessionsChangedVisibleStatus:)
-													 name:SyncSessionsChangedVisibleStatusNotification
-												   object:[notationController syncSessionController]];
-		[notationController performSelector:@selector(startSyncServices) withObject:nil afterDelay:0.0];
-		
-		if ([[notationController notationPrefs] secureTextEntry]) {
-			[[SecureTextEntryManager sharedInstance] enableSecureTextEntry];
-		} else {
-			[[SecureTextEntryManager sharedInstance] disableSecureTextEntry];
-		}
-		
 		[field selectText:nil];
 		
 		[oldNotation autorelease];
@@ -628,7 +583,7 @@ terminateApp:
 	NSInteger numberSelected = [notesTableView numberOfSelectedRows];
 	NSInteger tag = [menuItem tag];
     
-    if ((tag == TextilePreview) || (tag == MarkdownPreview) || (tag == MultiMarkdownPreview)) {
+    if ((tag == MarkdownPreview) || (tag == MultiMarkdownPreview)) {
         // Allow only one Preview mode to be selected at every one time
         [menuItem setState:((tag == currentPreviewMode) ? NSOnState : NSOffState)];
         return YES;
@@ -669,6 +624,11 @@ terminateApp:
         //		}
         //		[menuItem setTitle:[@"Open Note in " stringByAppendingString:defApp]];
         //		return (numberSelected == 1) && [notationController currentNoteStorageFormat] != SingleDatabaseFormat;
+	} else if (selector == @selector(toggleWordCount:)) {
+        //shows or hides part of the window, so the title changes (as View > Show/Hide Sidebar does) rather than a checkmark
+        [menuItem setTitle:[prefsController showWordCount] ? NSLocalizedString(@"Show Word Count", @"menu item title for showing the word count") :
+         NSLocalizedString(@"Hide Word Count", @"menu item title for hiding the word count")];
+        [menuItem setState:NSControlStateValueOff];
 	} else if (selector == @selector(toggleCollapse:)) {
         if ([notesSubview isCollapsed]) {
             [menuItem setTitle:NSLocalizedString(@"Expand Notes List",@"menu item title for expanding notes list")];
@@ -1060,20 +1020,10 @@ terminateApp:
 		if (currentNote) {
 			[self contentsUpdatedForNote:currentNote];
 		}
-	} else if ([selectorString isEqualToString:SEL_STR(setForegroundTextColor:sender:)]) {
-		if (userScheme!=2) {
-			[self setUserColorScheme:self];
-		}else {
-			[self setForegrndColor:[prefsController foregroundTextColor]];
-			[self updateColorScheme];
-		}
-	} else if ([selectorString isEqualToString:SEL_STR(setBackgroundTextColor:sender:)]) {
-		if (userScheme!=2) {
-			[self setUserColorScheme:self];
-		}else {
-			[self setBackgrndColor:[prefsController backgroundTextColor]];
-			[self updateColorScheme];
-		}
+	} else if ([selectorString isEqualToString:SEL_STR(setForegroundTextColor:sender:)] || [selectorString isEqualToString:SEL_STR(setBackgroundTextColor:sender:)] ||
+			   [selectorString isEqualToString:SEL_STR(setForegroundTextColorDark:sender:)] || [selectorString isEqualToString:SEL_STR(setBackgroundTextColorDark:sender:)]) {
+		//editing the User Scheme's colors switches to (or refreshes) the User Scheme
+		[self setUserColorScheme:self];
 		
 	} else if ([selectorString isEqualToString:SEL_STR(setTableFontSize:sender:)] || [selectorString isEqualToString:SEL_STR(setTableColumnsShowPreview:sender:)]) {
 		
@@ -1121,26 +1071,21 @@ terminateApp:
 	
 	switch ([sender tag]) {
 		case 1:		//shortcuts
-			path = [[NSBundle mainBundle] pathForResource:NSLocalizedString(@"Excruciatingly Useful Shortcuts", nil) ofType:@"nvhelp" inDirectory:nil];
+			[[ShortcutsWindowController sharedController] showWindow:self];
+			break;
 		case 2:		//acknowledgments
-			if (!path) path = [[NSBundle mainBundle] pathForResource:@"Acknowledgments" ofType:@"txt" inDirectory:nil];
+			path = [[NSBundle mainBundle] pathForResource:@"Acknowledgments" ofType:@"txt" inDirectory:nil];
 			[[NSWorkspace sharedWorkspace] openURLs:[NSArray arrayWithObject:[NSURL fileURLWithPath:path]] withAppBundleIdentifier:@"com.apple.TextEdit"
 											options:NSWorkspaceLaunchDefault additionalEventParamDescriptor:nil launchIdentifiers:NULL];
 			break;
 		case 3:		//product site
 			[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:NSLocalizedString(@"SiteURL", nil)]];
 			break;
-		case 4:		//development site
-			[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://github.com/ttscoff/nv/wiki"]];
-			break;
-        case 5:     //nvALT home
-            [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://brettterpstra.com/project/nvalt/"]];
+        case 5:     //nvALT website
+            [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://brettterpstra.com/project/nvalt/"]];
             break;
-        case 6:     //ElasticThreads
-            [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://elasticthreads.tumblr.com/nv"]];
-            break;
-        case 7:     //Brett Terpstra
-            [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://brettterpstra.com"]];
+        case 6:     //nv27 on GitHub
+            [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://github.com/fengypants/nv27"]];
             break;
 		default:
 			NSBeep();
@@ -2103,17 +2048,27 @@ terminateApp:
 	}
 }
 
-- (void)syncSessionsChangedVisibleStatus:(NSNotification*)aNotification {
-	SyncSessionController *syncSessionController = [aNotification object];
-	if ([syncSessionController hasErrors]) {
-		[titleBarButton setStatusIconType:AlertIcon];
-	} else if ([syncSessionController hasRunningSessions]) {
-		[titleBarButton setStatusIconType:SynchronizingIcon];
-	} else {
-		[titleBarButton setStatusIconType: [[NSUserDefaults standardUserDefaults] boolForKey:@"ShowSyncMenu"] ? DownArrowIcon : NoIcon ];
-	}
+//the standard About panel, with the credits set in the system font and label color (so they also read correctly
+//in Dark Mode) instead of coming from an HTML file in the default serif font
+- (IBAction)showAboutPanel:(id)sender {
+	NSMutableParagraphStyle *centered = [[[NSMutableParagraphStyle alloc] init] autorelease];
+	[centered setAlignment:NSTextAlignmentCenter];
+	NSDictionary *attributes = [NSDictionary dictionaryWithObjectsAndKeys:
+								[NSFont systemFontOfSize:[NSFont smallSystemFontSize]], NSFontAttributeName,
+								[NSColor labelColor], NSForegroundColorAttributeName,
+								centered, NSParagraphStyleAttributeName, nil];
+	
+	NSString *repository = @"github.com/fengypants/nv27";
+	NSString *text = [NSString stringWithFormat:@"A simplified nvALT for Apple silicon.\n\n"
+					  @"Based on nvALT by Brett Terpstra and David Halter, and Notational Velocity by Zachary Schneirov. "
+					  @"Markdown preview by cmark-gfm.\n\n%@", repository];
+	NSMutableAttributedString *credits = [[[NSMutableAttributedString alloc] initWithString:text attributes:attributes] autorelease];
+	[credits addAttribute:NSLinkAttributeName value:[NSURL URLWithString:@"https://github.com/fengypants/nv27"]
+					range:[text rangeOfString:repository]];
+	
+	[NSApp activate];
+	[NSApp orderFrontStandardAboutPanelWithOptions:[NSDictionary dictionaryWithObject:credits forKey:NSAboutPanelOptionCredits]];
 }
-
 
 - (IBAction)fixFileEncoding:(id)sender {
 	if (currentNote) {
@@ -2135,42 +2090,6 @@ terminateApp:
     if ([prefsController quitWhenClosingWindow]){
 		[NSApp terminate:nil];
     }
-}
-
-- (void)_finishSyncWait {
-	//always post to next runloop to ensure that a sleep-delay response invocation, if one is also queued, runs before this one
-	//if the app quits before the sleep-delay response posts, then obviously sleep will be delayed by quite a bit
-	[self performSelector:@selector(syncWaitQuit:) withObject:nil afterDelay:0];
-}
-
-- (IBAction)syncWaitQuit:(id)sender {
-	//need this variable to allow overriding the wait
-	waitedForUncommittedChanges = YES;
-	NSString *errMsg = [[notationController syncSessionController] changeCommittingErrorMessage];
-	if ([errMsg length]) NSRunAlertPanel(NSLocalizedString(@"Changes could not be uploaded.", nil), errMsg, @"Quit", nil, nil);
-	
-	[NSApp terminate:nil];
-}
-
-- (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender {
-	//if a sync session is still running, then wait for it to finish before sending terminatereply
-	//otherwise, if there are unsynced notes to send, then push them right now and wait until session is no longer running
-	//use waitForUncommitedChangesWithTarget:selector: and provide a callback to send NSTerminateNow
-	
-	InvocationRecorder *invRecorder = [InvocationRecorder invocationRecorder];
-	[[invRecorder prepareWithInvocationTarget:self] _finishSyncWait];
-	
-	if (!waitedForUncommittedChanges &&
-		[[notationController syncSessionController] waitForUncommitedChangesWithInvocation:[invRecorder invocation]]) {
-		
-		[[NSApp windows] makeObjectsPerformSelector:@selector(orderOut:) withObject:nil];
-		[syncWaitPanel center];
-		[syncWaitPanel makeKeyAndOrderFront:nil];
-		[syncWaitSpinner startAnimation:nil];
-		//use NSTerminateCancel instead of NSTerminateLater because we need the runloop functioning in order to receive start/stop sync notifications
-		return NSTerminateCancel;
-	}
-	return NSTerminateNow;
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
@@ -2340,16 +2259,33 @@ terminateApp:
 
 - (NSRect)splitView:(RBSplitView*)sender willDrawDividerInRect:(NSRect)dividerRect betweenView:(RBSplitSubview*)leading
 			andView:(RBSplitSubview*)trailing withProposedRect:(NSRect)imageRect {
-	[dividerShader drawDividerInRect:dividerRect withDimpleRect:imageRect blendVertically:![prefsController horizontalLayout]];
+	[[NSColor separatorColor] setFill];
+	NSRectFillUsingOperation(dividerRect, NSCompositingOperationSourceOver);
 	
 	return NSZeroRect;
 }
 
+//the divider's line plus kSplitViewDividerGrabMargin on either side, in the split view's coordinates
+- (NSRect)_dividerGrabRectOfSplitView:(RBSplitView*)sender {
+	if ([sender numberOfSubviews] < 2) return NSZeroRect;
+	NSRect leading = [[sender subviewAtPosition:0] frame], trailing = [[sender subviewAtPosition:1] frame];
+	NSRect bounds = [sender bounds];
+	if ([sender isVertical]) {
+		CGFloat lo = MIN(NSMaxX(leading), NSMinX(trailing)), hi = MAX(NSMaxX(leading), NSMinX(trailing));
+		return NSMakeRect(lo - kSplitViewDividerGrabMargin, NSMinY(bounds), hi - lo + 2 * kSplitViewDividerGrabMargin, NSHeight(bounds));
+	}
+	CGFloat lo = MIN(MIN(NSMaxY(leading), NSMaxY(trailing)), MAX(NSMinY(leading), NSMinY(trailing)));
+	CGFloat hi = MAX(MIN(NSMaxY(leading), NSMaxY(trailing)), MAX(NSMinY(leading), NSMinY(trailing)));
+	return NSMakeRect(NSMinX(bounds), lo - kSplitViewDividerGrabMargin, NSWidth(bounds), hi - lo + 2 * kSplitViewDividerGrabMargin);
+}
+
+- (NSRect)splitView:(RBSplitView*)sender cursorRect:(NSRect)rect forDivider:(NSUInteger)divider {
+	return NSIsEmptyRect(rect) ? rect : [self _dividerGrabRectOfSplitView:sender];
+}
+
 - (NSUInteger)splitView:(RBSplitView*)sender dividerForPoint:(NSPoint)point inSubview:(RBSplitSubview*)subview {
-	//if ([(AugmentedScrollView*)[notesTableView enclosingScrollView] shouldDragWithPoint:point sender:sender]) {
-	//	return 0;       // [firstSplit position], which we assume to be zero
-	//}
-	return NSNotFound;
+	//the thin divider can also be dragged from just beside it, as with NSSplitView
+	return NSPointInRect(point, [self _dividerGrabRectOfSplitView:sender]) ? 0 : NSNotFound;
 }
 
 - (BOOL)splitView:(RBSplitView*)sender canCollapse:(RBSplitSubview*)subview {
@@ -2407,7 +2343,13 @@ terminateApp:
             if (([window firstResponder]==notesTableView)||(isEditing&&([notesTableView editedRow]==rowIndex))) {//([notesTableView rowHeight]>30.0)||
                 [aCell setTextColor:[NSColor whiteColor]];
                 return;
-            }else if ([[foregrndColor colorUsingColorSpaceName:NSCalibratedWhiteColorSpace] whiteComponent]>0.5) {                    
+            }
+            //an inactive selection is light gray in light mode and dark gray in dark mode: pick text that reads on it
+            BOOL lightText = [[foregrndColor colorUsingColorSpaceName:NSCalibratedWhiteColorSpace] whiteComponent]>0.5;
+            if ([self appearanceIsDark] && !lightText) {
+                [aCell setTextColor:[NSColor whiteColor]];
+                return;
+            } else if (![self appearanceIsDark] && lightText) {
                 [aCell setTextColor:[NSColor colorWithCalibratedWhite:0.2 alpha:1.0]];
                 return;
             }
@@ -2563,12 +2505,27 @@ terminateApp:
 	[toolbar setDelegate:self];
 	[window setToolbar:toolbar];
 	
+	//put the search field on its own row below the window title, spanning the window (the default unified
+	//style squeezes toolbar items into the title bar next to the title); the preference style does this
+	//with the title centered, where the expanded style puts it at the leading edge
+	[window setToolbarStyle:NSWindowToolbarStylePreference];
+	[window setTitleVisibility:NSWindowTitleVisible];
 	[window setShowsToolbarButton:NO];
-	titleBarButton = [[TitlebarButton alloc] initWithFrame:NSMakeRect(0, 0, 19.0, 19.0) pullsDown:YES];
-	[titleBarButton addToWindow:window];
+	//the preference style centers items at their minimum size, so keep the field as wide as the window
+	[self updateSearchFieldWidth:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateSearchFieldWidth:)
+												 name:NSWindowDidResizeNotification object:window];
 	
 	[field setDelegate:self];
     [self setDualFieldIsVisible:[self dualFieldIsVisible]];
+}
+
+- (void)updateSearchFieldWidth:(NSNotification*)aNotification {
+	if (!dualFieldItem || [window toolbar] != toolbar) return;
+	CGFloat width = MAX(50.0, NSWidth([[window contentView] frame]) - 2 * 10.0);
+	CGFloat height = [dualFieldItem minSize].height;
+	[dualFieldItem setMinSize:NSMakeSize(width, height)];
+	[dualFieldItem setMaxSize:NSMakeSize(width, height)];
 }
 
 - (void)setDualFieldInView {
@@ -2600,7 +2557,6 @@ terminateApp:
     [textView setNextKeyView:field];
     [self setDualFieldIsVisible:[self dualFieldIsVisible]];
     [toolbar release];
-    [titleBarButton release];
 }
 
 - (void)setDualFieldIsVisible:(BOOL)isVis{
@@ -2620,7 +2576,7 @@ terminateApp:
     }
     //        [[NSUserDefaults standardUserDefaults] setBool:!isVis forKey:@"ToolbarHidden"];
     if (isVis) {
-        [window setTitle:@"nvALT"];
+        [window setTitle:[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleName"]];
         if (currentNote&&(![[field stringValue]isEqualToString:titleOfNote(currentNote)]))
             [field setStringValue:titleOfNote(currentNote)];
         
@@ -2823,13 +2779,77 @@ terminateApp:
 }
 
 #pragma mark color scheme methods
+
+//the fixed colors of the B/W (0) and Low Contrast (1) schemes, in a light and a dark variant
+static NSColor *SchemeColor(NSInteger scheme, BOOL background, BOOL dark) {
+    //with Accessibility > Display > Increase contrast on, Low Contrast falls back to B/W
+    if (scheme == 1 && [[NSWorkspace sharedWorkspace] accessibilityDisplayShouldIncreaseContrast])
+        scheme = 0;
+    NSColor *color;
+    if (scheme == 1) {
+        //softer than B/W but still about 8:1 contrast: soft charcoal on warm off-white ("paper"), and warm light
+        //gray on warm charcoal in dark mode
+        color = dark ? (background ? [NSColor colorWithSRGBRed:0x26/255.0 green:0x26/255.0 blue:0x24/255.0 alpha:1.0] :
+                                     [NSColor colorWithSRGBRed:0xC2/255.0 green:0xBF/255.0 blue:0xB8/255.0 alpha:1.0]) :
+                       (background ? [NSColor colorWithSRGBRed:0xF6/255.0 green:0xF5/255.0 blue:0xF2/255.0 alpha:1.0] :
+                                     [NSColor colorWithSRGBRed:0x4A/255.0 green:0x49/255.0 blue:0x46/255.0 alpha:1.0]);
+    } else {
+        //like the system's text views
+        color = [NSColor colorWithCalibratedWhite:dark ? (background ? 0.118 : 0.92) : (background ? 1.0 : 0.0) alpha:1.0];
+    }
+    return [color colorUsingColorSpaceName:NSCalibratedRGBColorSpace];
+}
+
+- (BOOL)appearanceIsDark {
+    NSAppearance *appearance = window ? [window effectiveAppearance] : [NSApp effectiveAppearance];
+    NSAppearanceName name = [appearance bestMatchFromAppearancesWithNames:
+                             [NSArray arrayWithObjects:NSAppearanceNameAqua, NSAppearanceNameDarkAqua, nil]];
+    return [name isEqualToString:NSAppearanceNameDarkAqua];
+}
+
+//Settings > General > Appearance: 0 follows the system, 1 is always light, 2 always dark
+//the User Scheme's colors (Settings > Fonts & Colors) for the current appearance
+- (NSColor *)userSchemeColor:(BOOL)background {
+    GlobalPrefs *prefs = [GlobalPrefs defaultPrefs];
+    NSColor *color = [self appearanceIsDark] ? (background ? [prefs backgroundTextColorDark] : [prefs foregroundTextColorDark]) :
+        (background ? [prefs backgroundTextColor] : [prefs foregroundTextColor]);
+    return color ? color : (background ? [NSColor textBackgroundColor] : [NSColor textColor]);
+}
+
+- (void)applyAppearancePreference {
+    NSInteger choice = [[NSUserDefaults standardUserDefaults] integerForKey:@"AppAppearance"];
+    [NSApp setAppearance:choice == 1 ? [NSAppearance appearanceNamed:NSAppearanceNameAqua] :
+     choice == 2 ? [NSAppearance appearanceNamed:NSAppearanceNameDarkAqua] : nil];
+}
+
+//Accessibility's Increase contrast setting changed: Low Contrast switches to (or back from) the B/W colors
+- (void)accessibilityDisplayOptionsDidChange:(NSNotification *)aNotification {
+    if (userScheme == 1)
+        [self setLCColorScheme:self];
+}
+
+//called by the notes list when its effective appearance changes (the system switched between light and dark, or
+//the Appearance setting changed): re-pick the light or dark colors of the current scheme
+- (void)appearanceDidChange {
+    static NSInteger lastDark = -1;
+    NSInteger dark = [self appearanceIsDark];
+    if (dark == lastDark) return;
+    lastDark = dark;
+    if (userScheme == 0) {
+        [self setBWColorScheme:self];
+    } else if (userScheme == 1) {
+        [self setLCColorScheme:self];
+    } else if (userScheme == 2) {
+        [self setUserColorScheme:self];
+    }
+}
     
     - (IBAction)setBWColorScheme:(id)sender{
         userScheme=0;
         [[NSUserDefaults standardUserDefaults] setInteger:userScheme forKey:@"ColorScheme"];
         
-        [self setForegrndColor:[[NSColor colorWithCalibratedWhite:0.02f alpha:1.0f]colorUsingColorSpaceName:NSCalibratedRGBColorSpace]];
-        [self setBackgrndColor:[[NSColor colorWithCalibratedWhite:0.98f alpha:1.0f]colorUsingColorSpaceName:NSCalibratedRGBColorSpace]];
+        [self setForegrndColor:SchemeColor(0, NO, [self appearanceIsDark])];
+        [self setBackgrndColor:SchemeColor(0, YES, [self appearanceIsDark])];
         NSMenu *mainM = [NSApp mainMenu];
         NSMenu *viewM = [[mainM itemWithTitle:@"View"] submenu];
         mainM = [[viewM itemWithTitle:@"Color Schemes"] submenu];
@@ -2848,9 +2868,8 @@ terminateApp:
         userScheme=1;
         [[NSUserDefaults standardUserDefaults] setInteger:userScheme forKey:@"ColorScheme"];
 
-        [self setForegrndColor:[NSColor colorWithCalibratedRed:0.2430 green:0.2430 blue:0.2430 alpha:1.0]];
-        
-        [self setBackgrndColor:[NSColor colorWithCalibratedRed:0.902 green:0.902 blue:0.902 alpha:1.0]];
+        [self setForegrndColor:SchemeColor(1, NO, [self appearanceIsDark])];
+        [self setBackgrndColor:SchemeColor(1, YES, [self appearanceIsDark])];
         NSMenu *mainM = [NSApp mainMenu];
         NSMenu *viewM = [[mainM itemWithTitle:@"View"] submenu];
         mainM = [[viewM itemWithTitle:@"Color Schemes"] submenu];
@@ -2868,8 +2887,8 @@ terminateApp:
     - (IBAction)setUserColorScheme:(id)sender{
         userScheme=2;
         [[NSUserDefaults standardUserDefaults] setInteger:userScheme forKey:@"ColorScheme"];
-        [self setForegrndColor:[prefsController foregroundTextColor]];
-        [self setBackgrndColor:[prefsController backgroundTextColor]];
+        [self setForegrndColor:[self userSchemeColor:NO]];
+        [self setBackgrndColor:[self userSchemeColor:YES]];
         NSMenu *mainM = [NSApp mainMenu];
         NSMenu *viewM = [[mainM itemWithTitle:@"View"] submenu];
         mainM = [[viewM itemWithTitle:@"Color Schemes"] submenu];
@@ -2890,7 +2909,6 @@ terminateApp:
         [dualFieldView setBackgroundColor:backgrndColor];
     }
     [mainView setBackgroundColor:backgrndColor];
-    [NotesTableHeaderCell setTxtColor:foregrndColor];
     
     [notesTableView setGridColor:foregrndColor];
     [notesTableView setBackgroundColor:backgrndColor];
@@ -2949,18 +2967,10 @@ terminateApp:
             if (!userScheme) {
                 userScheme = [[NSUserDefaults standardUserDefaults] integerForKey:@"ColorScheme"];
             }
-            if (userScheme==0) {
-                theColor = [NSColor colorWithCalibratedRed:1.0f green:1.0f blue:1.0f alpha:1.0f];
-            }else if (userScheme==1) {
-                theColor = [NSColor colorWithCalibratedRed:0.874f green:0.874f blue:0.874f alpha:1.0f];
+            if (userScheme==0 || userScheme==1) {
+                theColor = SchemeColor(userScheme, YES, [self appearanceIsDark]);
             }else if (userScheme==2) {
-                NSData *theData = [[NSUserDefaults standardUserDefaults] dataForKey:@"BackgroundTextColor"];
-                if (theData){
-                    theColor = (NSColor *)[NSUnarchiver unarchiveObjectWithData:theData];
-                }else {
-                    theColor = [prefsController backgroundTextColor];
-                }
-                
+                theColor = [self userSchemeColor:YES];
             }else{
                 theColor =  [NSColor whiteColor];
             }
@@ -2979,18 +2989,10 @@ terminateApp:
             if (!userScheme) {
                 userScheme = [[NSUserDefaults standardUserDefaults] integerForKey:@"ColorScheme"];
             }            
-            if (userScheme==0) {
-                theColor = [NSColor colorWithCalibratedRed:0.0f green:0.0f blue:0.0f alpha:1.0f];
-            }else if (userScheme==1) {
-                theColor = [NSColor colorWithCalibratedRed:0.142f green:0.142f blue:0.142f alpha:1.0f];
+            if (userScheme==0 || userScheme==1) {
+                theColor = SchemeColor(userScheme, NO, [self appearanceIsDark]);
             }else if (userScheme==2) {
-                
-                NSData *theData = [[NSUserDefaults standardUserDefaults] dataForKey:@"ForegroundTextColor"];
-                if (theData){
-                    theColor = (NSColor *)[NSUnarchiver unarchiveObjectWithData:theData];
-                }else {
-                    theColor = [prefsController foregroundTextColor];
-                }
+                theColor = [self userSchemeColor:NO];
             }
             [self setForegrndColor:theColor];
             return theColor;
@@ -3034,10 +3036,10 @@ terminateApp:
     }
     
     - (IBAction)toggleWordCount:(id)sender{
-        
-        
-        [prefsController synchronize];
-        if ([prefsController showWordCount]) {
+        //the ShowWordCount default is YES while the word count is hidden (it then only pops up while a modifier key is held)
+        BOOL show = [prefsController showWordCount];
+        [prefsController setShowWordCount:!show];
+        if (show) {
             [self updateWordCount:YES];
             [wordCounter setHidden:NO];
             popped=1;
@@ -3046,11 +3048,6 @@ terminateApp:
             [wordCounter setStringValue:@""];
             popped=0;
         }
-        
-        if (![[sender className] isEqualToString:@"NSMenuItem"]) {
-            [prefsController setShowWordCount:![prefsController showWordCount]];
-        }
-        
     }
     
     - (void)flagsChanged:(NSEvent *)theEvent{
@@ -3270,66 +3267,20 @@ terminateApp:
     
 #pragma mark toggleDock
     - (void)togDockIcon:(NSNotification *)notification{
-        
-        [NSApp hide:self];
+        //switch between a regular app and one without a Dock icon (an accessory app) in place, then bring nv27 back
+        //to the front, since the switch can deactivate it
         BOOL showIt=[[notification object]boolValue];
-        if (showIt) {
-            [self performSelectorOnMainThread:@selector(showDockIcon) withObject:nil waitUntilDone:NO];
-        }else {
-            [self performSelectorOnMainThread:@selector(hideDockIconAfterDelay) withObject:nil waitUntilDone:NO];
-            
+        if (!showIt && !statusItem) {
+            [self setUpStatusBarItem];
         }
-    }
-    
-    - (void)showDockIcon{
-        if (IsLionOrLater) {
-            ProcessSerialNumber psn = { 0, kCurrentProcess };
-            OSStatus returnCode = TransformProcessType(&psn, kProcessTransformToForegroundApplication);
-            if( returnCode != 0) {
-                NSLog(@"Could not bring the application to front. Error %d", returnCode);
-            }
-
-        }else{
-            enum {NSApplicationActivationPolicyRegular};
-            [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
-        }
-              [self performSelector:@selector(reActivate:) withObject:self afterDelay:0.16];
-    }
-
-    - (void)hideDockIcon{
-        //    id fullPath = [[NSBundle mainBundle] executablePath];
-        //    NSArray *arg = [NSArray arrayWithObjects:nil];
-        //    [NSTask launchedTaskWithLaunchPath:fullPath arguments:arg];
-        //    [NSApp terminate:sender];
-        if (IsLionOrLater) {
-            ProcessSerialNumber psn = { 0, kCurrentProcess };
-            OSStatus returnCode = TransformProcessType(&psn, kProcessTransformToUIElementApplication);
-            if( returnCode != 0) {
-                NSLog(@"Could not bring the application to front. Error %d", returnCode);
-            }
-            if (!statusItem) {
-                [self setUpStatusBarItem];
-            }
-            
-            [self performSelector:@selector(reActivate:) withObject:self afterDelay:0.36];
-        }else{
-//            NSLog(@"hiding dock incon in snow leopard");
-            id fullPath = [[NSBundle mainBundle] executablePath];
-//            NSArray *arg = [NSArray arrayWithObjects:nil];
-            [NSTask launchedTaskWithLaunchPath:fullPath arguments:@[]];
-            [NSApp terminate:self];
-        }
-        
+        [NSApp setActivationPolicy:showIt ? NSApplicationActivationPolicyRegular : NSApplicationActivationPolicyAccessory];
+        [self performSelector:@selector(reActivate:) withObject:self afterDelay:0.1];
     }
     
     - (void)reActivate:(id)sender{
         [NSApp activateIgnoringOtherApps:YES];
     }
     
-    - (void)hideDockIconAfterDelay{
-        
-        [self performSelector:@selector(hideDockIcon) withObject:nil afterDelay:0.22];
-    }
 
 
 
@@ -3348,22 +3299,15 @@ terminateApp:
 
 - (void)setUpStatusBarItem{
 
-    NSImage *statusIcon=[NSImage imageNamed:@"nvMenuDark"];
-    [statusIcon setSize:NSMakeSize(16.0, 16.0)];
+    //a template SF Symbol, so the menu bar tints it like the system's own items
+    NSImage *statusIcon = [NSImage imageWithSystemSymbolName:@"note.text" accessibilityDescription:@"nv27"];
+    statusIcon = [statusIcon imageWithSymbolConfiguration:[NSImageSymbolConfiguration configurationWithPointSize:15.0 weight:NSFontWeightRegular]];
     [statusIcon setTemplate:YES];
-    statusItem =[[NSStatusBar systemStatusBar] statusItemWithLength:24.f];
-    if (IsYosemiteOrLater) {
-        statusItem.button.image=statusIcon;
-        statusItem.button.target=self;
-        statusItem.button.action=@selector(statusItemAction:);
-        [statusItem.button sendActionOn:NSEventMaskLeftMouseUp|NSEventMaskRightMouseUp];
-    }else{
-        statusItem.image=statusIcon;
-        statusItem.target=self;
-        statusItem.action=@selector(statusItemAction:);
-         [statusItem sendActionOn:NSEventMaskLeftMouseUp|NSEventMaskRightMouseUp];
-        statusItem.highlightMode=YES;
-    }
+    statusItem =[[NSStatusBar systemStatusBar] statusItemWithLength:NSSquareStatusItemLength];
+    statusItem.button.image=statusIcon;
+    statusItem.button.target=self;
+    statusItem.button.action=@selector(statusItemAction:);
+    [statusItem.button sendActionOn:NSEventMaskLeftMouseUp|NSEventMaskRightMouseUp];
     [statusItem retain];
 
 }

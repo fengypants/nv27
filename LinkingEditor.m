@@ -21,7 +21,6 @@
 #import "NSString_NV.h"
 #import "NVPasswordGenerator.h"
 #import "ETClipView.h"
-//#import "NSTextFinder.h"
 //#import "NVTextFinderAdditions.h"
 
 
@@ -38,23 +37,6 @@ static long (*GetGetScriptManagerVariablePointer())(short);
 
 #define kDefaultTextInsetWidth 8.0
 #define kDefaultTextInsetHeight 8.0
-
-@interface NSCursor (WhiteIBeamCursor)
-+ (NSCursor*)whiteIBeamCursor;
-@end
-
-@implementation NSCursor (WhiteIBeamCursor)
-
-+ (NSCursor*)whiteIBeamCursor {
-	static NSCursor *invertedIBeamCursor = nil;
-	if (!invertedIBeamCursor) {
-		invertedIBeamCursor = [[NSCursor alloc] initWithImage:[NSImage imageNamed:@"IBeamInverted"] hotSpot:NSMakePoint(4,5)];
-	}
-	return invertedIBeamCursor;	
-}
-
-@end
-
 
 @implementation LinkingEditor
 
@@ -90,10 +72,6 @@ CGFloat _perceptualDarkness(NSColor*a);
     [self prepareTextFinder];
     
 	[[self window] setAcceptsMouseMovedEvents:YES];
-	if (IsLeopardOrLater) {
-		defaultIBeamCursorIMP = method_getImplementation(class_getClassMethod([NSCursor class], @selector(IBeamCursor)));
-		whiteIBeamCursorIMP = method_getImplementation(class_getClassMethod([NSCursor class], @selector(whiteIBeamCursor)));
-	}
 	
 	didRenderFully = NO;
 	[[self layoutManager] setDelegate:self];
@@ -174,8 +152,6 @@ if ([selectorString isEqualToString:SEL_STR(setNoteBodyFont:sender:)]) {
 //    NSLog(@"exist :>%@<",self.defaultParagraphStyle);
 //    [self.textStorage setAttributes:@{NSParagraphStyleAttributeName:[NSParagraphStyle defaultParagraphStyle]} range:NSMakeRange(0, self.string.length)];
 //    NSLog(@"exist :>%@<",self.defaultParagraphStyle);
-	[self performSelector:@selector(_fixCursorForBackgroundUpdatingMouseInside:) withObject:[NSNumber numberWithBool:YES] afterDelay:0.0];
-	
 	return [super becomeFirstResponder];
 }
 
@@ -188,8 +164,6 @@ if ([selectorString isEqualToString:SEL_STR(setNoteBodyFont:sender:)]) {
 - (BOOL)resignFirstResponder {
 	[notesTableView setShouldUseSecondaryHighlightColor:NO];
 	
-	[self performSelector:@selector(_fixCursorForBackgroundUpdatingMouseInside:) withObject:[NSNumber numberWithBool:YES] afterDelay:0.0];
-	
 	return [super resignFirstResponder];
 }
 
@@ -200,7 +174,6 @@ if ([selectorString isEqualToString:SEL_STR(setNoteBodyFont:sender:)]) {
 
 - (void)setBackgroundColor:(NSColor*)aColor {
 	backgroundIsDark = (_perceptualDarkness([aColor colorUsingColorSpaceName:NSCalibratedRGBColorSpace]) > 0.5);
-    [self fixCursorForBackgroundUpdatingMouseInside:YES];
 	[super setBackgroundColor:aColor];
 }
 
@@ -262,6 +235,13 @@ CGFloat _perceptualColorDifference(NSColor*a, NSColor*b) {
 	//if foreground color is too dark for hue changes to matter, then just use blue
 	if (brightness <= 0.24)
 		return [NSColor blueColor];
+	
+	//prefer blue, as links usually are: a light blue (like the system's dark-mode link color) on dark backgrounds,
+	//a deep blue on light ones; rotate the hue only when blue wouldn't stand out from this color scheme
+	NSColor *blueLink = _perceptualDarkness(bgColor) > 0.5 ? [NSColor colorWithCalibratedRed:0.33 green:0.62 blue:1.0 alpha:1.0] :
+		[NSColor colorWithCalibratedRed:0.0 green:0.30 blue:0.85 alpha:1.0];
+	if (_perceptualColorDifference(blueLink, bgColor) >= 300.0 && _perceptualColorDifference(blueLink, fgColor) >= 170.0)
+		return blueLink;
 	
 	brightness = _perceptualDarkness(bgColor) > 0.5 ? MAX(0.75, brightness) : MIN(0.35, brightness);
 	
@@ -1090,60 +1070,6 @@ copyRTFType:
 }
 */
 
-- (void)mouseEntered:(NSEvent*)anEvent {
-//	mouseInside = YES;
-	[self fixCursorForBackgroundUpdatingMouseInside:YES];
-    [super mouseEntered:anEvent];
-}
-- (void)mouseExited:(NSEvent*)anEvent {
-	mouseInside = NO;
-	[self fixCursorForBackgroundUpdatingMouseInside:NO];
-    
-    //fix for tooltip hanging around
-    [super mouseExited:anEvent];
-}
-
-- (void)_fixCursorForBackgroundUpdatingMouseInside:(NSNumber*)num {
-	[self fixCursorForBackgroundUpdatingMouseInside:[num boolValue]];
-}
-
-- (void)fixCursorForBackgroundUpdatingMouseInside:(BOOL)checkMouseLoc {
-	
-	if (IsLeopardOrLater && whiteIBeamCursorIMP && defaultIBeamCursorIMP) {
-        if (checkMouseLoc) {
-            mouseInside=[self mouseIsHere];
-        }
-//          NSLog(@"mouseInside :>%d<",mouseInside);
-		BOOL shouldBeWhite = mouseInside && backgroundIsDark && ![self isHidden];
-      
-		Class class = [NSCursor class];
-		
-		//set method implementation directly; whiteIBeamCursorIMP and defaultIBeamCursorIMP always point to the same respective blocks of code
-		Method defaultIBeamCursorMethod = class_getClassMethod(class, @selector(IBeamCursor));
-		method_setImplementation(defaultIBeamCursorMethod, shouldBeWhite ? whiteIBeamCursorIMP : defaultIBeamCursorIMP);
-		
-		NSCursor *currentCursor = [NSCursor currentCursor];
-		NSCursor *whiteCursor = whiteIBeamCursorIMP;
-		NSCursor *defaultCursor = defaultIBeamCursorIMP;
-      
-		//if the current cursor is set incorrectly, and and it's not a non-IBeam cursor, then update it (IBeamCursor points to our recently-set implementation)
-		if ((currentCursor == whiteCursor) != shouldBeWhite && (currentCursor == whiteCursor || currentCursor == defaultCursor)) {
-			[[NSCursor IBeamCursor] set];
-		}
-	}
-}
-
-//hiding or showing the view does not always produce mouseEntered/Exited events
-- (void)viewDidUnhide {
-	[self performSelector:@selector(_fixCursorForBackgroundUpdatingMouseInside:) withObject:[NSNumber numberWithBool:YES] afterDelay:0.0];
-
-	[super viewDidUnhide];
-}
-- (void)viewDidHide {
-	[self fixCursorForBackgroundUpdatingMouseInside:YES];
-	[super viewDidHide];
-}
-
 - (void)windowBecameOrResignedMain:(NSNotification *)aNotification  {
 	//changing the window ordering seems to occasionally trigger mouseExited events w/o a corresponding mouseEntered
 //	[self fixCursorForBackgroundUpdatingMouseInside:YES];
@@ -1280,12 +1206,14 @@ copyRTFType:
 		return;
 	}
 	
-	if ([aLink isKindOfClass:[NSURL class]] && [[aLink scheme] isEqualToString:@"nvalt"]) {
+	//nvalt:// and nv:// links come from notes written with the original nvALT
+	if ([aLink isKindOfClass:[NSURL class]] &&
+		[[NSArray arrayWithObjects:kNVURLScheme, @"nvalt", @"nv", nil] containsObject:[[aLink scheme] lowercaseString]]) {
         NSUInteger flags=[currentEvent modifierFlags];
         if (((flags&NSDeviceIndependentModifierFlagsMask)==(flags&NSCommandKeyMask))&&((flags&NSDeviceIndependentModifierFlagsMask)>0)) {
             NSString *newURLString=[[aLink lastPathComponent]stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
             NSString *txtString=[[NSString stringWithFormat:@"[[%@]]",[aLink lastPathComponent]] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-            newURLString=[NSString stringWithFormat:@"nvalt://make/?title=%@&txt=%@",newURLString,txtString];
+            newURLString=[NSString stringWithFormat:@"%@://make/?title=%@&txt=%@",kNVURLScheme,newURLString,txtString];
 //            NSLog(@"newurlstring:%@",newURLString);
             NSURL *newURL=[NSURL URLWithString:newURLString];
 //            NSLog(@"interpret from cmd-keydown OLD URL:||%@||  AND NEW URL:|%@|",[aLink absoluteString],[newURL absoluteString]);
@@ -1805,7 +1733,6 @@ static long (*GetGetScriptManagerVariablePointer())(short) {
 
 - (void)setMouseInside:(BOOL)inside{
     mouseInside=inside;
-    [self fixCursorForBackgroundUpdatingMouseInside:NO];
 }
 
 - (void)selectRangeAndRegisterUndo:(NSRange)selRange{

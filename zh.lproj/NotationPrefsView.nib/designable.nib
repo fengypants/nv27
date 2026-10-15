@@ -115,7 +115,7 @@
                                     <imageView hidden="YES" id="179">
                                         <rect key="frame" x="330" y="262" width="16" height="16"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" image="statusError" id="242"/>
+                                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" image="NSStatusUnavailable" id="242"/>
                                     </imageView>
                                     <textField verticalHuggingPriority="750" id="184">
                                         <rect key="frame" x="14" y="206" width="311" height="14"/>
@@ -177,7 +177,7 @@
                                     <imageView id="257">
                                         <rect key="frame" x="27" y="40" width="18" height="18"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" image="TinyAlert" id="258"/>
+                                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" image="NSCaution" id="258"/>
                                     </imageView>
                                     <textField verticalHuggingPriority="750" id="259">
                                         <rect key="frame" x="50" y="42" width="299" height="14"/>
@@ -309,7 +309,7 @@
                                     <button toolTip="Add new file extension" id="20">
                                         <rect key="frame" x="80" y="62" width="23" height="22"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                        <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="Add" imagePosition="only" alignment="center" alternateImage="Add_Pressed" enabled="NO" inset="2" id="220">
+                                        <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="NSAddTemplate" imagePosition="only" alignment="center" alternateImage="NSAddTemplate" enabled="NO" inset="2" id="220">
                                             <behavior key="behavior" lightByContents="YES"/>
                                             <font key="font" metaFont="smallSystem"/>
                                         </buttonCell>
@@ -321,7 +321,7 @@
                                     <button toolTip="Remove file extension" id="19">
                                         <rect key="frame" x="102" y="62" width="23" height="22"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                        <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="Remove" imagePosition="only" alignment="center" alternateImage="Remove_Pressed" enabled="NO" inset="2" id="219">
+                                        <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="NSRemoveTemplate" imagePosition="only" alignment="center" alternateImage="NSRemoveTemplate" enabled="NO" inset="2" id="219">
                                             <behavior key="behavior" lightByContents="YES"/>
                                             <font key="font" metaFont="smallSystem"/>
                                         </buttonCell>
@@ -332,7 +332,7 @@
                                     <button toolTip="Set as default file extension for new notes" id="263">
                                         <rect key="frame" x="124" y="62" width="23" height="22"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                        <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="MakeDefault" imagePosition="only" alignment="center" alternateImage="MakeDefault_Pressed" enabled="NO" inset="2" id="264">
+                                        <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="NSMenuOnStateTemplate" imagePosition="only" alignment="center" alternateImage="NSMenuOnStateTemplate" enabled="NO" inset="2" id="264">
                                             <behavior key="behavior" lightByContents="YES"/>
                                             <font key="font" metaFont="smallSystem"/>
                                         </buttonCell>
@@ -343,7 +343,7 @@
                                     <button toolTip="Add new file type" id="16">
                                         <rect key="frame" x="199" y="63" width="23" height="22"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                        <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="Add" imagePosition="only" alignment="center" alternateImage="Add_Pressed" enabled="NO" inset="2" id="217">
+                                        <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="NSAddTemplate" imagePosition="only" alignment="center" alternateImage="NSAddTemplate" enabled="NO" inset="2" id="217">
                                             <behavior key="behavior" lightByContents="YES"/>
                                             <font key="font" metaFont="smallSystem"/>
                                         </buttonCell>
@@ -355,7 +355,7 @@
                                     <button toolTip="Remove file type" id="21">
                                         <rect key="frame" x="221" y="63" width="23" height="22"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                        <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="Remove" imagePosition="only" alignment="center" alternateImage="Remove_Pressed" enabled="NO" inset="2" id="221">
+                                        <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="NSRemoveTemplate" imagePosition="only" alignment="center" alternateImage="NSRemoveTemplate" enabled="NO" inset="2" id="221">
                                             <behavior key="behavior" lightByContents="YES"/>
                                             <font key="font" metaFont="smallSystem"/>
                                         </buttonCell>
@@ -584,13 +584,10 @@
         <userDefaultsController representsSharedInstance="YES" id="UIt-II-BN0"/>
     </objects>
     <resources>
-        <image name="Add" width="23" height="22"/>
-        <image name="Add_Pressed" width="23" height="22"/>
-        <image name="MakeDefault" width="22" height="22"/>
-        <image name="MakeDefault_Pressed" width="22" height="22"/>
-        <image name="Remove" width="22" height="22"/>
-        <image name="Remove_Pressed" width="22" height="22"/>
-        <image name="TinyAlert" width="18" height="18"/>
-        <image name="statusError" width="16" height="16"/>
+        <image name="NSStatusUnavailable" width="16" height="16"/>
+        <image name="NSRemoveTemplate" width="16" height="16"/>
+        <image name="NSMenuOnStateTemplate" width="16" height="16"/>
+        <image name="NSCaution" width="16" height="16"/>
+        <image name="NSAddTemplate" width="16" height="16"/>
     </resources>
 </document>

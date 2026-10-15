@@ -169,7 +169,6 @@ NSInteger compareFileSize(id *a, id *b);
 - (void)removeAllSyncMDForService:(NSString*)serviceName;
 //- (void)removeKey:(NSString*)aKey forService:(NSString*)serviceName;
 - (void)updateWithSyncBody:(NSString*)newBody andTitle:(NSString*)newTitle;
-- (void)registerModificationWithOwnedServices;
 
 - (OSStatus)writeCurrentFileEncodingToFSRef:(FSRef*)fsRef;
 - (void)_setFileEncoding:(NSStringEncoding)encoding;

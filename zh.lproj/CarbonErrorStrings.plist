@@ -162,5 +162,7 @@
 	<string>磁盘空间已满</string>
 	<key>-5000</key>
 	<string>您的帐号没有访问目录的权限</string>
+	<key>-826</key>
+	<string>its notes are encrypted, and this version of nvALT no longer supports encryption (turn encryption off in the previous version of nvALT first, or choose a different folder)</string>
 </dict>
 </plist>

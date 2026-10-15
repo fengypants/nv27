@@ -9,36 +9,18 @@
 #import "PreviewController.h"
 #import "AppController.h"
 #import "NoteObject.h"
+#import "MarkdownRenderer.h"
 
 @implementation NSString (MultiMarkdown)
-
-/**
- * Locating a MultiMarkdown parsing script.  The options are as follows:
- *   1.  ~/Library/Application Support/MultiMarkdown/bin/mmd2ZettelXHTML.pl
- *   2.  ~/Library/Application Support/MultiMarkdown/bin/mmd2XHTML.pl
- *   3.  <Application>/MultiMarkdown/bin/mmd2ZettelXHTML.pl
- *
- * The third option should be a safe fallback since the appropriate MMD bundle
- * is included and shipped with this application.
- */
-+(NSString*)mmdDirectory {
-    // fallback path in this program's directiory
-    NSString *bundlePath = [[[NSBundle mainBundle] resourcePath]
-                              stringByAppendingPathComponent:@"multimarkdown"];
-    return bundlePath;
-} // mmdDirectory
-
-+(NSString*)tp2mdDirectory {
-  NSString *bundlePath = [[[NSBundle mainBundle] resourcePath]
-                          stringByAppendingPathComponent:@"tp2md.rb"];
-  return bundlePath;
-}
 
 +(NSString*)processTaskPaper:(NSString*)inputString
 {
     if (inputString)
     {
-        NSString *taskPaperScriptPath = @"/System/Library/Frameworks/Ruby.framework/Versions/Current/usr/bin/ruby";
+        //TaskPaper conversion relies on the system Ruby, which macOS may not ship; render as plain MultiMarkdown without it
+        NSString *taskPaperScriptPath = @"/usr/bin/ruby";
+        if (![[NSFileManager defaultManager] isExecutableFileAtPath:taskPaperScriptPath])
+            return inputString;
 
 
         NSString *argPath = [[NSBundle mainBundle] pathForResource:@"tp2md"
@@ -89,35 +71,7 @@
   if (archiveFoundRange.location != NSNotFound || tagFoundRange.location != NSNotFound) {
     inputString = [self processTaskPaper:inputString];
   }
-	NSString* mdScriptPath = [[self class] mmdDirectory];
-//    NSString* tpScriptPath = [[self class] tp2mdDirectory];
-	NSTask* task = [[[NSTask alloc] init] autorelease];
-	NSMutableArray* args = [NSMutableArray array];
-	
-	[task setArguments:args];
-	
-	NSPipe* stdinPipe = [NSPipe pipe];
-	NSPipe* stdoutPipe = [NSPipe pipe];
-	NSFileHandle* stdinFileHandle = [stdinPipe fileHandleForWriting];
-	NSFileHandle* stdoutFileHandle = [stdoutPipe fileHandleForReading];
-	
-	[task setStandardInput:stdinPipe];
-	[task setStandardOutput:stdoutPipe];
-	
-	[task setLaunchPath: [mdScriptPath stringByExpandingTildeInPath]];
-	[task launch];
-	
-	[stdinFileHandle writeData:[inputString dataUsingEncoding:NSUTF8StringEncoding]];
-	[stdinFileHandle closeFile];
-	
-	NSData* outputData = [stdoutFileHandle readDataToEndOfFile];
-	NSString* outputString = [[[NSString alloc] initWithData:outputData encoding:NSUTF8StringEncoding] autorelease];
-	[stdoutFileHandle closeFile];
-	
-	[task waitUntilExit];
-	
-	return outputString;
-	
+	return [MarkdownRenderer HTMLFromMultiMarkdown:inputString];
 }
 
 +(NSString*)documentWithProcessedMultiMarkdown:(NSString*)inputString
