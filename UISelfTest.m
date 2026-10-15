@@ -24,6 +24,8 @@
 #import "AttributedPlainText.h"
 #import "TagEditingManager.h"
 #import <objc/runtime.h>
+#include <stdio.h>
+#include <errno.h>
 
 static BOOL selfTestTracingFocus = NO;
 
@@ -490,6 +492,18 @@ static void SelfTestSpin(NSTimeInterval seconds) {
 		[note setContentString:[[[NSAttributedString alloc] initWithString:original attributes:[prefsController noteBodyAttributes]] autorelease]];
 		[notationController synchronizeNoteChanges:nil];
 		[original release];
+	}
+	
+	//saves swap the new file in with one rename where the volume allows it (the old four-rename way is the fallback)
+	{
+		NSString *a = [folder stringByAppendingPathComponent:@".selftest-swap-a"], *b = [folder stringByAppendingPathComponent:@".selftest-swap-b"];
+		[@"a" writeToFile:a atomically:NO encoding:NSUTF8StringEncoding error:NULL];
+		[@"b" writeToFile:b atomically:NO encoding:NSUTF8StringEncoding error:NULL];
+		BOOL swapped = renamex_np([a fileSystemRepresentation], [b fileSystemRepresentation], RENAME_SWAP) == 0;
+		SelfTestLog(@"upstream: notes folder's volume swaps files in one step=%d (%s), contents now a=\"%@\" b=\"%@\"", swapped, swapped ? "ok" : strerror(errno),
+					[NSString stringWithContentsOfFile:a encoding:NSUTF8StringEncoding error:NULL], [NSString stringWithContentsOfFile:b encoding:NSUTF8StringEncoding error:NULL]);
+		[[NSFileManager defaultManager] removeItemAtPath:a error:NULL];
+		[[NSFileManager defaultManager] removeItemAtPath:b error:NULL];
 	}
 	
 	//leftover temporary files from an earlier run go to the Trash, but not one that might be another copy's save in progress
