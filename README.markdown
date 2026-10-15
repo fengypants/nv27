@@ -1,6 +1,6 @@
 # nv27
 
-**nv27** is a simplified [nvALT](https://brettterpstra.com/project/nvalt/): stripped down to the essentials and rebuilt for Apple silicon and current macOS. It keeps what made Notational Velocity and nvALT great — one window, type to search or create, plain text files in a folder, keyboard all the way — and drops what had grown around it: sync services, encryption, a database format, and other extras. What remains is modernized: Intel-only components are replaced, and the interface from the Mac OS X 10.6 era now follows current macOS conventions, with light and dark mode.
+**nv27** is a simplified [nvALT](https://brettterpstra.com/project/nvalt/): stripped down to the essentials and rebuilt for Apple silicon and current macOS. It keeps what made Notational Velocity and nvALT great — one window, type to search or create, plain text files in a folder, keyboard all the way — and drops features that I wasn't using (or stopped working): sync services, encryption, single database format, and others. What remains is modernized: Intel-only components are replaced, and the interface from the Mac OS X 10.6 era now follows current macOS conventions, with light and dark mode.
 
 nv27 is a separate app, so it runs side by side with the original nvALT.
 
@@ -21,17 +21,13 @@ nv27 is a separate app, so it runs side by side with the original nvALT.
 - [Known limitations](#known-limitations)
 - [Credits and license](#credits-and-license)
 
-## Install
+## Requirements
 
-Requires an Apple silicon Mac running macOS 14 Sonoma or later (developed and tested on macOS 26).
-
-1. Download `nv27-arm64.zip` from the [latest release](https://github.com/fengypants/nv27/releases/latest) and double-click it to unzip.
-2. Drag **nv27.app** into Applications.
-3. The first time you open it, macOS refuses because the app isn't signed with an Apple Developer ID. Click **Done**, then go to **System Settings › Privacy & Security**, scroll down and click **Open Anyway**.
+Requires an Apple silicon Mac running macOS 14 Sonoma or later (developed and tested on macOS 27).
 
 ## What it is
 
-Notational Velocity is a way to take notes quickly using just the keyboard. Press a shortcut to bring up the window and start typing: nv27 searches all your notes as you type. Use ⌘J and ⌘K (or the arrow keys) to move through the matches, and Return to start editing. If nothing matches, Return creates a new note with what you typed as its title. Every change is saved as you go — there is no Save.
+Notational Velocity is a way to take notes quickly using just the keyboard. Press a shortcut to bring up the window and start typing: NV searches all your notes as you type. Use ⌘J and ⌘K (or the arrow keys) to move through the matches, and Return to start editing. If nothing matches, Return creates a new note with what you typed as its title. Every change is saved as you go — there is no Save.
 
 ## How nv27 differs from nvALT
 
