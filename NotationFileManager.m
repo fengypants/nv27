@@ -217,12 +217,24 @@ static OSStatus SwapFilesAtomically(FSRef *sourceRef, FSRef *destRef, BOOL *swap
 	return noErr;
 }
 
-//hidden temporary files are named ".<digits>-<digits>-<digits>" (CreateRandomizedFileName); a save that failed or
-//was interrupted could leave one behind. Move ones over an hour old (so not another copy's save in progress) to the Trash
+//after a failed save, delete its temporary file, but only while it's still under its hidden temporary name: if the
+//step-by-step renaming failed partway, the file could already be under the note's own name
+static void DeleteTemporaryFileIfStillTemporary(FSRef *tempRef) {
+	UInt8 path[PATH_MAX];
+	if (FSRefMakePath(tempRef, path, sizeof(path)) != noErr) return;
+	const char *name = strrchr((const char*)path, '/');
+	if (name && name[1] == '.')
+		(void)FSDeleteObject(tempRef);
+	else
+		NSLog(@"not deleting %s after a failed save: it's no longer under its temporary name", (const char*)path);
+}
+
 - (NSString*)noteDirectoryPath {
 	return [[NSFileManager defaultManager] pathWithFSRef:&noteDirectoryRef];
 }
 
+//hidden temporary files are named ".<digits>-<digits>-<digits>" (CreateRandomizedFileName); a save that failed or
+//was interrupted could leave one behind. Move ones over an hour old (so not another copy's save in progress) to the Trash
 - (NSUInteger)trashStaleTemporaryFiles {
 	NSString *directoryPath = [self noteDirectoryPath];
 	if (!directoryPath) return 0;
@@ -677,7 +689,7 @@ terminate:
     if (err != noErr) {
 		NSLog(@"error exchanging contents of temporary file with destination file %@: %d",filename, err);
 		//the note is still in memory and will be saved again; don't leave the hidden temporary file in the notes folder
-		(void)FSDeleteObject(&tempFileRef);
+		DeleteTemporaryFileIfStillTemporary(&tempFileRef);
 		return err;
     }
     
