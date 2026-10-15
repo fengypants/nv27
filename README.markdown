@@ -87,7 +87,7 @@ nv27 follows current macOS conventions throughout. In particular:
 - **Preview window:** SF Symbols for lock, print and save.
 - **Help menu:** *Keyboard Shortcuts* opens a window listing every shortcut in tables, in standard macOS key order (instead of an RTF document in TextEdit; its text is in `en.lproj/KeyboardShortcuts.md`, translated in the other languages' folders, as nvALT's shortcuts document was). The menu also links to the nv27 repository and the nvALT and Notational Velocity websites.
 - **About:** shows nv27, its version and a link to this repository, in the system font.
-- Remaining interface text uses the system font (SF Pro); the note body font is yours to choose in Settings › Fonts & Colors (default Helvetica 12).
+- Remaining interface text uses the system font (SF Pro); the note body font is yours to choose in Settings › Fonts & Colors (default Helvetica 14).
 
 ## Running alongside nvALT
 

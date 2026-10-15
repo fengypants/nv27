@@ -407,13 +407,6 @@
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
-                    <connections>
-                        <binding destination="390" name="hidden" keyPath="values.TextEditor" id="398">
-                            <dictionary key="options">
-                                <string key="NSValueTransformerName">NSIsNil</string>
-                            </dictionary>
-                        </binding>
-                    </connections>
                 </textField>
                 <textField verticalHuggingPriority="750" id="457">
                     <rect key="frame" x="18" y="50" width="77" height="17"/>

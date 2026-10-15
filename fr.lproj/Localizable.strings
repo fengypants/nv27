@@ -657,3 +657,40 @@
 /* Menu Item for Use Selection for Find */
 "Use Selection for Find" = "Use Selection for Find";
 
+/* Settings window form labels */
+"Appearance:" = "Apparence :";
+"List text size:" = "Taille du texte de la liste :";
+"Hotkey:" = "Raccourci :";
+"Brings nv27 to the front from any app." = "Met nv27 au premier plan depuis n’importe quelle app.";
+"Behavior:" = "Comportement :";
+"Show icon in:" = "Afficher l’icône dans :";
+"Dock" = "Dock";
+"Menu bar" = "Barre des menus";
+"Notes folder:" = "Dossier des notes :";
+"Store notes as:" = "Enregistrer les notes en :";
+"File extensions:" = "Extensions :";
+"Files with these extensions are read as notes. Right-click one to make it the default for new notes." = "Les fichiers portant ces extensions sont lus comme des notes. Cliquez sur l’une d’elles avec le bouton droit pour en faire l’extension par défaut des nouvelles notes.";
+"Styled text:" = "Texte stylé :";
+"Spelling:" = "Orthographe :";
+"Tab key:" = "Touche Tab :";
+"Links:" = "Liens :";
+"Auto-pair:" = "Fermeture auto :";
+"Direction:" = "Sens :";
+"External editor:" = "Éditeur externe :";
+"Note font:" = "Police des notes :";
+"Search terms:" = "Termes recherchés :";
+"Highlight in notes" = "Surligner dans les notes";
+"Light" = "Clair";
+"Dark" = "Sombre";
+"Text color:" = "Couleur du texte :";
+"Background:" = "Arrière-plan :";
+"Used by the User Scheme (⌥⌘3)." = "Utilisées par le thème utilisateur (⌥⌘3).";
+"Notes list:" = "Liste des notes :";
+"Always show grid lines" = "Toujours afficher le quadrillage";
+"Alternating row colors" = "Couleurs de ligne alternées";
+"Note width:" = "Largeur des notes :";
+"Keep note text width readable" = "Limiter la largeur du texte pour la lisibilité";
+"Maximum:" = "Maximum :";
+"Close brackets and quotes automatically" = "Fermer automatiquement parenthèses et guillemets";
+"Typing ( [ { or \" also adds its closing character." = "Taper ( [ { ou \" ajoute aussi le caractère fermant.";
+"Right-to-left text" = "Texte de droite à gauche";

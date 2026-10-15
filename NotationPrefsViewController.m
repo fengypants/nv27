@@ -268,6 +268,22 @@
 	[self updateExtensionButtons];
 }
 
+- (NSPopUpButton*)storageFormatPopUp {
+	return storageFormatPopupButton;
+}
+
+- (NSScrollView*)extensionsListView {
+	return [allowedExtensionsTable enclosingScrollView];
+}
+
+- (NSSegmentedControl*)extensionButtons {
+	return extensionButtons;
+}
+
+- (NSButton*)confirmFileDeletionCheckbox {
+	return confirmFileDeletionButton;
+}
+
 - (void)updateExtensionButtons {
 	[extensionButtons setEnabled:[newExtensionButton isEnabled] forSegment:0];
 	[extensionButtons setEnabled:[removeExtensionButton isEnabled] forSegment:1];

@@ -658,3 +658,40 @@
 /* Menu Item for Use Selection for Find */
 "Use Selection for Find" = "Use Selection for Find";
 
+/* Settings window form labels */
+"Appearance:" = "外观：";
+"List text size:" = "列表文字大小：";
+"Hotkey:" = "快捷键：";
+"Brings nv27 to the front from any app." = "从任何应用将 nv27 调到最前面。";
+"Behavior:" = "行为：";
+"Show icon in:" = "图标显示位置：";
+"Dock" = "程序坞";
+"Menu bar" = "菜单栏";
+"Notes folder:" = "笔记文件夹：";
+"Store notes as:" = "笔记存储格式：";
+"File extensions:" = "文件扩展名：";
+"Files with these extensions are read as notes. Right-click one to make it the default for new notes." = "带有这些扩展名的文件会被读取为笔记。右键点按某个扩展名，可将其设为新笔记的默认扩展名。";
+"Styled text:" = "带格式文本：";
+"Spelling:" = "拼写：";
+"Tab key:" = "Tab 键：";
+"Links:" = "链接：";
+"Auto-pair:" = "自动配对：";
+"Direction:" = "方向：";
+"External editor:" = "外部编辑器：";
+"Note font:" = "笔记字体：";
+"Search terms:" = "搜索词：";
+"Highlight in notes" = "在笔记中高亮显示";
+"Light" = "浅色";
+"Dark" = "深色";
+"Text color:" = "文字颜色：";
+"Background:" = "背景：";
+"Used by the User Scheme (⌥⌘3)." = "用于用户配色方案（⌥⌘3）。";
+"Notes list:" = "笔记列表：";
+"Always show grid lines" = "始终显示网格线";
+"Alternating row colors" = "交替行颜色";
+"Note width:" = "笔记宽度：";
+"Keep note text width readable" = "限制文字宽度以便阅读";
+"Maximum:" = "最大：";
+"Close brackets and quotes automatically" = "自动补全括号和引号";
+"Typing ( [ { or \" also adds its closing character." = "输入 ( [ { 或 \" 时会同时添加对应的闭合字符。";
+"Right-to-left text" = "从右到左的文字";

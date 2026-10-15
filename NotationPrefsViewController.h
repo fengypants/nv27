@@ -90,4 +90,10 @@
 #pragma mark nvALT Finder tagging
 - (IBAction)switchToFinderTags:(id)sender;
 
+//the Notes pane's controls, which the Settings window lays out in its own form (see -[PrefsWindowController layOutNotesPane])
+- (NSPopUpButton*)storageFormatPopUp;
+- (NSScrollView*)extensionsListView;
+- (NSSegmentedControl*)extensionButtons;
+- (NSButton*)confirmFileDeletionCheckbox;
+
 @end
