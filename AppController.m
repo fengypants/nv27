@@ -341,7 +341,6 @@ void outletObjectAwoke(id sender) {
 
     //Sparkle (and its update feed, which serves the original Intel-only nvALT) has been removed;
     //hide the "Check for Updates…" items until an updater for this build is set up
-    [sparkleUpdateItem setHidden:YES];
     [[statBarMenu itemWithTag:902] setHidden:YES];
     // add elasticthreads' menuitems
     if(IsLeopardOrLater){

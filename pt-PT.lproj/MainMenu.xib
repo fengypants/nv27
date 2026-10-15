@@ -46,10 +46,6 @@
                                     <action selector="showPreferencesWindow:" target="213" id="381"/>
                                 </connections>
                             </menuItem>
-                            <menuItem isSeparatorItem="YES" id="991">
-                                <modifierMask key="keyEquivalentModifierMask" command="YES"/>
-                            </menuItem>
-                            <menuItem title="Verificar Atualizações…" tag="88" id="990"/>
                             <menuItem isSeparatorItem="YES" id="143">
                                 <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                             </menuItem>
@@ -699,7 +695,6 @@ CA
                 <outlet property="previewToggler" destination="1260" id="1271"/>
                 <outlet property="printPreviewItem" destination="1294" id="1298"/>
                 <outlet property="savePreviewItem" destination="1265" id="1299"/>
-                <outlet property="sparkleUpdateItem" destination="990" id="1052"/>
                 <outlet property="statBarMenu" destination="1123" id="1158"/>
                 <outlet property="textScrollView" destination="1217" id="1278"/>
                 <outlet property="textView" destination="1218" id="1233"/>
