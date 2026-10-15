@@ -695,3 +695,6 @@
 "Close brackets and quotes automatically" = "Chiudi automaticamente parentesi e virgolette";
 "Typing ( [ { or \" also adds its closing character." = "Digitando ( [ { o \" viene aggiunto anche il carattere di chiusura.";
 "Right-to-left text" = "Testo da destra a sinistra";
+
+/* title of the keyboard shortcuts welcome note */
+"Excruciatingly Useful Shortcuts" = "Scorciatoie terribilmente utili";

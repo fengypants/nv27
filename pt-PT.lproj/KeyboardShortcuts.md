@@ -98,4 +98,4 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 
 ## Em qualquer lado
 
-| O seu atalho | Traz o NV para a frente. Defina-o em Preferências › Geral. |
+| O seu atalho | Traz o nv27 para a frente a partir de qualquer app. Defina-o em Preferências › Geral. |

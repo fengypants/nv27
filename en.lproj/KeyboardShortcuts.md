@@ -106,4 +106,4 @@ change them too when a shortcut changes.
 
 ## Anywhere
 
-| Your hotkey | Bring NV to the front. Set it in Settings › General. |
+| Your hotkey | Brings nv27 to the front from any app. Set it in Settings › General. |

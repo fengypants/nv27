@@ -694,3 +694,6 @@
 "Close brackets and quotes automatically" = "Fermer automatiquement parenthèses et guillemets";
 "Typing ( [ { or \" also adds its closing character." = "Taper ( [ { ou \" ajoute aussi le caractère fermant.";
 "Right-to-left text" = "Texte de droite à gauche";
+
+/* title of the keyboard shortcuts welcome note */
+"Excruciatingly Useful Shortcuts" = "Raccourcis incroyablement utiles";

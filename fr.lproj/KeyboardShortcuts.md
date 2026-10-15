@@ -98,4 +98,4 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 
 ## Partout
 
-| Votre raccourci | Met NV au premier plan. À définir dans Préférences › Général. |
+| Votre raccourci | Met nv27 au premier plan depuis n’importe quelle app. À définir dans Préférences › Général. |

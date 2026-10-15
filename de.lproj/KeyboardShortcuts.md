@@ -98,4 +98,4 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 
 ## Überall
 
-| Ihr Tastenkürzel | NV in den Vordergrund holen. Festlegen unter Einstellungen › Allgemeines. |
+| Ihr Tastenkürzel | Holt nv27 aus jeder App in den Vordergrund. Festlegen unter Einstellungen › Allgemeines. |

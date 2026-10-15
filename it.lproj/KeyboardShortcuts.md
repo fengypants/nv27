@@ -98,4 +98,4 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 
 ## Ovunque
 
-| La tua scorciatoia | Porta NV in primo piano. Si imposta in Preferenze › Generali. |
+| La tua scorciatoia | Porta nv27 in primo piano da qualsiasi app. Si imposta in Preferenze › Generali. |
