@@ -220,9 +220,14 @@ static ExternalEditorListController* sharedInstance = nil;
 		[ed release];
 	}
 	
-	//initialize the default editor if one has not already been set or if the identifier was somehow lost from the list
+	//initialize the default editor if one has not already been set or if the identifier was somehow lost from the list:
+	//TextEdit, until the user picks another (nvALT picked whichever installed ODB editor came last in an unordered set,
+	//so a new install could start with any editor on the Mac)
 	if (![self editorIsMember:[self defaultExternalEditor]] || ![[self defaultExternalEditor] isInstalled]) {
-		if ([[self _installedODBEditors] count]) {
+		ExternalEditor *textEdit = [[[ExternalEditor alloc] initWithBundleID:@"com.apple.TextEdit" resolvedURL:nil] autorelease];
+		if ([textEdit isInstalled]) {
+			[self setDefaultEditor:textEdit];
+		} else if ([[self _installedODBEditors] count]) {
 			[self setDefaultEditor:[[self _installedODBEditors] lastObject]];
 		}
 	}
