@@ -694,6 +694,3 @@
 "Close brackets and quotes automatically" = "Fechar automaticamente parênteses e aspas";
 "Typing ( [ { or \" also adds its closing character." = "Escrever ( [ { ou \" adiciona também o caráter de fecho.";
 "Right-to-left text" = "Texto da direita para a esquerda";
-
-/* title of the keyboard shortcuts welcome note */
-"Excruciatingly Useful Shortcuts" = "Atalhos incrivelmente úteis";

@@ -695,6 +695,3 @@
 "Close brackets and quotes automatically" = "自动补全括号和引号";
 "Typing ( [ { or \" also adds its closing character." = "输入 ( [ { 或 \" 时会同时添加对应的闭合字符。";
 "Right-to-left text" = "从右到左的文字";
-
-/* title of the keyboard shortcuts welcome note */
-"Excruciatingly Useful Shortcuts" = "常用快捷键";

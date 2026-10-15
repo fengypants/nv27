@@ -707,6 +707,3 @@
 "Close brackets and quotes automatically" = "Klammern und Anführungszeichen automatisch schließen";
 "Typing ( [ { or \" also adds its closing character." = "Zu ( [ { oder \" wird das schließende Zeichen ergänzt.";
 "Right-to-left text" = "Text von rechts nach links";
-
-/* title of the keyboard shortcuts welcome note */
-"Excruciatingly Useful Shortcuts" = "Äußerst nützliche Tastenkürzel";

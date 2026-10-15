@@ -695,6 +695,3 @@
 "Close brackets and quotes automatically" = "Close brackets and quotes automatically";
 "Typing ( [ { or \" also adds its closing character." = "Typing ( [ { or \" also adds its closing character.";
 "Right-to-left text" = "Right-to-left text";
-
-/* title of the keyboard shortcuts welcome note */
-"Excruciatingly Useful Shortcuts" = "Excruciatingly Useful Shortcuts";

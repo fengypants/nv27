@@ -71,7 +71,7 @@ NSString *ShouldImportCreationDates = @"ShouldImportCreationDates";
 			if ([shortcuts length]) {
 				NSMutableAttributedString *body = [[[NSMutableAttributedString alloc] initWithString:shortcuts
 																						  attributes:[prefsController noteBodyAttributes]] autorelease];
-				NoteObject *shortcutsNote = [[[NoteObject alloc] initWithNoteBody:body title:NSLocalizedString(@"Excruciatingly Useful Shortcuts", @"title of the keyboard shortcuts welcome note")
+				NoteObject *shortcutsNote = [[[NoteObject alloc] initWithNoteBody:body title:@"Excruciatingly Useful Shortcuts"
 																		 delegate:nil format:SingleDatabaseFormat labels:nil] autorelease];
 				if (shortcutsNote) helpNotes = [[NSArray arrayWithObject:shortcutsNote] arrayByAddingObjectsFromArray:helpNotes ? helpNotes : [NSArray array]];
 			}
