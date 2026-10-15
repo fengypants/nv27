@@ -479,8 +479,11 @@ terminate:
     BOOL isUnique = YES;
     NSString *uniqueFilename = title;
 	
-	//remove illegal characters
-	NSMutableString *sanitizedName = [[[uniqueFilename stringByReplacingOccurrencesOfString:@":" withString:@"-"] mutableCopy] autorelease];
+	//remove illegal characters; "/" too, which the path methods below treat as a folder separator: a title of "/"
+	//came out as no filename at all (nil), which crashed when the note was saved (NV issue 354 was a hang from the same title)
+	NSMutableString *sanitizedName = [[[[uniqueFilename stringByReplacingOccurrencesOfString:@":" withString:@"-"]
+										stringByReplacingOccurrencesOfString:@"/" withString:@"-"] mutableCopy] autorelease];
+	if (![sanitizedName length]) [sanitizedName setString:NSLocalizedString(@"Untitled Note", @"Title of a nameless note")];
 	if ([sanitizedName characterAtIndex:0] == (unichar)'.')	[sanitizedName replaceCharactersInRange:NSMakeRange(0, 1) withString:@"_"];
 	uniqueFilename = [[sanitizedName copy] autorelease];
 	
