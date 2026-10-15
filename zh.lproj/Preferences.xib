@@ -424,13 +424,6 @@
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
-                    <connections>
-                        <binding destination="436" name="hidden" keyPath="values.TextEditor" id="505">
-                            <dictionary key="options">
-                                <string key="NSValueTransformerName">NSIsNil</string>
-                            </dictionary>
-                        </binding>
-                    </connections>
                 </textField>
                 <popUpButton verticalHuggingPriority="750" id="561">
                     <rect key="frame" x="153" y="16" width="194" height="26"/>
