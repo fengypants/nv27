@@ -44,7 +44,6 @@
 	NSString *stringDuringFind;
 	NoteObject *noteDuringFind;
 	
-	IMP defaultIBeamCursorIMP, whiteIBeamCursorIMP;
     
     BOOL managesTextWidth;
 	NSString *beforeString;
@@ -84,7 +83,6 @@
 - (void)indicateRange:(NSValue*)rangeValue;
 
 - (void)fixTypingAttributesForSubstitutedFonts;
-- (void)fixCursorForBackgroundUpdatingMouseInside:(BOOL)checkMouseLoc;
 
 - (BOOL)_selectionAbutsBulletIndentRange;
 - (BOOL)_rangeIsAutoIdentedBullet:(NSRange)aRange;

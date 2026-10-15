@@ -10,7 +10,7 @@ The other languages' copies (de, fr, it, pt-PT, zh .lproj folders) list the same
 change them too when a shortcut changes.
 -->
 
-In the order of most to least useful:
+## In the order of most to least useful
 
 | ⌘L | Place the insertion point in the search/title area |
 | Esc | Clear the current search |

@@ -150,8 +150,6 @@
         </window>
     </objects>
     <resources>
-        <image name="TabClose_Front_Pressed" width="12" height="13"/>
-        <image name="TabClose_Front_Rollover" width="12" height="13"/>
         <image name="lock" catalog="system" width="13" height="15"/>
         <image name="printer" catalog="system" width="16" height="15"/>
         <image name="square.and.arrow.down" catalog="system" width="14" height="16"/>

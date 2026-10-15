@@ -2,7 +2,7 @@
 Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same rows in the same order.
 -->
 
-按从最常用到最不常用的顺序：
+## 按从最常用到最不常用的顺序
 
 | ⌘L | 将插入点移到搜索/标题区域 |
 | Esc | 清除当前搜索 |

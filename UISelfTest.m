@@ -15,6 +15,9 @@
 #import "DualField.h"
 #import "NoteObject.h"
 #import "ShortcutsWindowController.h"
+#import "PTKeyComboPanel.h"
+#import "BookmarksController.h"
+#import "GlobalPrefs.h"
 #import <objc/runtime.h>
 
 static BOOL selfTestTracingFocus = NO;
@@ -265,6 +268,19 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 		}
 	}
 	[settingsWindow orderOut:nil];
+	
+	//the hotkey panel (its icon is an SF Symbol) and the Bookmarks window
+	NSWindow *hotkeyPanel = [[PTKeyComboPanel sharedPanel] window];
+	[hotkeyPanel display];
+	PrintSnapshotOfWindow(hotkeyPanel, @"hotkey");
+	[[prefsController bookmarksController] showBookmarks:nil];
+	[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1.0]];
+	for (NSWindow *aWindow in [NSApp windows]) {
+		if (aWindow != window && [aWindow isVisible] && [aWindow isKindOfClass:[NSPanel class]] && [[aWindow frameAutosaveName] isEqualToString:@"bookmarksWindow"]) {
+			PrintSnapshotOfWindow(aWindow, @"bookmarks");
+			[aWindow orderOut:nil];
+		}
+	}
 	
 	//the About panel, and how wide candidate lines for its first credits line are next to its text area
 	[self showAboutPanel:nil];
