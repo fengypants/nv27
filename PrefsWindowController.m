@@ -533,6 +533,7 @@
 		[folderLocationsMenuButton setMenu:[self directorySelectionMenu]];
 	
 	NSAssert(prefsView != nil, @"switching to a nil prefs view!");
+	[self matchPaneWidths];
     
 	[[NSFontPanel sharedFontPanel] close];
 	
@@ -557,6 +558,24 @@
     [window setFrame:newFrame display:YES animate:YES];
 
     [window setContentView:prefsView];
+}
+
+//all panes share the widest one's width (Fonts & Colors), so switching panes changes only the window's height,
+//as in the system's own settings windows; each narrower pane's content stays centered in the extra space
+- (void)matchPaneWidths {
+	NSArray *panes = [NSArray arrayWithObjects:generalView, [self databaseView], editingView, fontsColorsView, nil];
+	CGFloat width = 0.0;
+	for (NSView *pane in panes) width = MAX(width, NSWidth([pane frame]));
+	for (NSView *pane in panes) {
+		CGFloat delta = width - NSWidth([pane frame]);
+		if (delta < 1.0) continue;
+		BOOL autoresizes = [pane autoresizesSubviews];
+		[pane setAutoresizesSubviews:NO];
+		[pane setFrameSize:NSMakeSize(width, NSHeight([pane frame]))];
+		for (NSView *subview in [pane subviews])
+			[subview setFrameOrigin:NSMakePoint(round(NSMinX([subview frame]) + delta / 2.0), NSMinY([subview frame]))];
+		[pane setAutoresizesSubviews:autoresizes];
+	}
 }
 
 NSRect ScaleRectWithFactor(NSRect rect, float factor) {
