@@ -93,9 +93,32 @@ jobs:
           name: nv27-arm64
           path: nv27-arm64.zip
 
+      - name: Publish the release
+        # pushing a version tag (e.g. v1.0) publishes that version: the app, with its section of RELEASE_NOTES.md
+        if: matrix.configuration == 'ForBuilding' && github.event_name == 'push' && github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          APP_VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" \
+            build/DerivedData/Build/Products/ForBuilding/nv27.app/Contents/Info.plist)
+          if [ "$VERSION" != "$APP_VERSION" ]; then
+            echo "Tag $GITHUB_REF_NAME doesn't match the app's version $APP_VERSION"; exit 1
+          fi
+          # the "## <version>" section of the release notes, with the README link pointing at this tag
+          awk -v heading="## $VERSION" '$0 == heading {found=1; next} /^## /{found=0} found' RELEASE_NOTES.md \
+            | sed "s#](README.markdown#](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/blob/${GITHUB_REF_NAME}/README.markdown#g" \
+            > release-notes.md
+          test -s release-notes.md || { echo "RELEASE_NOTES.md has no \"## $VERSION\" section"; exit 1; }
+          gh release create "$GITHUB_REF_NAME" nv27-arm64.zip \
+            --verify-tag \
+            --latest \
+            --title "nv27 $VERSION" \
+            --notes-file release-notes.md
+
       - name: Publish to the "latest-build" release
-        # one stable download link for the newest build of a push (pull requests only build)
-        if: matrix.configuration == 'ForBuilding' && github.event_name == 'push'
+        # one stable download link for the newest build of a branch push (pull requests and version tags don't)
+        if: matrix.configuration == 'ForBuilding' && github.event_name == 'push' && github.ref_type == 'branch'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
