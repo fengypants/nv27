@@ -29,24 +29,27 @@ static NSString *BMNoteUUIDStringKey = @"NoteUUIDString";
 @implementation NoteBookmark
 
 - (id)initWithDictionary:(NSDictionary*)aDict {
-        if (aDict) {
-            NSString *uuidString = [aDict objectForKey:BMNoteUUIDStringKey];
-            if (uuidString) {
-                return (self=[self initWithNoteUUIDBytes:[uuidString uuidBytes] searchString:[aDict objectForKey:BMSearchStringKey]]);
-            } else {
-                NSLog(@"NoteBookmark init: supplied nil uuidString");
-            }
-        } else {
-            NSLog(@"NoteBookmark init: supplied nil dictionary; couldn't init");
-            
-        }
-    return nil;
+	//saved bookmarks come from the preferences file, so check what's there instead of trusting it
+	if ([aDict isKindOfClass:[NSDictionary class]]) {
+		NSString *uuidString = [aDict objectForKey:BMNoteUUIDStringKey];
+		NSString *search = [aDict objectForKey:BMSearchStringKey];
+		if ([uuidString isKindOfClass:[NSString class]] && [uuidString length]) {
+			return (self=[self initWithNoteUUIDBytes:[uuidString uuidBytes] searchString:[search isKindOfClass:[NSString class]] ? search : nil]);
+		}
+		NSLog(@"NoteBookmark init: no note UUID in %@", aDict);
+	} else {
+		NSLog(@"NoteBookmark init: not a dictionary: %@", aDict);
+	}
+	[self release];
+	return nil;
 }
 
 - (id)initWithNoteUUIDBytes:(CFUUIDBytes)bytes searchString:(NSString*)aString {
 	if (self=[super init]) {
 		uuidBytes = bytes;
-		searchString = [aString copy];
+		//nil when a note is bookmarked with nothing typed in the search field; a nil here used to end the saved
+		//dictionary early (dropping the note's UUID), and the empty bookmark it left stopped the next launch
+		searchString = [(aString ? aString : @"") copy];
         return self;
 	}
 	
@@ -171,6 +174,7 @@ static NSString *BMNoteUUIDStringKey = @"NoteUUIDString";
 		for (i=0; i<[array count]; i++) {
 			NSDictionary *dict = [array objectAtIndex:i];
 			NoteBookmark *bookmark = [[NoteBookmark alloc] initWithDictionary:dict];
+			if (!bookmark) continue; //unreadable (e.g. saved without its note's UUID): skip it rather than fail
 			[bookmark setDelegate:self];
 			[bookmarks addObject:bookmark];
 			[bookmark release];
