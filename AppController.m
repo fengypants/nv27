@@ -406,20 +406,22 @@ void outletObjectAwoke(id sender) {
 	NSString *subMessage = @"";
 	
 	//if the option key is depressed, go straight to picking a new notes folder location
-	if (kCGEventFlagMaskAlternate == (CGEventSourceFlagsState(kCGEventSourceStateCombinedSessionState) & NSDeviceIndependentModifierFlagsMask)) {
-		goto showOpenPanel;
-	}
+	//(this used to jump into the middle of the loop below, past where location was set; a folder that then
+	//failed to open reported it with garbage for its location)
+	BOOL shouldShowOpenPanel = (kCGEventFlagMaskAlternate == (CGEventSourceFlagsState(kCGEventSourceStateCombinedSessionState) & NSDeviceIndependentModifierFlagsMask));
 	
-	if (aliasData) {
-	    newNotation = [[[NotationController alloc] initWithAliasData:aliasData error:&err] autorelease];
-	    subMessage = NSLocalizedString(@"Please choose a different folder in which to store your notes.",nil);
-	} else {
-	    newNotation = [[[NotationController alloc] initWithDefaultDirectoryReturningError:&err] autorelease];
-	    subMessage = NSLocalizedString(@"Please choose a folder in which your notes will be stored.",nil);
+	if (!shouldShowOpenPanel) {
+		if (aliasData) {
+			newNotation = [[[NotationController alloc] initWithAliasData:aliasData error:&err] autorelease];
+			subMessage = NSLocalizedString(@"Please choose a different folder in which to store your notes.",nil);
+		} else {
+			newNotation = [[[NotationController alloc] initWithDefaultDirectoryReturningError:&err] autorelease];
+			subMessage = NSLocalizedString(@"Please choose a folder in which your notes will be stored.",nil);
+		}
+		//no need to display an alert if the error wasn't real
+		if (err == kPassCanceledErr)
+			shouldShowOpenPanel = YES;
 	}
-	//no need to display an alert if the error wasn't real
-	if (err == kPassCanceledErr)
-		goto showOpenPanel;
 	
 	NSString *location = (aliasData ? [[NSFileManager defaultManager] pathCopiedFromAliasData:aliasData] : NSLocalizedString(@"your Application Support directory",nil));
 	if (!location) { //fscopyaliasinfo sucks
@@ -432,23 +434,29 @@ void outletObjectAwoke(id sender) {
 	}
 	
 	while (!newNotation) {
-	    location = [location stringByAbbreviatingWithTildeInPath];
-	    NSString *reason = [NSString reasonStringFromCarbonFSError:err];
-		
-	    if (NSRunAlertPanel([NSString stringWithFormat:NSLocalizedString(@"Unable to initialize notes database in \n%@ because %@.",nil), location, reason],
-							subMessage, NSLocalizedString(@"Choose another folder",nil),NSLocalizedString(@"Quit",nil),NULL) == NSAlertDefaultReturn) {
+		if (shouldShowOpenPanel) {
 			//show nsopenpanel, defaulting to current default notes dir
 			FSRef notesDirectoryRef;
-		showOpenPanel:
 			if (![prefsWindowController getNewNotesRefFromOpenPanel:&notesDirectoryRef returnedPath:&location]) {
 				//they cancelled the open panel, or it was unable to get the path/FSRef of the file
-//                [newNotation release];
 				goto terminateApp;
 			} else if ((newNotation = [[[NotationController alloc] initWithDirectoryRef:&notesDirectoryRef error:&err] autorelease])) {
 				//have to make sure alias data is saved from setNotationController
 				[newNotation setAliasNeedsUpdating:YES];
 				break;
 			}
+			//the chosen folder didn't work either: say why, then offer the open panel again
+			subMessage = NSLocalizedString(@"Please choose a different folder in which to store your notes.",nil);
+			shouldShowOpenPanel = NO;
+			continue;
+		}
+		
+	    location = [location stringByAbbreviatingWithTildeInPath];
+	    NSString *reason = [NSString reasonStringFromCarbonFSError:err];
+		
+	    if (NSRunAlertPanel([NSString stringWithFormat:NSLocalizedString(@"Unable to initialize notes database in \n%@ because %@.",nil), location, reason],
+							subMessage, NSLocalizedString(@"Choose another folder",nil),NSLocalizedString(@"Quit",nil),NULL) == NSAlertDefaultReturn) {
+			shouldShowOpenPanel = YES;
 	    } else {
 			goto terminateApp;
 	    }
@@ -539,8 +547,9 @@ terminateApp:
 		[self restoreListStateUsingPreferences];
 		
 		//window's undomanager could be referencing actions from the old notation object
-		[[window undoManager] removeAllActions];
-		[notationController setUndoManager:[window undoManager]];
+		//(the window's own undo manager: [window undoManager] is the note editor's when the editor has focus)
+		[windowUndoManager removeAllActions];
+		[notationController setUndoManager:windowUndoManager];
 		
 		if ([notationController aliasNeedsUpdating]) {
 			[prefsController setAliasDataForDefaultDirectory:[notationController aliasDataForNoteDirectory] sender:self];
@@ -826,6 +835,8 @@ terminateApp:
 
 
 - (IBAction)deleteNote:(id)sender {
+	//pressing ⌘⌫ again while the delete confirmation is showing would queue a second one
+	if ([window attachedSheet]) return;
 	NSIndexSet *indexes = [notesTableView selectedRowIndexes];
 	if ([indexes count] > 0) {
 		

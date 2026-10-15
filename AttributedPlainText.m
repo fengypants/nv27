@@ -201,7 +201,11 @@ static BOOL _StringWithRangeIsProbablyObjC(NSString *string, NSRange blockRange)
 }
 
 - (void)addLinkAttributesForRange:(NSRange)changedRange {
-//    return;
+	//keep the range inside the text: Find & Replace can shorten it after the range was worked out
+	NSUInteger stringLength = [self length];
+	if (changedRange.location > stringLength)
+		return;
+	changedRange.length = MIN(changedRange.length, stringLength - changedRange.location);
 	if (!changedRange.length)
 		return;
 	

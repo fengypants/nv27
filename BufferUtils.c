@@ -59,6 +59,9 @@ static const unsigned char gsToLowerMap[256] = {
 static u_int32_t u8_nextchar(const char *s, size_t *i);
 
 char *replaceString(char *oldString, const char *newString) {
+    //realloc could move or free oldString before newString (the same string) is copied from it
+    if (newString == oldString) return oldString;
+    
     size_t newLen = strlen(newString) + 1;
 
     //realloc is smart enough to do better memory management than we can do right here
@@ -97,10 +100,12 @@ void modp_tolower_copy(char* dest, const char* str, int len) {
 	const uint8_t* ustr = (const uint8_t*) str;
 	const int leftover = len % sizeof(NSUInteger);
 	const int imax = len / sizeof(NSUInteger);
-	const NSUInteger* s = (const NSUInteger*) str;
-	NSUInteger* d = (NSUInteger*) dest;
+	//copy each word in and out: the strings needn't be aligned for word-sized loads and stores
+	const char* s = str;
+	char* d = dest;
 	for (i = 0; i != imax; ++i) {
-		eax = s[i];
+		memcpy(&eax, s, sizeof(NSUInteger));
+		s += sizeof(NSUInteger);
 		/*
 		 * This is based on the algorithm by Paul Hsieh
 		 * http://www.azillionmonkeys.com/qed/asmexample.html
@@ -114,11 +119,13 @@ void modp_tolower_copy(char* dest, const char* str, int len) {
 		ebx = (0x7f7f7f7fu & ebx) + 0x1a1a1a1au;
 		ebx = ((ebx & ~eax) >> 2)  & 0x20202020u;
 #endif
-		*d++ = eax + ebx;
+		eax += ebx;
+		memcpy(d, &eax, sizeof(NSUInteger));
+		d += sizeof(NSUInteger);
 	}
 	
 	i = imax * sizeof(NSUInteger);
-	dest = (char*) d;
+	dest = d;
 	switch (leftover) {
 #if __LP64__ || NS_BUILD_32_LIKE_64
 		case 7: *dest++ = (char) gsToLowerMap[ustr[i++]];
@@ -150,7 +157,8 @@ static force_inline u_int32_t u8_nextchar(const char *s, size_t *i) {
 		ch += (unsigned char)s[(*i)];
 		sz++;
 	} while (s[*i] && (++(*i)) && !isutf(s[*i]));
-	ch -= offsetsFromUTF8[sz-1];
+	//malformed text can have a run of more continuation bytes than offsetsFromUTF8 has entries
+	ch -= offsetsFromUTF8[MIN(sz, (size_t)6) - 1];
 	
 	return ch;
 }

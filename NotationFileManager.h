@@ -68,6 +68,8 @@ NSUInteger diskUUIDIndexForNotation(NotationController *controller);
 							 verifyWithSelector:(SEL)verifySel verificationDelegate:(id)verifyDelegate;
 + (OSStatus)trashFolderRef:(FSRef*)trashRef forChild:(FSRef*)childRef;
 - (OSStatus)moveFileToTrash:(FSRef *)childRef forFilename:(NSString*)filename;
+- (NSString*)noteDirectoryPath;
+- (NSUInteger)trashStaleTemporaryFiles;
 - (void)notifyOfChangedTrash;
 @end
 

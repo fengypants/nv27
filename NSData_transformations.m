@@ -21,6 +21,7 @@
 #include "broken_md5.h"
 
 #include <unistd.h>
+#include <stdint.h>
 #include <zlib.h>
 #include <CommonCrypto/CommonCryptor.h>
 #include <CommonCrypto/CommonDigest.h>
@@ -58,9 +59,10 @@
 							   [self bytes], [self length], level);
 		if (zlibError == Z_OK) {
 			// Add original size to the end of the buffer, written big-endian
-			*( (unsigned *) ([newData mutableBytes] + bufferLength) ) =
-            NSSwapHostIntToBig( [self length] );
-			[newData setLength:bufferLength + sizeof(unsigned)];
+			// (copied in: the end of the compressed data needn't be aligned for a 4-byte store)
+			uint32_t originalSizeBE = NSSwapHostIntToBig((uint32_t)[self length]);
+			memcpy((uint8_t *)[newData mutableBytes] + bufferLength, &originalSizeBE, sizeof(originalSizeBE));
+			[newData setLength:bufferLength + sizeof(originalSizeBE)];
 		} else {
 			NSLog(@"error compressing: %s", zError(zlibError));
 			newData = nil;
@@ -84,7 +86,9 @@
 	
 	newData = nil;
 	if ( [self isCompressedFormat] ) {
-		originalSize = NSSwapBigIntToHost(*((unsigned *) ([self bytes] + [self length] - sizeof(unsigned))));
+		uint32_t originalSizeBE = 0;
+		memcpy(&originalSizeBE, (const uint8_t *)[self bytes] + [self length] - sizeof(originalSizeBE), sizeof(originalSizeBE));
+		originalSize = NSSwapBigIntToHost(originalSizeBE);
 		
 		//catch the NSInvalidArgumentException that's thrown if originalSize is too large
 		NS_DURING
@@ -129,9 +133,12 @@
 	 *    *( (short *) bytes ) ) % 31 == 0 : the two first bytes as a whole (big endian format) must be a multiple of 31
 	 *                                       (this is discussed in the FCHECK in FLG, flags, section)
 	 */
-	if( ( *bytes & 0x0F ) == 8 && ( *bytes & 0x80 ) == 0 &&
-		NSSwapBigShortToHost( *( (short *) bytes ) ) % 31 == 0 )
-		return YES;
+	if( ( *bytes & 0x0F ) == 8 && ( *bytes & 0x80 ) == 0 ) {
+		uint16_t header = 0;
+		memcpy(&header, bytes, sizeof(header));
+		if (NSSwapBigShortToHost(header) % 31 == 0)
+			return YES;
+	}
 	
 	return NO;
 }
