@@ -116,7 +116,7 @@ Every push is built by GitHub Actions (`.github/workflows/build.yml`). Debug bui
 
 ## Known limitations
 
-- **Not notarized:** the app is signed ad hoc, so macOS asks you to approve it once (see [Install](#install)).
+- **Not notarized:** the app is signed ad hoc, so macOS asks you to approve it once.
 - **No auto-update:** check [Releases](https://github.com/fengypants/nv27/releases) for new versions.
 - **TaskPaper** notes are converted for the preview with the system `ruby`; if macOS stops shipping Ruby, they render as plain MultiMarkdown.
 - **Encrypted nvALT databases** don't open (see [Removed features](#removed-features)).
