@@ -8,7 +8,7 @@ nv27 is a separate app, so it runs side by side with the original nvALT.
 
 ## Contents
 
-- [Install](#install)
+- [Requirements](#requirements)
 - [What it is](#what-it-is)
 - [How nv27 differs from nvALT](#how-nv27-differs-from-nvalt)
   - [Platform](#platform)
