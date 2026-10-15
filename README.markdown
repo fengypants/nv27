@@ -1,6 +1,6 @@
 # nv27
 
-**nv27** is a simple, modern [nvALT](https://brettterpstra.com/project/nvalt/): stripped down to the essentials and rebuilt for Apple silicon and current macOS. It keeps what made Notational Velocity and nvALT great — one window, type to search or create, plain text files in a folder, keyboard all the way — and drops what had grown around it: sync services, encryption, a database format, and other extras. What remains is modernized: Intel-only components are replaced, and the interface from the Mac OS X 10.6 era now follows current macOS conventions, with light and dark mode.
+**nv27** is a simplified [nvALT](https://brettterpstra.com/project/nvalt/): stripped down to the essentials and rebuilt for Apple silicon and current macOS. It keeps what made Notational Velocity and nvALT great — one window, type to search or create, plain text files in a folder, keyboard all the way — and drops what had grown around it: sync services, encryption, a database format, and other extras. What remains is modernized: Intel-only components are replaced, and the interface from the Mac OS X 10.6 era now follows current macOS conventions, with light and dark mode.
 
 nv27 is a separate app, so it runs side by side with the original nvALT.
 
