@@ -24,10 +24,12 @@ Requires an Apple silicon Mac with macOS 14 or later.
 - **Notes are just files:** plain text by default; `.md` files are recognized out of the box. Tags are stored on each file as OpenMeta tags, as in nvALT, so they stay separate from Finder tags.
 - **Faster Markdown preview** rendered in the app (tables, footnotes, task lists, strikethrough, autolinks); MultiMarkdown metadata is hidden.
 - **Light and Dark mode:** an Appearance setting (Automatic, Light, Dark), and every color scheme has light and dark variants. The User Scheme (default) has separate Light and Dark colors in Settings › Fonts & Colors — black on white in light mode and warm light gray on charcoal in dark mode by default. Low Contrast is now a soft "paper" look and follows *Increase contrast*.
-- **Modern interface throughout:** centered window title; full-width search field with SF Symbols; standard list headers, gridlines and divider; Mail-style list in the side-by-side layout; blue links; standard Settings toolbar and controls; SF Symbols in the preview window and menu bar; system font everywhere except your note text.
-- **Show Dock icon** is a checkbox that applies instantly; hiding the Dock icon shows the menu bar icon.
+- **Modern interface throughout:** centered window title; full-width search field with SF Symbols; standard list headers, gridlines and divider; Mail-style list in the side-by-side layout; blue links; SF Symbols in the preview window, hotkey panel and menu bar; system font everywhere except your note text.
+- **Redesigned Settings:** the standard toolbar, and every tab laid out as a standard macOS settings form at one width, with clearer, translated labels.
+- **Show icon in: Dock / Menu bar** (Settings › General) applies instantly; hiding the Dock icon shows the menu bar icon.
+- **New defaults** for new users: Helvetica 14 note text, Large list text, no gridlines, Tab moves to the next field (Option-Tab indents), and pasted text keeps no styles.
 - **Color scheme shortcuts** are ⌥⌘1–3 in every language (⌘1–9 remain bookmarks).
-- **Keyboard Shortcuts** (Help menu) opens a window listing every shortcut, instead of an RTF document in TextEdit.
+- **Keyboard Shortcuts** (Help menu) opens a window listing every shortcut, instead of an RTF document in TextEdit, translated into all of nv27's languages. A new notes folder also gets an up-to-date shortcuts note, and its welcome notes describe nv27.
 - **Help menu** links to the nv27 repository and the nvALT and Notational Velocity websites.
 
 ### Removed
@@ -45,6 +47,8 @@ Requires an Apple silicon Mac with macOS 14 or later.
 - Missing gridlines in the notes list after partial redraws.
 - Unreadable selected-row titles in dark color schemes.
 - Green links in dark color schemes (now blue).
+- The Services menu item now appears translated (its translations still used nvALT's name, so none applied).
+- The External Text Editor setting's label was hidden until an editor had been chosen.
 
 ### Known limitations
 

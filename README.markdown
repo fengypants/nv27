@@ -82,12 +82,13 @@ nv27 follows current macOS conventions throughout. In particular:
   - **Low Contrast** — soft charcoal on a warm off-white "paper", or warm light gray on warm charcoal. It switches to B/W when Accessibility's *Increase contrast* is on.
   - **User Scheme** (the default) — your own colors, with separate Light and Dark pairs in Settings › Fonts & Colors; they default to B/W light and Low Contrast dark.
 - **Links** in notes are blue in light and dark schemes.
-- **Settings** use the standard toolbar with SF Symbols, aligned controls, standard buttons and lists (a single extensions list with attached +/− and *Set as Default* in its contextual menu), a standard font control, and a number field for the maximum note width. Panels for removed features are gone.
-- **Dock and menu bar:** "Show Dock icon" is a checkbox that applies immediately (no restart); hiding it turns on the menu bar icon, an SF Symbol.
+- **Settings** use the standard toolbar with SF Symbols, and every tab is laid out as a standard macOS settings form at one width: right-aligned labels, controls lined up after them, related checkboxes grouped under one label, and explanations in small secondary text. Labels are reworded in plain sentence case, there's a single extensions list with attached +/− and *Set as Default* in its contextual menu, and panels for removed features are gone.
+- **Dock and menu bar:** Settings › General › *Show icon in: Dock / Menu bar* applies immediately (no restart); hiding the Dock icon turns on the menu bar icon, an SF Symbol.
 - **Preview window:** SF Symbols for lock, print and save.
 - **Help menu:** *Keyboard Shortcuts* opens a window listing every shortcut in tables, in standard macOS key order (instead of an RTF document in TextEdit; its text is in `en.lproj/KeyboardShortcuts.md`, translated in the other languages' folders, as nvALT's shortcuts document was). The menu also links to the nv27 repository and the nvALT and Notational Velocity websites.
 - **About:** shows nv27, its version and a link to this repository, in the system font.
 - Remaining interface text uses the system font (SF Pro); the note body font is yours to choose in Settings › Fonts & Colors (default Helvetica 14).
+- **New defaults** (for new users): Helvetica 14 note text, Large list text, no gridlines, the Tab key moves to the next field (Option-Tab indents), and pasted text keeps no styles from other apps.
 
 ## Running alongside nvALT
 
