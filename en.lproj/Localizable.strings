@@ -658,3 +658,39 @@
 /* Menu Item for Use Selection for Find */
 "Use Selection for Find" = "Use Selection for Find";
 
+/* Settings window form labels */
+"Appearance:" = "Appearance:";
+"List text size:" = "List text size:";
+"Hotkey:" = "Hotkey:";
+"Brings nv27 to the front from any app." = "Brings nv27 to the front from any app.";
+"Behavior:" = "Behavior:";
+"Show icon in:" = "Show icon in:";
+"Dock" = "Dock";
+"Menu bar" = "Menu bar";
+"Notes folder:" = "Notes folder:";
+"Store notes as:" = "Store notes as:";
+"File extensions:" = "File extensions:";
+"Files with these extensions are read as notes. Right-click one to make it the default for new notes." = "Files with these extensions are read as notes. Right-click one to make it the default for new notes.";
+"Styled text:" = "Styled text:";
+"Spelling:" = "Spelling:";
+"Tab key:" = "Tab key:";
+"Links:" = "Links:";
+"Auto-pair:" = "Auto-pair:";
+"Match opening characters with closing characters" = "Match opening characters with closing characters";
+"For example, typing a left bracket also adds a right bracket." = "For example, typing a left bracket also adds a right bracket.";
+"Direction:" = "Direction:";
+"External editor:" = "External editor:";
+"Note font:" = "Note font:";
+"Search terms:" = "Search terms:";
+"Highlight in notes" = "Highlight in notes";
+"Light" = "Light";
+"Dark" = "Dark";
+"Text color:" = "Text color:";
+"Background:" = "Background:";
+"Used by the User Scheme (⌥⌘3)." = "Used by the User Scheme (⌥⌘3).";
+"Notes list:" = "Notes list:";
+"Always show grid lines" = "Always show grid lines";
+"Alternating row colors" = "Alternating row colors";
+"Note width:" = "Note width:";
+"Keep note text width readable" = "Keep note text width readable";
+"Maximum:" = "Maximum:";

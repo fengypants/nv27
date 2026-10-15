@@ -363,34 +363,10 @@
 - (NSView*)databaseView {
     if (![notationPrefsView subviews] || ![[notationPrefsView subviews] count]) {
 		[notationPrefsView addSubview:[[self notationPrefsViewController] view]];
-		[self fitNotationPrefsView];
+		[self layOutNotesPane];
 	}
 	
     return databaseView;
-}
-
-//the notes storage view can be shorter than its placeholder (its tabs for removed features are gone): shrink the
-//placeholder to fit, keeping the rows above it the same distance away, and the pane by the same amount
-- (void)fitNotationPrefsView {
-	NSView *storageView = [[self notationPrefsViewController] view];
-	NSRect placeholder = [notationPrefsView frame];
-	CGFloat delta = NSHeight(placeholder) - NSHeight([storageView frame]);
-	if (delta <= 0.0 || [databaseView isFlipped]) return;
-	
-	BOOL autoresizes = [databaseView autoresizesSubviews], placeholderAutoresizes = [notationPrefsView autoresizesSubviews];
-	[databaseView setAutoresizesSubviews:NO];
-	[notationPrefsView setAutoresizesSubviews:NO];
-	
-	[storageView setFrameOrigin:NSZeroPoint];
-	[notationPrefsView setFrameSize:NSMakeSize(NSWidth(placeholder), NSHeight(placeholder) - delta)];
-	for (NSView *row in [databaseView subviews]) {
-		if (row != notationPrefsView && NSMinY([row frame]) >= NSMaxY(placeholder) - 1.0)
-			[row setFrameOrigin:NSMakePoint(NSMinX([row frame]), NSMinY([row frame]) - delta)];
-	}
-	[databaseView setFrameSize:NSMakeSize(NSWidth([databaseView frame]), NSHeight([databaseView frame]) - delta)];
-	
-	[notationPrefsView setAutoresizesSubviews:placeholderAutoresizes];
-	[databaseView setAutoresizesSubviews:autoresizes];
 }
 
 - (void)addToolbarItemWithName:(NSString*)name {
@@ -480,6 +456,9 @@
 	[window setToolbarStyle:NSWindowToolbarStylePreference];
 	
 	[window setShowsToolbarButton:NO];
+	[self layOutGeneralPane];
+	[self layOutEditingPane];
+	[self layOutFontsColorsPane];
     [self switchViews:nil];  //select last selected pane by default
     
 }
@@ -560,6 +539,230 @@
     [window setContentView:prefsView];
 }
 
+#pragma mark - form layout
+
+//each pane is laid out as a standard macOS settings form: a column of right-aligned labels and a column of controls,
+//built in a grid view from the pane's existing controls (their actions, bindings and outlets are unchanged);
+//whatever of the old layout isn't reused (its labels) is hidden
+
+#define FORM_MARGIN 20.0
+#define FORM_HELP_WIDTH 250.0
+#define FORM_CHECKBOX_INDENT 20.0
+#define FORM_MIN_PANE_WIDTH 420.0
+
+typedef enum { FormAlignBaseline = 0, FormAlignCenter, FormAlignTop } FormRowAlignment;
+
+//a row: a label (or nil to continue the group above), its content, the space above it and how the label lines up
+static NSDictionary *FormRow(NSString *label, NSView *content, CGFloat spaceAbove, FormRowAlignment alignment) {
+	return [NSDictionary dictionaryWithObjectsAndKeys:label ? (id)label : (id)[NSNull null], @"label", content, @"content",
+			[NSNumber numberWithDouble:spaceAbove], @"space", [NSNumber numberWithInt:alignment], @"align", nil];
+}
+
+static void FormFixSize(NSView *view, CGFloat width, CGFloat height) {
+	[view setTranslatesAutoresizingMaskIntoConstraints:NO];
+	if (width > 0.0) [[[view widthAnchor] constraintEqualToConstant:width] setActive:YES];
+	if (height > 0.0) [[[view heightAnchor] constraintEqualToConstant:height] setActive:YES];
+}
+
+//explanatory text: small, secondary, wrapping to the control column
+static NSTextField *FormHelp(NSTextField *field, NSString *text) {
+	if (!field) field = [NSTextField wrappingLabelWithString:text];
+	else if (text) [field setStringValue:text];
+	[field setFont:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]]];
+	[field setTextColor:[NSColor secondaryLabelColor]];
+	[field setSelectable:NO];
+	[[field cell] setWraps:YES];
+	[field setPreferredMaxLayoutWidth:FORM_HELP_WIDTH];
+	[field setTranslatesAutoresizingMaskIntoConstraints:NO];
+	[[[field widthAnchor] constraintLessThanOrEqualToConstant:FORM_HELP_WIDTH] setActive:YES];
+	return field;
+}
+
+//help text under a checkbox lines up with the checkbox's title
+static NSView *FormIndented(NSView *view) {
+	NSStackView *stack = [NSStackView stackViewWithViews:[NSArray arrayWithObject:view]];
+	[stack setEdgeInsets:NSEdgeInsetsMake(0, FORM_CHECKBOX_INDENT, 0, 0)];
+	return stack;
+}
+
+static NSStackView *FormHStack(NSArray *views) {
+	NSStackView *stack = [NSStackView stackViewWithViews:views];
+	[stack setOrientation:NSUserInterfaceLayoutOrientationHorizontal];
+	[stack setAlignment:NSLayoutAttributeCenterY];
+	[stack setSpacing:8.0];
+	return stack;
+}
+
+static NSTextField *FormSmallLabel(NSString *text, CGFloat width) {
+	NSTextField *label = [NSTextField labelWithString:text];
+	[label setAlignment:NSTextAlignmentCenter];
+	[label setFont:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]]];
+	[label setTextColor:[NSColor secondaryLabelColor]];
+	if (width > 0.0) FormFixSize(label, width, 0.0);
+	return label;
+}
+
+//a checkbox with its title on the right, as checkboxes normally are (some had a label-style title on the left)
+static NSButton *FormCheckbox(NSButton *button, NSString *title) {
+	if (title) [button setTitle:title];
+	[button setImagePosition:NSImageLeading];
+	[button setAlignment:NSTextAlignmentNatural];
+	return button;
+}
+
+static id FormControlWithAction(NSView *pane, SEL action) {
+	for (NSView *view in [pane subviews])
+		if ([view isKindOfClass:[NSControl class]] && [(NSControl*)view action] == action) return view;
+	return nil;
+}
+
+//the pane's multi-line explanatory texts, top to bottom
+static NSArray *FormHelpFields(NSView *pane) {
+	NSMutableArray *fields = [NSMutableArray array];
+	for (NSView *view in [pane subviews])
+		if ([view isKindOfClass:[NSTextField class]] && ![(NSTextField*)view isEditable] && ![(NSTextField*)view isBezeled] && NSHeight([view frame]) >= 26.0)
+			[fields addObject:view];
+	[fields sortUsingComparator:^NSComparisonResult(NSView *a, NSView *b) {
+		return NSMinY([a frame]) > NSMinY([b frame]) ? NSOrderedAscending : NSOrderedDescending;
+	}];
+	return fields;
+}
+
+- (void)layOutPane:(NSView*)pane rows:(NSArray*)rows {
+	NSMutableArray *cells = [NSMutableArray arrayWithCapacity:[rows count]];
+	for (NSDictionary *row in rows) {
+		id label = [row objectForKey:@"label"];
+		NSView *labelView = label == [NSNull null] ? [NSGridCell emptyContentView] : [NSTextField labelWithString:label];
+		[cells addObject:[NSArray arrayWithObjects:labelView, [row objectForKey:@"content"], nil]];
+	}
+	NSGridView *grid = [NSGridView gridViewWithViews:cells];
+	[grid setRowSpacing:8.0];
+	[grid setColumnSpacing:8.0];
+	[grid setRowAlignment:NSGridRowAlignmentFirstBaseline];
+	[[grid columnAtIndex:0] setXPlacement:NSGridCellPlacementTrailing];
+	[[grid columnAtIndex:1] setXPlacement:NSGridCellPlacementLeading];
+	for (NSUInteger i = 0; i < [rows count]; i++) {
+		NSDictionary *row = [rows objectAtIndex:i];
+		NSGridRow *gridRow = [grid rowAtIndex:i];
+		[gridRow setTopPadding:[[row objectForKey:@"space"] doubleValue]];
+		switch ([[row objectForKey:@"align"] intValue]) {
+			case FormAlignCenter: [gridRow setRowAlignment:NSGridRowAlignmentNone]; [gridRow setYPlacement:NSGridCellPlacementCenter]; break;
+			case FormAlignTop: [gridRow setRowAlignment:NSGridRowAlignmentNone]; [gridRow setYPlacement:NSGridCellPlacementTop]; break;
+			default: break;
+		}
+	}
+	
+	//the old layout's leftovers (its labels) stay in the pane, hidden: some are still referenced
+	for (NSView *view in [pane subviews]) [view setHidden:YES];
+	
+	[grid setTranslatesAutoresizingMaskIntoConstraints:NO];
+	[pane addSubview:grid];
+	NSSize fit = [grid fittingSize];
+	[pane setFrameSize:NSMakeSize(MAX(FORM_MIN_PANE_WIDTH, ceil(fit.width) + 2.0 * FORM_MARGIN), ceil(fit.height) + 2.0 * FORM_MARGIN)];
+	[[[grid centerXAnchor] constraintEqualToAnchor:[pane centerXAnchor]] setActive:YES];
+	[[[grid topAnchor] constraintEqualToAnchor:[pane topAnchor] constant:FORM_MARGIN] setActive:YES];
+}
+
+- (void)layOutGeneralPane {
+	NSButton *setHotkeyButton = FormControlWithAction(generalView, @selector(setAppShortcut:));
+	NSButton *menuBarButton = FormControlWithAction(generalView, @selector(toggleStatusItem:));
+	NSTextField *autoSelectHelp = [FormHelpFields(generalView) firstObject];
+	FormFixSize(appShortcutField, 120.0, 0.0);
+	FormFixSize(tableTextSizeField, 44.0, 0.0);
+	[togDockButton setTitle:NSLocalizedString(@"Dock", @"Settings: show the app icon in the Dock")];
+	[menuBarButton setTitle:NSLocalizedString(@"Menu bar", @"Settings: show the app icon in the menu bar")];
+	
+	NSMutableArray *rows = [NSMutableArray array];
+	[rows addObject:FormRow(NSLocalizedString(@"Appearance:", nil), appearancePopUp, 0, FormAlignBaseline)];
+	[rows addObject:FormRow(NSLocalizedString(@"List text size:", nil), FormHStack([NSArray arrayWithObjects:tableTextMenuButton, tableTextSizeField, nil]), 0, FormAlignCenter)];
+	[rows addObject:FormRow(NSLocalizedString(@"Hotkey:", @"Settings: the hotkey that brings nv27 to the front"),
+							FormHStack([NSArray arrayWithObjects:appShortcutField, setHotkeyButton, nil]), 12, FormAlignCenter)];
+	[rows addObject:FormRow(nil, FormHelp(nil, NSLocalizedString(@"Brings nv27 to the front from any app.", nil)), 0, FormAlignBaseline)];
+	[rows addObject:FormRow(NSLocalizedString(@"Behavior:", nil), completeNoteTitlesButton, 12, FormAlignBaseline)];
+	if (autoSelectHelp) [rows addObject:FormRow(nil, FormIndented(FormHelp(autoSelectHelp, nil)), 0, FormAlignBaseline)];
+	[rows addObject:FormRow(nil, confirmDeletionButton, 0, FormAlignBaseline)];
+	[rows addObject:FormRow(nil, quitWhenClosingButton, 0, FormAlignBaseline)];
+	[rows addObject:FormRow(NSLocalizedString(@"Show icon in:", @"Settings: where the app icon appears (Dock, menu bar)"), togDockButton, 12, FormAlignBaseline)];
+	if (menuBarButton) [rows addObject:FormRow(nil, menuBarButton, 0, FormAlignBaseline)];
+	[self layOutPane:generalView rows:rows];
+}
+
+- (void)layOutEditingPane {
+	NSArray *helpFields = FormHelpFields(editingView);
+	[tabKeyRadioMatrix sizeToCells];
+	FormFixSize(tabKeyRadioMatrix, NSWidth([tabKeyRadioMatrix frame]), NSHeight([tabKeyRadioMatrix frame]));
+	FormCheckbox(autoPairButton, NSLocalizedString(@"Match opening characters with closing characters", @"Settings: auto-pairing checkbox"));
+	
+	NSMutableArray *rows = [NSMutableArray array];
+	[rows addObject:FormRow(NSLocalizedString(@"Styled text:", nil), styledTextButton, 0, FormAlignBaseline)];
+	[rows addObject:FormRow(NSLocalizedString(@"Spelling:", nil), checkSpellingButton, 0, FormAlignBaseline)];
+	[rows addObject:FormRow(NSLocalizedString(@"Tab key:", nil), tabKeyRadioMatrix, 12, FormAlignTop)];
+	if ([helpFields count]) [rows addObject:FormRow(nil, FormIndented(FormHelp([helpFields objectAtIndex:0], nil)), 0, FormAlignBaseline)];
+	[rows addObject:FormRow(nil, softTabsButton, 0, FormAlignBaseline)];
+	[rows addObject:FormRow(NSLocalizedString(@"Links:", nil), makeURLsClickable, 12, FormAlignBaseline)];
+	[rows addObject:FormRow(nil, autoSuggestLinksButton, 0, FormAlignBaseline)];
+	[rows addObject:FormRow(NSLocalizedString(@"Auto-pair:", nil), autoPairButton, 12, FormAlignBaseline)];
+	[rows addObject:FormRow(nil, FormIndented(FormHelp(nil, NSLocalizedString(@"For example, typing a left bracket also adds a right bracket.", nil))), 0, FormAlignBaseline)];
+	[rows addObject:FormRow(NSLocalizedString(@"Direction:", nil), rtlButton, 12, FormAlignBaseline)];
+	[rows addObject:FormRow(NSLocalizedString(@"External editor:", nil), externalEditorMenuButton, 12, FormAlignBaseline)];
+	[self layOutPane:editingView rows:rows];
+}
+
+- (void)layOutFontsColorsPane {
+	NSButton *selectFontButton = FormControlWithAction(fontsColorsView, @selector(changeBodyFont:));
+	NSButton *keepWidthButton = FormControlWithAction(fontsColorsView, @selector(toggleKeepsTextWidthInWindow:));
+	FormFixSize(bodyTextFontField, 180.0, 0.0);
+	FormFixSize(maxWidthField, 52.0, 0.0);
+	for (NSColorWell *well in [NSArray arrayWithObjects:searchHighlightColorWell, foregroundColorWell, foregroundColorWellDark, backgroundColorWell, backgroundColorWellDark, nil])
+		FormFixSize(well, 52.0, 24.0);
+	FormCheckbox(highlightSearchTermsButton, NSLocalizedString(@"Highlight in notes", @"Settings: highlight search terms in the note text"));
+	FormCheckbox(showGridButton, NSLocalizedString(@"Always show grid lines", nil));
+	FormCheckbox(altRowsButton, NSLocalizedString(@"Alternating row colors", nil));
+	FormCheckbox(keepWidthButton, NSLocalizedString(@"Keep note text width readable", nil));
+	
+	NSMutableArray *rows = [NSMutableArray array];
+	[rows addObject:FormRow(NSLocalizedString(@"Note font:", nil), FormHStack([NSArray arrayWithObjects:bodyTextFontField, selectFontButton, nil]), 0, FormAlignCenter)];
+	[rows addObject:FormRow(NSLocalizedString(@"Search terms:", nil), FormHStack([NSArray arrayWithObjects:highlightSearchTermsButton, searchHighlightColorWell, nil]), 12, FormAlignCenter)];
+	[rows addObject:FormRow(nil, FormHStack([NSArray arrayWithObjects:FormSmallLabel(NSLocalizedString(@"Light", @"Settings: light-mode color column"), 52.0),
+											 FormSmallLabel(NSLocalizedString(@"Dark", @"Settings: dark-mode color column"), 52.0), nil]), 12, FormAlignCenter)];
+	[rows addObject:FormRow(NSLocalizedString(@"Text color:", nil), FormHStack([NSArray arrayWithObjects:foregroundColorWell, foregroundColorWellDark, nil]), 0, FormAlignCenter)];
+	[rows addObject:FormRow(NSLocalizedString(@"Background:", nil), FormHStack([NSArray arrayWithObjects:backgroundColorWell, backgroundColorWellDark, nil]), 0, FormAlignCenter)];
+	[rows addObject:FormRow(nil, FormHelp(nil, NSLocalizedString(@"Used by the User Scheme (⌥⌘3).", nil)), 0, FormAlignBaseline)];
+	[rows addObject:FormRow(NSLocalizedString(@"Notes list:", nil), showGridButton, 12, FormAlignBaseline)];
+	[rows addObject:FormRow(nil, altRowsButton, 0, FormAlignBaseline)];
+	[rows addObject:FormRow(NSLocalizedString(@"Note width:", nil), keepWidthButton, 12, FormAlignBaseline)];
+	[rows addObject:FormRow(nil, FormIndented(FormHStack([NSArray arrayWithObjects:[NSTextField labelWithString:NSLocalizedString(@"Maximum:", @"Settings: maximum note width")],
+																   maxWidthField, maxWidthStepper, [NSTextField labelWithString:@"px"], nil])), 0, FormAlignCenter)];
+	[self layOutPane:fontsColorsView rows:rows];
+}
+
+- (void)layOutNotesPane {
+	NotationPrefsViewController *notesController = [self notationPrefsViewController];
+	NSScrollView *list = [notesController extensionsListView];
+	NSSegmentedControl *listButtons = [notesController extensionButtons];
+	
+	//the extensions list with its +/- buttons attached to its bottom edge
+	CGFloat listWidth = 180.0, listHeight = 96.0, buttonsHeight = NSHeight([listButtons frame]);
+	NSView *listBox = [[[NSView alloc] initWithFrame:NSMakeRect(0, 0, listWidth, listHeight + buttonsHeight - 1.0)] autorelease];
+	[list setAutoresizingMask:NSViewNotSizable];
+	[listButtons setAutoresizingMask:NSViewNotSizable];
+	[list setFrame:NSMakeRect(0, buttonsHeight - 1.0, listWidth, listHeight)];
+	[listButtons setFrameOrigin:NSZeroPoint];
+	[listBox addSubview:list];
+	[listBox addSubview:listButtons];
+	FormFixSize(listBox, listWidth, listHeight + buttonsHeight - 1.0);
+	[[[folderLocationsMenuButton widthAnchor] constraintGreaterThanOrEqualToConstant:180.0] setActive:YES];
+	
+	NSMutableArray *rows = [NSMutableArray array];
+	[rows addObject:FormRow(NSLocalizedString(@"Notes folder:", nil), folderLocationsMenuButton, 0, FormAlignBaseline)];
+	[rows addObject:FormRow(NSLocalizedString(@"Store notes as:", nil), [notesController storageFormatPopUp], 0, FormAlignBaseline)];
+	[rows addObject:FormRow(NSLocalizedString(@"File extensions:", nil), listBox, 12, FormAlignTop)];
+	[rows addObject:FormRow(nil, FormHelp(nil, NSLocalizedString(@"Files with these extensions are read as notes. Right-click one to make it the default for new notes.", nil)), 0, FormAlignBaseline)];
+	[rows addObject:FormRow(nil, [notesController confirmFileDeletionCheckbox], 12, FormAlignBaseline)];
+	[self layOutPane:databaseView rows:rows];
+}
+
+
 //all panes share the widest one's width (Fonts & Colors), so switching panes changes only the window's height,
 //as in the system's own settings windows; each narrower pane's content stays centered in the extra space
 - (void)matchPaneWidths {
@@ -573,7 +776,7 @@
 		[pane setAutoresizesSubviews:NO];
 		[pane setFrameSize:NSMakeSize(width, NSHeight([pane frame]))];
 		for (NSView *subview in [pane subviews])
-			[subview setFrameOrigin:NSMakePoint(round(NSMinX([subview frame]) + delta / 2.0), NSMinY([subview frame]))];
+			if ([subview translatesAutoresizingMaskIntoConstraints]) [subview setFrameOrigin:NSMakePoint(round(NSMinX([subview frame]) + delta / 2.0), NSMinY([subview frame]))];
 		[pane setAutoresizesSubviews:autoresizes];
 	}
 }
