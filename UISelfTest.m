@@ -18,7 +18,14 @@
 #import "PTKeyComboPanel.h"
 #import "BookmarksController.h"
 #import "GlobalPrefs.h"
+#import "NotationController.h"
+#import "NotationFileManager.h"
+#import "NotationPrefs.h"
+#import "AttributedPlainText.h"
+#import "TagEditingManager.h"
 #import <objc/runtime.h>
+#include <stdio.h>
+#include <errno.h>
 
 static BOOL selfTestTracingFocus = NO;
 
@@ -367,8 +374,247 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 		PrintSnapshotOfWindow(shortcutsWindow, [NSString stringWithFormat:@"shortcuts-%@-end", localization]);
 	}
 	[shortcutsText release];
+	[shortcutsWindow orderOut:nil];
+	[self _selfTestUpstreamFixes];
 	SelfTestLog(@"done");
 	exit(0);
+}
+
+//checks for bugs fixed in Notational Velocity 2.5.1 and for the reports in its issue tracker that nv27 might share;
+//a watchdog reports a hang (rather than CI just timing out) and says which check it was in
+static const char * volatile selfTestStage = "";
+
+static void SelfTestSpin(NSTimeInterval seconds) {
+	[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:seconds]];
+}
+
+- (NSInteger)_selfTestRowOfNote:(NoteObject*)note {
+	for (NSInteger i = 0; i < [notesTableView numberOfRows]; i++)
+		if ([notationController noteObjectAtFilteredIndex:i] == note) return i;
+	return -1;
+}
+
+- (NSArray*)_selfTestTemporaryFilesInNotesFolder {
+	NSRegularExpression *tempName = [NSRegularExpression regularExpressionWithPattern:@"^(\\.[0-9]+-[0-9]+-[0-9]+|4A696D[0-9A-F]{2})$" options:0 error:NULL];
+	NSMutableArray *names = [NSMutableArray array];
+	for (NSString *name in [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[notationController noteDirectoryPath] error:NULL])
+		if ([tempName numberOfMatchesInString:name options:0 range:NSMakeRange(0, [name length])]) [names addObject:name];
+	return names;
+}
+
+- (void)_selfTestUpstreamFixes {
+	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 90 * NSEC_PER_SEC), dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{
+		fprintf(stdout, "SELFTEST upstream: HANG (still running after 90 s) in \"%s\"\n", selfTestStage);
+		fflush(stdout);
+		exit(3);
+	});
+	[window makeKeyAndOrderFront:nil];
+	[self searchForString:@""];
+	SelfTestSpin(0.5);
+	NSString *folder = [notationController noteDirectoryPath];
+	SelfTestLog(@"upstream: notes folder %@, %ld notes", [folder stringByAbbreviatingWithTildeInPath], (long)[notesTableView numberOfRows]);
+	
+	//Find & Replace can shorten the text after the edited range was worked out (NV 2.5.1 "fix find-replace crash")
+	selfTestStage = "edited range past the end of the text";
+	@try {
+		NSTextStorage *storage = [[[NSTextStorage alloc] initWithString:@"see http://example.com now"] autorelease];
+		[storage addLinkAttributesForRange:NSMakeRange(20, 50)];
+		[storage addLinkAttributesForRange:NSMakeRange(60, 5)];
+		NSUInteger length = [[textView string] length];
+		[textView setValue:[NSValue valueWithRange:NSMakeRange(length + 5, 3)] forKey:@"changedRange"];
+		[textView didChangeText];
+		[textView setValue:[NSValue valueWithRange:NSMakeRange(length > 2 ? length - 2 : 0, 40)] forKey:@"changedRange"];
+		[textView didChangeText];
+		SelfTestLog(@"upstream: links and editor with an edited range past the end of the text: no exception");
+	} @catch (NSException *exception) {
+		SelfTestLog(@"upstream: links and editor with an edited range past the end of the text: EXCEPTION %@: %@", [exception name], [exception reason]);
+	}
+	
+	//NV issue 354: NV hung editing titles after a note was titled "/"; what nv27 makes of awkward titles
+	selfTestStage = "filenames for awkward titles";
+	for (NSString *title in [NSArray arrayWithObjects:@"/", @"a/b", @"/x", @"x/", @":", @".hidden", @"", nil]) {
+		@try {
+			SelfTestLog(@"upstream: filename for title \"%@\" = \"%@\"", title, [notationController uniqueFilenameForTitle:title fromNote:nil]);
+		} @catch (NSException *exception) {
+			SelfTestLog(@"upstream: filename for title \"%@\": EXCEPTION %@: %@", title, [exception name], [exception reason]);
+		}
+	}
+	selfTestStage = "notes titled \"/\"";
+	@try {
+		NSMutableArray *slashNotes = [NSMutableArray array];
+		for (int i = 0; i < 2; i++) {
+			NSAttributedString *body = [[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"slash note %d", i]
+																		attributes:[prefsController noteBodyAttributes]] autorelease];
+			NoteObject *note = [[[NoteObject alloc] initWithNoteBody:body title:@"/" delegate:notationController
+															  format:[notationController currentNoteStorageFormat] labels:nil] autorelease];
+			[notationController addNewNote:note];
+			[slashNotes addObject:note];
+		}
+		[notationController synchronizeNoteChanges:nil];
+		SelfTestSpin(1.0);
+		for (NoteObject *note in slashNotes) {
+			NSString *path = [folder stringByAppendingPathComponent:filenameOfNote(note)];
+			SelfTestLog(@"upstream: note titled \"%@\" saved as \"%@\" (on disk: %d, contents \"%@\")", titleOfNote(note), filenameOfNote(note),
+						[[NSFileManager defaultManager] fileExistsAtPath:path],
+						[NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:NULL]);
+		}
+		//then rename another note, which is where NV hung
+		selfTestStage = "renaming a note after notes titled \"/\"";
+		NoteObject *other = [notationController noteObjectAtFilteredIndex:0];
+		NSString *oldTitle = [[titleOfNote(other) copy] autorelease];
+		[other setTitleString:@"Renamed after slash"];
+		[notationController synchronizeNoteChanges:nil];
+		SelfTestSpin(0.5);
+		SelfTestLog(@"upstream: renamed \"%@\" to \"%@\", file \"%@\" (on disk: %d)", oldTitle, titleOfNote(other), filenameOfNote(other),
+					[[NSFileManager defaultManager] fileExistsAtPath:[folder stringByAppendingPathComponent:filenameOfNote(other)]]);
+		[other setTitleString:oldTitle];
+		[notationController synchronizeNoteChanges:nil];
+		for (NoteObject *note in slashNotes) [notationController removeNote:note];
+		SelfTestSpin(0.5);
+	} @catch (NSException *exception) {
+		SelfTestLog(@"upstream: notes titled \"/\": EXCEPTION %@: %@", [exception name], [exception reason]);
+	}
+	
+	//saving swaps the new file in whole; nothing is left behind under a temporary name
+	selfTestStage = "saving a note";
+	{
+		NoteObject *note = [notationController noteObjectAtFilteredIndex:0];
+		NSString *path = [folder stringByAppendingPathComponent:filenameOfNote(note)];
+		NSString *original = [[[note contentString] string] copy];
+		NSAttributedString *edited = [[[NSAttributedString alloc] initWithString:[original stringByAppendingString:@"\nsaved by the self-test"]
+																	  attributes:[prefsController noteBodyAttributes]] autorelease];
+		[note setContentString:edited];
+		[notationController synchronizeNoteChanges:nil];
+		SelfTestSpin(0.5);
+		NSString *onDisk = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:NULL];
+		SelfTestLog(@"upstream: saved \"%@\": file has the new text=%d; temporary files left in the notes folder: %@", titleOfNote(note),
+					[onDisk hasSuffix:@"saved by the self-test"], [self _selfTestTemporaryFilesInNotesFolder]);
+		[note setContentString:[[[NSAttributedString alloc] initWithString:original attributes:[prefsController noteBodyAttributes]] autorelease]];
+		[notationController synchronizeNoteChanges:nil];
+		[original release];
+	}
+	
+	//saves swap the new file in with one rename where the volume allows it (the old four-rename way is the fallback)
+	{
+		NSString *a = [folder stringByAppendingPathComponent:@".selftest-swap-a"], *b = [folder stringByAppendingPathComponent:@".selftest-swap-b"];
+		[@"a" writeToFile:a atomically:NO encoding:NSUTF8StringEncoding error:NULL];
+		[@"b" writeToFile:b atomically:NO encoding:NSUTF8StringEncoding error:NULL];
+		BOOL swapped = renamex_np([a fileSystemRepresentation], [b fileSystemRepresentation], RENAME_SWAP) == 0;
+		SelfTestLog(@"upstream: notes folder's volume swaps files in one step=%d (%s), contents now a=\"%@\" b=\"%@\"", swapped, swapped ? "ok" : strerror(errno),
+					[NSString stringWithContentsOfFile:a encoding:NSUTF8StringEncoding error:NULL], [NSString stringWithContentsOfFile:b encoding:NSUTF8StringEncoding error:NULL]);
+		[[NSFileManager defaultManager] removeItemAtPath:a error:NULL];
+		[[NSFileManager defaultManager] removeItemAtPath:b error:NULL];
+	}
+	
+	//leftover temporary files from an earlier run go to the Trash, but not one that might be another copy's save in progress
+	selfTestStage = "leftover temporary files";
+	{
+		NSString *stale = [folder stringByAppendingPathComponent:@".123456-1700000000-1"];
+		NSString *fresh = [folder stringByAppendingPathComponent:@".123456-1700000000-2"];
+		[@"stale" writeToFile:stale atomically:NO encoding:NSUTF8StringEncoding error:NULL];
+		[@"fresh" writeToFile:fresh atomically:NO encoding:NSUTF8StringEncoding error:NULL];
+		[[NSFileManager defaultManager] setAttributes:[NSDictionary dictionaryWithObject:[NSDate dateWithTimeIntervalSinceNow:-7200]
+																				  forKey:NSFileModificationDate] ofItemAtPath:stale error:NULL];
+		NSUInteger trashed = [notationController trashStaleTemporaryFiles];
+		SelfTestLog(@"upstream: leftover temporary files: moved %lu to the Trash; 2-hour-old one still there=%d, new one still there=%d", (unsigned long)trashed,
+					[[NSFileManager defaultManager] fileExistsAtPath:stale], [[NSFileManager defaultManager] fileExistsAtPath:fresh]);
+		[[NSFileManager defaultManager] removeItemAtPath:fresh error:NULL];
+	}
+	
+	//a file moved out of the folder and back under another name (by another app, so FSEvents reports it, in two scans)
+	//is the same note, not a deletion and a new note
+	selfTestStage = "file renamed across two folder scans";
+	{
+		BOOL confirmed = [[notationController notationPrefs] confirmFileDeletion];
+		[[notationController notationPrefs] setConfirmsFileDeletion:NO];
+		NoteObject *note = [[notationController noteObjectAtFilteredIndex:0] retain];
+		NSString *oldName = [[filenameOfNote(note) copy] autorelease];
+		NSString *outside = [NSTemporaryDirectory() stringByAppendingPathComponent:oldName];
+		NSString *newName = [@"Moved back " stringByAppendingString:oldName];
+		[[NSFileManager defaultManager] removeItemAtPath:outside error:NULL];
+		[[NSTask launchedTaskWithLaunchPath:@"/bin/mv" arguments:[NSArray arrayWithObjects:[folder stringByAppendingPathComponent:oldName], outside, nil]] waitUntilExit];
+		SelfTestSpin(1.6);
+		NSInteger rowWhileGone = [self _selfTestRowOfNote:note];
+		[[NSTask launchedTaskWithLaunchPath:@"/bin/mv" arguments:[NSArray arrayWithObjects:outside, [folder stringByAppendingPathComponent:newName], nil]] waitUntilExit];
+		SelfTestSpin(4.0);
+		SelfTestLog(@"upstream: file moved out and back as \"%@\": same note still listed=%d (listed while gone=%d), its file now \"%@\", notes listed with that file=%ld",
+					newName, [self _selfTestRowOfNote:note] >= 0, rowWhileGone >= 0, filenameOfNote(note),
+					(long)[[[notationController valueForKey:@"allNotes"] filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id obj, NSDictionary *b) {
+						return [filenameOfNote(obj) isEqualToString:newName]; }]] count]);
+		[note release];
+		[[notationController notationPrefs] setConfirmsFileDeletion:confirmed];
+	}
+	
+	//NV issue 218: ⌘⌫ while renaming a note deleted it and gave its title to the next note
+	selfTestStage = "command-delete while renaming";
+	{
+		BOOL confirmed = [prefsController confirmNoteDeletion];
+		[prefsController setConfirmNoteDeletion:NO sender:self];
+		NSInteger rowsBefore = [notesTableView numberOfRows];
+		NoteObject *first = [notationController noteObjectAtFilteredIndex:0], *second = [notationController noteObjectAtFilteredIndex:1];
+		NSString *firstTitle = [[titleOfNote(first) copy] autorelease], *secondTitle = [[titleOfNote(second) copy] autorelease];
+		[notesTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
+		[self renameNote:nil];
+		SelfTestSpin(0.5);
+		BOOL wasEditing = [notesTableView currentEditor] != nil;
+		NSEvent *commandDelete = [NSEvent keyEventWithType:NSEventTypeKeyDown location:NSZeroPoint modifierFlags:NSEventModifierFlagCommand
+												 timestamp:[[NSProcessInfo processInfo] systemUptime] windowNumber:[window windowNumber] context:nil
+												characters:@"\x7f" charactersIgnoringModifiers:@"\x7f" isARepeat:NO keyCode:51];
+		[NSApp sendEvent:commandDelete];
+		SelfTestSpin(0.5);
+		BOOL stillEditing = [notesTableView currentEditor] != nil;
+		NSString *editorText = stillEditing ? [[[(NSTextView*)[notesTableView currentEditor] string] copy] autorelease] : nil;
+		[window makeFirstResponder:notesTableView];
+		SelfTestSpin(0.5);
+		SelfTestLog(@"upstream: command-delete while renaming \"%@\" (editing=%d): rows %ld -> %ld, that note listed=%d, still editing=%d (title being edited \"%@\"), next note \"%@\" now titled \"%@\"",
+					firstTitle, wasEditing, (long)rowsBefore, (long)[notesTableView numberOfRows], [self _selfTestRowOfNote:first] >= 0, stillEditing,
+					editorText, secondTitle, titleOfNote(second));
+		[prefsController setConfirmNoteDeletion:confirmed sender:self];
+	}
+	
+	//a second ⌘⌫ while the delete confirmation is showing mustn't queue another confirmation
+	selfTestStage = "delete confirmation twice";
+	{
+		BOOL confirmed = [prefsController confirmNoteDeletion];
+		[prefsController setConfirmNoteDeletion:YES sender:self];
+		[notesTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
+		NSInteger rowsBefore = [notesTableView numberOfRows];
+		[self deleteNote:nil];
+		SelfTestSpin(0.5);
+		NSWindow *firstSheet = [window attachedSheet];
+		[self deleteNote:nil];
+		SelfTestSpin(0.5);
+		if (firstSheet) [window endSheet:firstSheet returnCode:NSAlertSecondButtonReturn];
+		SelfTestSpin(1.0);
+		NSWindow *nextSheet = [window attachedSheet];
+		SelfTestLog(@"upstream: delete twice with confirmation: first confirmation shown=%d, another shown after cancelling=%d, rows %ld -> %ld",
+					firstSheet != nil, nextSheet != nil, (long)rowsBefore, (long)[notesTableView numberOfRows]);
+		if (nextSheet) [window endSheet:nextSheet returnCode:NSAlertSecondButtonReturn];
+		[prefsController setConfirmNoteDeletion:confirmed sender:self];
+	}
+	
+	//the tag panel for several notes, closed with its close button
+	selfTestStage = "tag panel closed with its close button";
+	{
+		[notesTableView selectRowIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, MIN((NSInteger)2, [notesTableView numberOfRows]))] byExtendingSelection:NO];
+		[self tagNote:nil];
+		SelfTestSpin(0.5);
+		NSWindow *tagPanel = nil;
+		for (NSWindow *aWindow in [NSApp windows])
+			if ([aWindow isVisible] && [aWindow isKindOfClass:[NSPanel class]] && [[aWindow title] length] && [[tagEditor tagField] window] == aWindow) tagPanel = aWindow;
+		SelfTestLog(@"upstream: tag panel shown=%d", tagPanel != nil);
+		[tagPanel performClose:nil];
+		SelfTestSpin(1.0);
+		[window makeKeyAndOrderFront:nil];
+		SelfTestSpin(0.5);
+		//open and close it once more, now that the first one is gone
+		[self tagNote:nil];
+		SelfTestSpin(0.5);
+		[[[tagEditor tagField] window] performClose:nil];
+		SelfTestSpin(1.0);
+		SelfTestLog(@"upstream: tag panel closed with its close button twice: no crash");
+	}
+	selfTestStage = "";
 }
 
 @end

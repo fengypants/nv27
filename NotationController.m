@@ -166,6 +166,7 @@
 		}
 		
 		[self updateTitlePrefixConnections];
+		[self trashStaleTemporaryFiles];
     }
     
     return self;

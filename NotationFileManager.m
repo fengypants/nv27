@@ -25,6 +25,8 @@
 #import "NSData_transformations.h"
 #include <sys/param.h>
 #include <sys/mount.h>
+#include <stdio.h>
+#include <errno.h>
 
 #import <Foundation/Foundation.h>
 #include <CommonCrypto/CommonDigest.h>
@@ -184,6 +186,77 @@ static BOOL VolumeSupportsExchangeObjects(NotationController *controller) {
 		}
 	}
 	return controller->volumeSupportsExchangeObjects;
+}
+
+//swap two files' names in one step (renamex_np with RENAME_SWAP), leaving each FSRef on the file now under its own
+//name, the way FSExchangeObjects would; *swapped says whether the swap happened (nothing changes if it didn't)
+static OSStatus SwapFilesAtomically(FSRef *sourceRef, FSRef *destRef, BOOL *swapped) {
+	UInt8 sourcePath[PATH_MAX], destPath[PATH_MAX];
+	OSStatus err = noErr;
+	*swapped = NO;
+	
+	if ((err = FSRefMakePath(sourceRef, sourcePath, sizeof(sourcePath))) != noErr ||
+		(err = FSRefMakePath(destRef, destPath, sizeof(destPath))) != noErr)
+		return err;
+	
+	if (renamex_np((const char*)sourcePath, (const char*)destPath, RENAME_SWAP) != 0) {
+		int swapErrno = errno;
+		static BOOL loggedSwapFailure = NO;
+		if (!loggedSwapFailure) {
+			NSLog(@"couldn't swap files in one step (%s); renaming them one at a time instead", strerror(swapErrno));
+			loggedSwapFailure = YES;
+		}
+		return swapErrno == ENOENT ? fnfErr : ioErr;
+	}
+	*swapped = YES;
+	
+	//FSRefs follow files, not names: point each one back at the file now under its own name
+	if ((err = FSPathMakeRef(sourcePath, sourceRef, NULL)) != noErr ||
+		(err = FSPathMakeRef(destPath, destRef, NULL)) != noErr)
+		return err;
+	return noErr;
+}
+
+//after a failed save, delete its temporary file, but only while it's still under its hidden temporary name: if the
+//step-by-step renaming failed partway, the file could already be under the note's own name
+static void DeleteTemporaryFileIfStillTemporary(FSRef *tempRef) {
+	UInt8 path[PATH_MAX];
+	if (FSRefMakePath(tempRef, path, sizeof(path)) != noErr) return;
+	const char *name = strrchr((const char*)path, '/');
+	if (name && name[1] == '.')
+		(void)FSDeleteObject(tempRef);
+	else
+		NSLog(@"not deleting %s after a failed save: it's no longer under its temporary name", (const char*)path);
+}
+
+- (NSString*)noteDirectoryPath {
+	return [[NSFileManager defaultManager] pathWithFSRef:&noteDirectoryRef];
+}
+
+//hidden temporary files are named ".<digits>-<digits>-<digits>" (CreateRandomizedFileName); a save that failed or
+//was interrupted could leave one behind. Move ones over an hour old (so not another copy's save in progress) to the Trash
+- (NSUInteger)trashStaleTemporaryFiles {
+	NSString *directoryPath = [self noteDirectoryPath];
+	if (!directoryPath) return 0;
+	
+	NSRegularExpression *tempName = [NSRegularExpression regularExpressionWithPattern:@"^\\.[0-9]+-[0-9]+-[0-9]+$" options:0 error:NULL];
+	NSDate *cutoff = [NSDate dateWithTimeIntervalSinceNow:-3600.0];
+	NSUInteger count = 0;
+	
+	for (NSString *name in [[NSFileManager defaultManager] contentsOfDirectoryAtPath:directoryPath error:NULL]) {
+		if (![tempName numberOfMatchesInString:name options:0 range:NSMakeRange(0, [name length])]) continue;
+		NSURL *url = [NSURL fileURLWithPath:[directoryPath stringByAppendingPathComponent:name]];
+		NSDate *modified = nil;
+		NSNumber *isRegularFile = nil;
+		if (![url getResourceValue:&isRegularFile forKey:NSURLIsRegularFileKey error:NULL] || ![isRegularFile boolValue] ||
+			![url getResourceValue:&modified forKey:NSURLContentModificationDateKey error:NULL] || [modified compare:cutoff] != NSOrderedAscending)
+			continue;
+		NSError *error = nil;
+		if ([[NSFileManager defaultManager] trashItemAtURL:url resultingItemURL:NULL error:&error]) count++;
+		else NSLog(@"couldn't move leftover temporary file %@ to the Trash: %@", name, error);
+	}
+	if (count) NSLog(@"moved %lu leftover temporary files from the notes folder to the Trash", (unsigned long)count);
+	return count;
 }
 
 - (void)purgeOldPerDiskInfoFromNotes {
@@ -418,8 +491,11 @@ terminate:
     BOOL isUnique = YES;
     NSString *uniqueFilename = title;
 	
-	//remove illegal characters
-	NSMutableString *sanitizedName = [[[uniqueFilename stringByReplacingOccurrencesOfString:@":" withString:@"-"] mutableCopy] autorelease];
+	//remove illegal characters; "/" too, which the path methods below treat as a folder separator: a title of "/"
+	//came out as no filename at all (nil), which crashed when the note was saved (NV issue 354 was a hang from the same title)
+	NSMutableString *sanitizedName = [[[[uniqueFilename stringByReplacingOccurrencesOfString:@":" withString:@"-"]
+										stringByReplacingOccurrencesOfString:@"/" withString:@"-"] mutableCopy] autorelease];
+	if (![sanitizedName length]) [sanitizedName setString:NSLocalizedString(@"Untitled Note", @"Title of a nameless note")];
 	if ([sanitizedName characterAtIndex:0] == (unichar)'.')	[sanitizedName replaceCharactersInRange:NSMakeRange(0, 1) withString:@"_"];
 	uniqueFilename = [[sanitizedName copy] autorelease];
 	
@@ -564,7 +640,7 @@ terminate:
     //now write to temporary file and swap
     if ((err = FSRefWriteData(&tempFileRef, BlockSizeForNotation(self), [data length], [data bytes], pleaseCacheMask, false)) != noErr) {
 		NSLog(@"error writing to temporary file: %d", err);
-		
+		(void)FSDeleteObject(&tempFileRef);
 		return err;
     }
 	
@@ -584,17 +660,27 @@ terminate:
 		
 		if ((err = [self createFileIfNotPresentInNotesDirectory:destRef forFilename:filename fileWasCreated:nil]) != noErr) {
 			NSLog(@"error creating or getting fsref for file %@: %d", filename, err);
+			(void)FSDeleteObject(&tempFileRef);
 			return err;
 		}
     }
     //if destRef is not zeros, just assume that it exists and retry if it doesn't
 	FSRef newSourceRef, newDestRef;
+	BOOL swapped = NO;
 	
 	if (VolumeSupportsExchangeObjects(self) != 1) {
-		//NSLog(@"emulating fsexchange objects");
-		if ((err = FSExchangeObjectsEmulate(&tempFileRef, destRef, &newSourceRef, &newDestRef)) == noErr) {
-			memcpy(&tempFileRef, &newSourceRef, sizeof(FSRef));
-			memcpy(destRef, &newDestRef, sizeof(FSRef));
+		//APFS can't exchange file contents, but it can swap two names in one step, so the note's file is never missing
+		if ((err = SwapFilesAtomically(&tempFileRef, destRef, &swapped)) != noErr && swapped) {
+			//the new contents are in place; the old ones stay under the temporary name until the next launch clears them
+			NSLog(@"swapped temporary file into %@ but couldn't find the files again: %d", filename, err);
+			return err;
+		}
+		if (!swapped) {
+			//the volume can't swap names either: rename both files through placeholder names, one step at a time
+			if ((err = FSExchangeObjectsEmulate(&tempFileRef, destRef, &newSourceRef, &newDestRef)) == noErr) {
+				memcpy(&tempFileRef, &newSourceRef, sizeof(FSRef));
+				memcpy(destRef, &newDestRef, sizeof(FSRef));
+			}
 		}
 	} else {
 		err = FSExchangeObjects(&tempFileRef, destRef);
@@ -602,6 +688,8 @@ terminate:
 		
     if (err != noErr) {
 		NSLog(@"error exchanging contents of temporary file with destination file %@: %d",filename, err);
+		//the note is still in memory and will be saved again; don't leave the hidden temporary file in the notes folder
+		DeleteTemporaryFileIfStillTemporary(&tempFileRef);
 		return err;
     }
     

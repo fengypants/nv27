@@ -20,6 +20,12 @@
 
 //class for managing notifications of external deletion of note files
 
+//a file renamed or replaced by another app (Finder, Dropbox, an editor's safe-save) can look deleted in one scan of the
+//notes folder and reappear in the next, which FSEvents reports up to a second later; wait past that before treating
+//the note as deleted, so the next scan can find it again (updateForVerifiedExistingNote) instead of it being removed
+//and re-added as a new note (losing its bookmarks and dates)
+static const NSTimeInterval DeletedNoteReconcileDelay = 2.0;
+
 @implementation DeletionManager
 
 - (id)init {
@@ -82,7 +88,7 @@
 			//canceling the delayed selector would not be necessary if updateForVerifiedExistingNote 
 			//did not have the potential to clear out deletedNotes before the selector posted to the next run loop
 			[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(processDeletedNotes) object:nil];
-			[self performSelector:@selector(processDeletedNotes) withObject:nil afterDelay:0];
+			[self performSelector:@selector(processDeletedNotes) withObject:nil afterDelay:DeletedNoteReconcileDelay];
 		}
 		
 		BOOL didAddDeletedNote = NO;
@@ -109,7 +115,7 @@
 	if (aNote) {
 		if (![deletedNotes count]) {
 			[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(processDeletedNotes) object:nil];
-			[self performSelector:@selector(processDeletedNotes) withObject:nil afterDelay:0];
+			[self performSelector:@selector(processDeletedNotes) withObject:nil afterDelay:DeletedNoteReconcileDelay];
 		}
 		//filter dups or remove these notes from allNotes before adding them here!
 		if (![self noteFileIsAlreadyDeleted:aNote]) {
@@ -157,6 +163,8 @@ void updateForVerifiedExistingNote(DeletionManager *self, NoteObject *goodNote) 
 
 
 - (void)processDeletedNotes {
+	//the files may all have turned up again in the meantime
+	if (![deletedNotes count]) return;
 	
 	if ([[notationController notationPrefs] confirmFileDeletion]) {
 		[self showPanelForDeletedNotes];

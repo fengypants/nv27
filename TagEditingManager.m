@@ -20,6 +20,8 @@
 			NSLog(@"Failed to load TagEditer.nib");
 		}else{
             isHappening = YES;
+            //the panel is released in -dealloc; closing it with its close button mustn't release it too
+            [tagPanel setReleasedWhenClosed:NO];
             NSRect zRect=[tagPanel frame];
             centerpoint.x-=(zRect.size.width/2.0);
             centerpoint.y-=(zRect.size.height+70.0);

@@ -1,5 +1,21 @@
 # nv27 release notes
 
+## 1.0.2
+
+Reliability fixes, several of them from Notational Velocity 2.5.1, which nvALT and nv27 are based on. To update, quit nv27 and replace nv27.app in Applications with the one from **nv27-arm64.zip**; your notes and settings are kept.
+
+### Fixed
+
+- **A note titled "/" crashed nv27** when it was saved. "/" in a title now becomes "-" in the note's filename, the way ":" already did. (Notational Velocity hung on the same title.)
+- **Saving a note no longer briefly removes its file.** On APFS, nv27 saved by renaming the note's file and the new version through placeholder names in four steps; a sync service like Dropbox could catch the note missing in between. nv27 now swaps the new version in with a single step.
+- **Failed saves no longer leave hidden files in your notes folder.** If a save failed partway, its hidden temporary file (named like `.1234567-890-12`) stayed in the notes folder, and a sync service would copy it. nv27 now removes it straight away, and when it opens a notes folder it moves any such files over an hour old to the Trash.
+- **A note renamed or replaced by another app stays the same note.** When Finder, Dropbox or an editor renamed or replaced a note's file, nv27 could see the old name gone a moment before the new one appeared, and treat it as a deleted note plus a new one, losing its bookmarks and dates. nv27 now waits two seconds before treating a missing file as deleted.
+- **Find & Replace could crash nv27** when a replacement shortened the note.
+- **Closing the tag window with its close button could crash nv27.**
+- **Holding Option when opening nv27** to choose a different notes folder could crash it if that folder then failed to open.
+- **Pressing ⌘⌫ again while the delete confirmation was showing** queued a second confirmation.
+- **Undo after switching notes folders** could act on the note editor's changes instead of the notes list's.
+
 ## 1.0.1
 
 Fixes for problems found after 1.0. To update, quit nv27 and replace nv27.app in Applications with the one from **nv27-arm64.zip**; your notes and settings are kept.

@@ -259,8 +259,9 @@ CFDateFormatterRef simplenoteDateFormatter(int lowPrecision) {
 
 - (NSString*)filenameExpectingAdditionalCharCount:(NSUInteger)charCount {
 	NSString *newfilename = self;
+	//(cut at a whole character, so an emoji or accented letter isn't split in two)
 	if ([self length] + charCount > 255)
-		newfilename = [self substringToIndex: 255 - charCount];
+		newfilename = [self substringToIndex:[self rangeOfComposedCharacterSequenceAtIndex:255 - charCount].location];
 
 	return newfilename;
 }
