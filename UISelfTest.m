@@ -677,12 +677,13 @@ static void SelfTestSpin(NSTimeInterval seconds) {
 										timestamp:[[NSProcessInfo processInfo] systemUptime] windowNumber:[window windowNumber] context:nil
 									   characters:[NSString stringWithFormat:@"%C", (unichar)NSPageDownFunctionKey]
 					  charactersIgnoringModifiers:[NSString stringWithFormat:@"%C", (unichar)NSPageDownFunctionKey] isARepeat:NO keyCode:121];
-	NSRect originalFrame = [window frame];
+	CGFloat originalDimension = [notesSubview dimension];
 	for (int taller = 0; taller < 2; taller++) {
 		if (taller) {
-			NSRect frame = originalFrame;
-			frame.size.height += 250; frame.origin.y -= 250;
-			[window setFrame:frame display:YES];
+			//drag the divider down: the list gets the note editor's room
+			[notesSubview setDimension:originalDimension + 150];
+			[splitView adjustSubviews];
+			[window display];
 			SelfTestSpin(0.5);
 		}
 		[notesTableView selectRowAndScroll:0];
@@ -693,7 +694,8 @@ static void SelfTestSpin(NSTimeInterval seconds) {
 		SelfTestLog(@"list keys: list %.0f pt tall (about %.0f rows): Page Down from row 0 -> row %ld", listHeight, listHeight / stride,
 					(long)[notesTableView selectedRow]);
 	}
-	[window setFrame:originalFrame display:YES];
+	[notesSubview setDimension:originalDimension];
+	[splitView adjustSubviews];
 	SelfTestSpin(0.3);
 	
 	[notesTableView selectRowAndScroll:[notesTableView numberOfRows] / 2];
