@@ -28,6 +28,8 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 
 | ↑ ↓ | Im Suchfeld: durch die Notizliste blättern |
 | ⌘↑ ⌘↓ | Erste bzw. letzte Notiz der Liste |
+| ↖ ↘ | In der Notizliste: erste bzw. letzte Notiz (am MacBook fn← fn→) |
+| ⇞ ⇟ | In der Notizliste: eine Seite nach oben bzw. unten (am MacBook fn↑ fn↓) |
 | ⇧⌘N | Hauptfenster anzeigen |
 
 ## Notizen

@@ -28,6 +28,8 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 
 | ↑ ↓ | 在搜索栏中：在笔记列表中上下移动 |
 | ⌘↑ ⌘↓ | 列表中的第一个或最后一个笔记 |
+| ↖ ↘ | 在笔记列表中：第一个或最后一个笔记（MacBook 上为 fn← fn→） |
+| ⇞ ⇟ | 在笔记列表中：向上或向下翻页（MacBook 上为 fn↑ fn↓） |
 | ⇧⌘N | 显示主窗口 |
 
 ## 笔记

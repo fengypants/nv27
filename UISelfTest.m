@@ -376,6 +376,7 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 	[shortcutsText release];
 	[shortcutsWindow orderOut:nil];
 	[self _selfTestUpstreamFixes];
+	[self _selfTestListKeys];
 	SelfTestLog(@"done");
 	exit(0);
 }
@@ -614,6 +615,53 @@ static void SelfTestSpin(NSTimeInterval seconds) {
 		SelfTestSpin(1.0);
 		SelfTestLog(@"upstream: tag panel closed with its close button twice: no crash");
 	}
+	selfTestStage = "";
+}
+
+//Home/End and Page Up/Page Down in the notes list move through the list (they used to go to the search field)
+- (void)_selfTestListKeys {
+	selfTestStage = "Home, End, Page Up, Page Down in the notes list";
+	NSMutableArray *added = [NSMutableArray array];
+	for (int i = 0; i < 30; i++) {
+		NSAttributedString *body = [[[NSAttributedString alloc] initWithString:@"paging" attributes:[prefsController noteBodyAttributes]] autorelease];
+		NoteObject *note = [[[NoteObject alloc] initWithNoteBody:body title:[NSString stringWithFormat:@"Paging test %02d", i] delegate:notationController
+														  format:[notationController currentNoteStorageFormat] labels:nil] autorelease];
+		[notationController addNewNote:note];
+		[added addObject:note];
+	}
+	[self searchForString:@""];
+	SelfTestSpin(0.5);
+	[window makeKeyAndOrderFront:nil];
+	[notesTableView selectRowAndScroll:3];
+	[window makeFirstResponder:notesTableView];
+	SelfTestSpin(0.3);
+	NSString *searchBefore = [[[field stringValue] copy] autorelease];
+	CGFloat stride = [notesTableView rowHeight] + [notesTableView intercellSpacing].height;
+	SelfTestLog(@"list keys: %ld notes, about %.0f rows fit in the list, selected row 3", (long)[notesTableView numberOfRows],
+				NSHeight([notesTableView visibleRect]) / stride);
+	
+	struct { unichar key; unsigned short keyCode; const char *name; } keys[] = {
+		{NSPageDownFunctionKey, 121, "Page Down"}, {NSPageDownFunctionKey, 121, "Page Down"}, {NSPageUpFunctionKey, 116, "Page Up"},
+		{NSEndFunctionKey, 119, "End"}, {NSPageDownFunctionKey, 121, "Page Down"}, {NSPageUpFunctionKey, 116, "Page Up"},
+		{NSHomeFunctionKey, 115, "Home"}, {NSPageUpFunctionKey, 116, "Page Up"}};
+	for (size_t i = 0; i < sizeof(keys) / sizeof(keys[0]); i++) {
+		NSString *chars = [NSString stringWithCharacters:&keys[i].key length:1];
+		NSEvent *event = [NSEvent keyEventWithType:NSEventTypeKeyDown location:NSZeroPoint modifierFlags:NSEventModifierFlagFunction
+										 timestamp:[[NSProcessInfo processInfo] systemUptime] windowNumber:[window windowNumber] context:nil
+										characters:chars charactersIgnoringModifiers:chars isARepeat:NO keyCode:keys[i].keyCode];
+		[NSApp sendEvent:event];
+		SelfTestSpin(0.3);
+		NSRange visibleRows = [notesTableView rowsInRect:[notesTableView visibleRect]];
+		SelfTestLog(@"list keys: %s -> selected row %ld (rows %lu-%lu showing), focus in list=%d, search field unchanged=%d", keys[i].name,
+					(long)[notesTableView selectedRow], (unsigned long)visibleRows.location, (unsigned long)NSMaxRange(visibleRows) - 1,
+					[window firstResponder] == notesTableView, [[field stringValue] isEqualToString:searchBefore]);
+	}
+	[notesTableView selectRowAndScroll:[notesTableView numberOfRows] / 2];
+	[window display];
+	PrintSnapshotOfWindow(window, @"list-paging");
+	
+	for (NoteObject *note in added) [notationController removeNote:note];
+	SelfTestSpin(0.5);
 	selfTestStage = "";
 }
 

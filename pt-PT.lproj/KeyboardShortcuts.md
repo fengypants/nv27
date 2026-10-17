@@ -28,6 +28,8 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 
 | ↑ ↓ | No campo de pesquisa: percorre a lista de notas |
 | ⌘↑ ⌘↓ | Primeira ou última nota da lista |
+| ↖ ↘ | Na lista de notas: primeira ou última nota (fn← fn→ num MacBook) |
+| ⇞ ⇟ | Na lista de notas: página anterior ou seguinte (fn↑ fn↓ num MacBook) |
 | ⇧⌘N | Mostra a janela principal |
 
 ## Notas
