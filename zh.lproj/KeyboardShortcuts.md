@@ -26,7 +26,7 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 
 ## 搜索和创建笔记
 
-| ↓ | 在搜索栏中：转到笔记列表，从所选笔记开始 |
+| ↓ | 在搜索栏中：转到列表中的第一个笔记 |
 | ⌘↑ ⌘↓ | 列表中的第一个或最后一个笔记 |
 | fn← fn→ | 在笔记列表中：第一个或最后一个笔记（或 Home、End） |
 | fn↑ fn↓ | 在笔记列表中：向上或向下翻页（或 Page Up、Page Down） |

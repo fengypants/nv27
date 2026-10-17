@@ -1193,12 +1193,10 @@ terminateApp:
 			return NO;
 		
 		if (command == @selector(moveDown:) && [notesTableView numberOfRows] > 0) {
-			//the down arrow goes into the notes list: to the note the search already selected (typing a note's title
-			//selects it), or to the first note when none is; moving the selection a row from here skipped that note
-			if ([notesTableView numberOfSelectedRows] == 0)
-				[notesTableView selectRowAndScroll:0];
-			else
-				[notesTableView scrollRowToVisible:[notesTableView selectedRow]];
+			//the down arrow goes into the notes list, at its first note. Typing the start of a note's title selects that
+			//note, which needn't be first (notes mentioning the text elsewhere can sort above it); moving down from it,
+			//or going to it, looked like skipping the notes above
+			[notesTableView selectRowAndScroll:0];
 			[window makeFirstResponder:notesTableView];
 			return YES;
 		}

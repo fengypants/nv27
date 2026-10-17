@@ -431,6 +431,22 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 	[window display];
 	PrintSnapshotOfWindow(window, @"list-from-search");
 	
+	//1b: typing the start of a title selects that note, which can sort below notes mentioning the text in their body
+	[self searchForString:@""];
+	SelfTestSpin(0.3);
+	[notesTableView deselectAll:nil];
+	[window makeFirstResponder:field];
+	[[field currentEditor] insertText:@"Exc"];
+	SelfTestSpin(0.5);
+	afterTyping = [self _selfTestSelectionDescription];
+	NSMutableArray *listed = [NSMutableArray array];
+	for (NSInteger i = 0; i < [notesTableView numberOfRows]; i++) [listed addObject:titleOfNote([notationController noteObjectAtFilteredIndex:i])];
+	[self _selfTestPostKey:NSDownArrowFunctionKey keyCode:125 flags:arrowFlags];
+	afterFirst = [self _selfTestSelectionDescription];
+	[self _selfTestPostKey:NSDownArrowFunctionKey keyCode:125 flags:arrowFlags];
+	SelfTestLog(@"arrow from search: typed \"Exc\" (list: %@) -> %@; down arrow -> %@; again -> %@", [listed componentsJoinedByString:@" | "],
+				afterTyping, afterFirst, [self _selfTestSelectionDescription]);
+	
 	//2: nothing selected: the down arrow goes to the first note
 	[self searchForString:@""];
 	SelfTestSpin(0.3);
