@@ -352,6 +352,7 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 	SelfTestLog(@"keyboard shortcuts window: visible=%d title=\"%@\" characters=%lu", [shortcutsWindow isVisible], [shortcutsWindow title],
 				(unsigned long)[[shortcutsText string] length]);
 	PrintSnapshotOfWindow(shortcutsWindow, @"shortcuts");
+	[self _selfTestSnapshotShortcutsText:shortcutsText containing:@"⇞" tag:@"shortcuts-paging"];
 	[shortcutsText scrollRangeToVisible:NSMakeRange([[shortcutsText string] length], 0)];
 	[shortcutsWindow display];
 	PrintSnapshotOfWindow(shortcutsWindow, @"shortcuts-end");
@@ -369,6 +370,8 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 		[shortcutsWindow display];
 		SelfTestLog(@"keyboard shortcuts %@: characters=%lu", localization, (unsigned long)[[shortcutsText string] length]);
 		PrintSnapshotOfWindow(shortcutsWindow, [@"shortcuts-" stringByAppendingString:localization]);
+		if ([localization isEqualToString:@"zh"])
+			[self _selfTestSnapshotShortcutsText:shortcutsText containing:@"⇞" tag:@"shortcuts-zh-paging"];
 		[shortcutsText scrollRangeToVisible:NSMakeRange([[shortcutsText string] length], 0)];
 		[shortcutsWindow display];
 		PrintSnapshotOfWindow(shortcutsWindow, [NSString stringWithFormat:@"shortcuts-%@-end", localization]);
@@ -379,6 +382,19 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 	[self _selfTestListKeys];
 	SelfTestLog(@"done");
 	exit(0);
+}
+
+//the part of the Keyboard Shortcuts window around a given string, scrolled to the top of the window
+- (void)_selfTestSnapshotShortcutsText:(NSTextView*)shortcutsText containing:(NSString*)needle tag:(NSString*)tag {
+	NSRange found = [[shortcutsText string] rangeOfString:needle];
+	SelfTestLog(@"keyboard shortcuts: \"%@\" found=%d", needle, found.location != NSNotFound);
+	if (found.location == NSNotFound) return;
+	NSRect glyphRect = [[shortcutsText layoutManager] boundingRectForGlyphRange:
+						[[shortcutsText layoutManager] glyphRangeForCharacterRange:found actualCharacterRange:NULL] inTextContainer:[shortcutsText textContainer]];
+	[shortcutsText scrollPoint:NSMakePoint(0, MAX((CGFloat)0, NSMinY(glyphRect) - 120))];
+	[[shortcutsText window] display];
+	PrintSnapshotOfWindow([shortcutsText window], tag);
+	[shortcutsText scrollRangeToVisible:NSMakeRange(0, 0)];
 }
 
 //checks for bugs fixed in Notational Velocity 2.5.1 and for the reports in its issue tracker that nv27 might share;
