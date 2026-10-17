@@ -385,24 +385,28 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 	exit(0);
 }
 
-//a key press delivered the way the keyboard's are (queued, so it's the window's current event when handled)
+//a key press delivered the way the keyboard's are: queued, then taken off the queue and sent, so it's the app's
+//current event while it's handled
 - (void)_selfTestPostKey:(unichar)key keyCode:(unsigned short)keyCode flags:(NSEventModifierFlags)flags {
 	NSString *chars = [NSString stringWithCharacters:&key length:1];
 	[NSApp postEvent:[NSEvent keyEventWithType:NSEventTypeKeyDown location:NSZeroPoint modifierFlags:flags
 									 timestamp:[[NSProcessInfo processInfo] systemUptime] windowNumber:[window windowNumber] context:nil
 									characters:chars charactersIgnoringModifiers:chars isARepeat:NO keyCode:keyCode] atStart:NO];
-	[NSApp postEvent:[NSEvent keyEventWithType:NSEventTypeKeyUp location:NSZeroPoint modifierFlags:flags
-									 timestamp:[[NSProcessInfo processInfo] systemUptime] windowNumber:[window windowNumber] context:nil
-									characters:chars charactersIgnoringModifiers:chars isARepeat:NO keyCode:keyCode] atStart:NO];
-	SelfTestSpin(0.4);
+	NSEvent *event;
+	while ((event = [NSApp nextEventMatchingMask:NSEventMaskAny untilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]
+										   inMode:NSDefaultRunLoopMode dequeue:YES]))
+		[NSApp sendEvent:event];
+	SelfTestSpin(0.3);
 }
 
 - (NSString*)_selfTestSelectionDescription {
 	NSInteger row = [notesTableView selectedRow];
-	return row < 0 ? @"none" : [NSString stringWithFormat:@"row %ld \"%@\"", (long)row, titleOfNote([notationController noteObjectAtFilteredIndex:row])];
+	NSString *focus = [window firstResponder] == notesTableView ? @"list" : [field currentEditor] ? @"search field" : NSStringFromClass([[window firstResponder] class]);
+	return row < 0 ? [NSString stringWithFormat:@"none selected, focus in %@", focus] :
+		[NSString stringWithFormat:@"row %ld \"%@\", focus in %@", (long)row, titleOfNote([notationController noteObjectAtFilteredIndex:row]), focus];
 }
 
-//the down arrow in the search field moves to the notes list: which note it lands on, and how the selection is drawn
+//the down arrow in the search field goes into the notes list: to the note the search selected, or the first
 - (void)_selfTestArrowFromSearch {
 	selfTestStage = "down arrow from the search field";
 	const NSEventModifierFlags arrowFlags = NSEventModifierFlagFunction | NSEventModifierFlagNumericPad;
@@ -412,63 +416,36 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 	for (NSInteger i = 0; i < [notesTableView numberOfRows]; i++)
 		SelfTestLog(@"arrow from search: list row %ld \"%@\"", (long)i, titleOfNote([notationController noteObjectAtFilteredIndex:i]));
 	
-	//1: a note was selected, then Esc in the search field cleared the search
-	[notesTableView selectRowAndScroll:2];
-	[window makeFirstResponder:field];
-	SelfTestSpin(0.3);
-	[self _selfTestPostKey:0x1B keyCode:53 flags:0];
-	NSString *afterEsc = [self _selfTestSelectionDescription];
-	[self _selfTestPostKey:NSDownArrowFunctionKey keyCode:125 flags:arrowFlags];
-	SelfTestLog(@"arrow from search: row 2 selected, Esc -> %@ (search \"%@\"), then down arrow -> %@ (focus in search field=%d, list emphasized=%d)",
-				afterEsc, [field stringValue], [self _selfTestSelectionDescription], [notesTableView selectionIsEmphasized] && [window firstResponder] != notesTableView,
-				[notesTableView selectionIsEmphasized]);
-	[window display];
-	PrintSnapshotOfWindow(window, @"list-from-search");
-	
-	//2: row 1 selected, then the selection cleared some other way (here, deselectAll)
-	[notesTableView selectRowAndScroll:1];
-	[notesTableView deselectAll:nil];
-	[window makeFirstResponder:field];
-	SelfTestSpin(0.3);
-	[self _selfTestPostKey:NSDownArrowFunctionKey keyCode:125 flags:arrowFlags];
-	NSString *afterFirst = [self _selfTestSelectionDescription];
-	[self _selfTestPostKey:NSDownArrowFunctionKey keyCode:125 flags:arrowFlags];
-	SelfTestLog(@"arrow from search: row 1 selected then deselected, then down arrow -> %@, down arrow again -> %@", afterFirst,
-				[self _selfTestSelectionDescription]);
-	//2b: the same with nothing selected before
-	[self searchForString:@"zzzz no such note"];
-	SelfTestSpin(0.3);
-	[self searchForString:@""];
-	SelfTestSpin(0.3);
-	[notesTableView deselectAll:nil];
-	[window makeFirstResponder:field];
-	SelfTestSpin(0.3);
-	NSString *beforeArrow = [self _selfTestSelectionDescription];
-	[self _selfTestPostKey:NSDownArrowFunctionKey keyCode:125 flags:arrowFlags];
-	afterFirst = [self _selfTestSelectionDescription];
-	[self _selfTestPostKey:NSDownArrowFunctionKey keyCode:125 flags:arrowFlags];
-	SelfTestLog(@"arrow from search: after a search with no matches and clearing it (%@ selected), down arrow -> %@, again -> %@", beforeArrow,
-				afterFirst, [self _selfTestSelectionDescription]);
-	
-	//3: typing the start of a title selects that note; the down arrow then goes to the next one
+	//1: typing a note's whole title selects it; the down arrow goes to it in the list, then on to the next
 	[notesTableView deselectAll:nil];
 	[window makeFirstResponder:field];
 	NSString *firstTitle = titleOfNote([notationController noteObjectAtFilteredIndex:0]);
-	[[field currentEditor] insertText:[firstTitle substringToIndex:MIN((NSUInteger)4, [firstTitle length])]];
+	[[field currentEditor] insertText:firstTitle];
 	SelfTestSpin(0.5);
 	NSString *afterTyping = [self _selfTestSelectionDescription];
 	[self _selfTestPostKey:NSDownArrowFunctionKey keyCode:125 flags:arrowFlags];
-	SelfTestLog(@"arrow from search: typed \"%@\" -> %@, then down arrow -> %@", [field stringValue], afterTyping, [self _selfTestSelectionDescription]);
+	NSString *afterFirst = [self _selfTestSelectionDescription];
+	[self _selfTestPostKey:NSDownArrowFunctionKey keyCode:125 flags:arrowFlags];
+	SelfTestLog(@"arrow from search: typed \"%@\" -> %@; down arrow -> %@; again -> %@", firstTitle, afterTyping, afterFirst,
+				[self _selfTestSelectionDescription]);
+	[window display];
+	PrintSnapshotOfWindow(window, @"list-from-search");
 	
-	//and the same selection with the note editor focused: gray
+	//2: nothing selected: the down arrow goes to the first note
 	[self searchForString:@""];
 	SelfTestSpin(0.3);
-	[notesTableView selectRowAndScroll:0];
-	[window makeFirstResponder:textView];
+	[notesTableView deselectAll:nil];
+	[window makeFirstResponder:field];
 	SelfTestSpin(0.3);
-	SelfTestLog(@"arrow from search: editor focused, list emphasized=%d", [notesTableView selectionIsEmphasized]);
-	[window display];
-	PrintSnapshotOfWindow(window, @"list-editor-focus");
+	NSString *before = [self _selfTestSelectionDescription];
+	[self _selfTestPostKey:NSDownArrowFunctionKey keyCode:125 flags:arrowFlags];
+	afterFirst = [self _selfTestSelectionDescription];
+	[self _selfTestPostKey:NSDownArrowFunctionKey keyCode:125 flags:arrowFlags];
+	SelfTestLog(@"arrow from search: %@; down arrow -> %@; again -> %@", before, afterFirst, [self _selfTestSelectionDescription]);
+	
+	//3: typing in the list still goes to the search field
+	[self _selfTestPostKey:'h' keyCode:4 flags:0];
+	SelfTestLog(@"arrow from search: typing 'h' in the list -> search field \"%@\", %@", [field stringValue], [self _selfTestSelectionDescription]);
 	selfTestStage = "";
 }
 

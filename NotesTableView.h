@@ -40,7 +40,6 @@ typedef struct _ViewLocationContext {
 	BOOL viewMenusValid;
 	BOOL hadHighlightInForeground, hadHighlightInBackground;
 	BOOL shouldUseSecondaryHighlightColor, isActiveStyle;
-	NSWindow *firstResponderObservedWindow;
 	BOOL lastEventActivatedTagEdit, wasDeleting, isAutocompleting;
 	
 	id labelsListSource;
@@ -75,7 +74,6 @@ typedef struct _ViewLocationContext {
 - (float)tableFontHeight;
 
 - (BOOL)isActiveStyle;
-- (BOOL)selectionIsEmphasized;
 - (void)setShouldUseSecondaryHighlightColor:(BOOL)value;
 - (void)_setActiveStyleState:(BOOL)activeStyle;
 - (void)updateTitleDereferencorState;

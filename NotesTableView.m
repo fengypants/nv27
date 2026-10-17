@@ -125,11 +125,6 @@ static void _CopyItemWithSelectorFromMenu(NSMenu *destMenu, NSMenu *sourceMenu, 
 }
 
 - (void)dealloc {
-	if (firstResponderObservedWindow) {
-		[firstResponderObservedWindow removeObserver:self forKeyPath:@"firstResponder" context:NotesTableFirstResponderContext];
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidBecomeKeyNotification object:firstResponderObservedWindow];
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidResignKeyNotification object:firstResponderObservedWindow];
-	}
 	[loadStatusAttributes release];
     [allColumns release];
 	[allColsDict release];
@@ -238,58 +233,10 @@ static void _CopyItemWithSelectorFromMenu(NSMenu *destMenu, NSMenu *sourceMenu, 
 	 ([globalPrefs tableColumnsShowPreview] ? (activeStyle ? properlyHighlightingTableTitleOfNote : tableTitleOfNote) : titleOfNote2)];
 }
 
-//the selection shows in the accent color (with white text) while the list is in charge of it: when the list has focus,
-//or when the search field does, since typing and the arrow keys there choose the selected note. In the note editor or
-//another window it's gray, as macOS draws an unfocused list's selection
-- (BOOL)selectionIsEmphasized {
-	NSWindow *win = [self window];
-	if (![win isKeyWindow]) return NO;
-	NSResponder *responder = [win firstResponder];
-	if (responder == self || [self currentEditor]) return YES;
-	return controlField && [responder isKindOfClass:[NSTextView class]] && [(NSTextView*)responder isFieldEditor] &&
-		[(NSTextView*)responder delegate] == (id)controlField;
-}
-
 - (void)updateTitleDereferencorState {
-	[self _setActiveStyleState:[self selectionIsEmphasized]];
-}
-
-static void *NotesTableFirstResponderContext = &NotesTableFirstResponderContext;
-
-//redraw the selection when focus moves between the search field, the list and the editor, or the window comes and goes
-- (void)viewWillMoveToWindow:(NSWindow *)newWindow {
-	if (firstResponderObservedWindow) {
-		[firstResponderObservedWindow removeObserver:self forKeyPath:@"firstResponder" context:NotesTableFirstResponderContext];
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidBecomeKeyNotification object:firstResponderObservedWindow];
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidResignKeyNotification object:firstResponderObservedWindow];
-		firstResponderObservedWindow = nil;
-	}
-	[super viewWillMoveToWindow:newWindow];
-}
-
-- (void)viewDidMoveToWindow {
-	[super viewDidMoveToWindow];
-	if ((firstResponderObservedWindow = [self window])) {
-		[firstResponderObservedWindow addObserver:self forKeyPath:@"firstResponder" options:0 context:NotesTableFirstResponderContext];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_focusOrKeyWindowChanged:)
-													 name:NSWindowDidBecomeKeyNotification object:firstResponderObservedWindow];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_focusOrKeyWindowChanged:)
-													 name:NSWindowDidResignKeyNotification object:firstResponderObservedWindow];
-	}
-}
-
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-	if (context == NotesTableFirstResponderContext) {
-		[self _focusOrKeyWindowChanged:nil];
-	} else {
-		[super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
-	}
-}
-
-- (void)_focusOrKeyWindowChanged:(NSNotification *)aNotification {
-	BOOL wasActive = isActiveStyle;
-	[self updateTitleDereferencorState];
-	if (wasActive != isActiveStyle || [self numberOfSelectedRows]) [self setNeedsDisplay:YES];
+	NSWindow *win = [self window];
+	[self _setActiveStyleState: [win isMainWindow] && ([win firstResponder] == self || [self currentEditor]) ];
+   
 }
 
 - (BOOL)becomeFirstResponder {
@@ -1532,17 +1479,7 @@ enum { kNext_Tag = 'j', kPrev_Tag = 'k' };
     if (![self dataSource]) {
 		return;
 	}
-	if ([self selectionIsEmphasized] && [[self window] firstResponder] != self && ![self currentEditor]) {
-		//AppKit draws a list's selection gray while something else has focus; with the search field in charge, draw it
-		//the way the list does when it has focus
-		[[NSColor selectedContentBackgroundColor] setFill];
-		[[self selectedRowIndexes] enumerateIndexesUsingBlock:^(NSUInteger row, BOOL *stop) {
-			NSRect rowRect = NSIntersectionRect([self rectOfRow:row], clipRect);
-			if (!NSIsEmptyRect(rowRect)) NSRectFill(rowRect);
-		}];
-		return;
-	}
-	[super highlightSelectionInClipRect:clipRect];
+        [super highlightSelectionInClipRect:clipRect];
 }
 
 @end

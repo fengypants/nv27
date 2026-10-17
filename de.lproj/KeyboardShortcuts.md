@@ -26,7 +26,7 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 
 ## Suchen und Notizen anlegen
 
-| ↑ ↓ | Im Suchfeld: durch die Notizliste blättern |
+| ↓ | Im Suchfeld: zur Notizliste wechseln, beginnend bei der ausgewählten Notiz |
 | ⌘↑ ⌘↓ | Erste bzw. letzte Notiz der Liste |
 | fn← fn→ | In der Notizliste: erste bzw. letzte Notiz (oder Home, End) |
 | fn↑ fn↓ | In der Notizliste: eine Seite nach oben bzw. unten (oder Page Up, Page Down) |

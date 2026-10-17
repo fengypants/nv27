@@ -1192,6 +1192,17 @@ terminateApp:
 		if (command == @selector(deleteBackward:))
 			return NO;
 		
+		if (command == @selector(moveDown:) && [notesTableView numberOfRows] > 0) {
+			//the down arrow goes into the notes list: to the note the search already selected (typing a note's title
+			//selects it), or to the first note when none is; moving the selection a row from here skipped that note
+			if ([notesTableView numberOfSelectedRows] == 0)
+				[notesTableView selectRowAndScroll:0];
+			else
+				[notesTableView scrollRowToVisible:[notesTableView selectedRow]];
+			[window makeFirstResponder:notesTableView];
+			return YES;
+		}
+		
 		if (command == @selector(moveDown:) || command == @selector(moveUp:) ||
 			//catch shift-up/down selection behavior
 			command == @selector(moveDownAndModifySelection:) ||
@@ -2350,8 +2361,7 @@ terminateApp:
 - (void)tableView:(NSTableView *)aTableView willDisplayCell:(id)aCell forTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)rowIndex {
     if (aTableView==notesTableView) {
         if ([aCell isHighlighted]) {
-            //white on the accent-colored selection: the list or the search field has focus (see -selectionIsEmphasized)
-            if ([notesTableView selectionIsEmphasized]||(isEditing&&([notesTableView editedRow]==rowIndex))) {
+            if (([window firstResponder]==notesTableView)||(isEditing&&([notesTableView editedRow]==rowIndex))) {//([notesTableView rowHeight]>30.0)||
                 [aCell setTextColor:[NSColor whiteColor]];
                 return;
             }
