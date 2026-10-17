@@ -352,7 +352,7 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 	SelfTestLog(@"keyboard shortcuts window: visible=%d title=\"%@\" characters=%lu", [shortcutsWindow isVisible], [shortcutsWindow title],
 				(unsigned long)[[shortcutsText string] length]);
 	PrintSnapshotOfWindow(shortcutsWindow, @"shortcuts");
-	[self _selfTestSnapshotShortcutsText:shortcutsText containing:@"⇞" tag:@"shortcuts-paging"];
+	[self _selfTestSnapshotShortcutsText:shortcutsText containing:@"fn↑" tag:@"shortcuts-paging"];
 	[shortcutsText scrollRangeToVisible:NSMakeRange([[shortcutsText string] length], 0)];
 	[shortcutsWindow display];
 	PrintSnapshotOfWindow(shortcutsWindow, @"shortcuts-end");
@@ -371,7 +371,7 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 		SelfTestLog(@"keyboard shortcuts %@: characters=%lu", localization, (unsigned long)[[shortcutsText string] length]);
 		PrintSnapshotOfWindow(shortcutsWindow, [@"shortcuts-" stringByAppendingString:localization]);
 		if ([localization isEqualToString:@"zh"])
-			[self _selfTestSnapshotShortcutsText:shortcutsText containing:@"⇞" tag:@"shortcuts-zh-paging"];
+			[self _selfTestSnapshotShortcutsText:shortcutsText containing:@"fn↑" tag:@"shortcuts-zh-paging"];
 		[shortcutsText scrollRangeToVisible:NSMakeRange([[shortcutsText string] length], 0)];
 		[shortcutsWindow display];
 		PrintSnapshotOfWindow(shortcutsWindow, [NSString stringWithFormat:@"shortcuts-%@-end", localization]);
@@ -672,6 +672,30 @@ static void SelfTestSpin(NSTimeInterval seconds) {
 					(long)[notesTableView selectedRow], (unsigned long)visibleRows.location, (unsigned long)NSMaxRange(visibleRows) - 1,
 					[window firstResponder] == notesTableView, [[field stringValue] isEqualToString:searchBefore]);
 	}
+	//a page is however many rows show when the key is pressed: give the list more room and page again
+	NSEvent *pageDown = [NSEvent keyEventWithType:NSEventTypeKeyDown location:NSZeroPoint modifierFlags:NSEventModifierFlagFunction
+										timestamp:[[NSProcessInfo processInfo] systemUptime] windowNumber:[window windowNumber] context:nil
+									   characters:[NSString stringWithFormat:@"%C", (unichar)NSPageDownFunctionKey]
+					  charactersIgnoringModifiers:[NSString stringWithFormat:@"%C", (unichar)NSPageDownFunctionKey] isARepeat:NO keyCode:121];
+	NSRect originalFrame = [window frame];
+	for (int taller = 0; taller < 2; taller++) {
+		if (taller) {
+			NSRect frame = originalFrame;
+			frame.size.height += 250; frame.origin.y -= 250;
+			[window setFrame:frame display:YES];
+			SelfTestSpin(0.5);
+		}
+		[notesTableView selectRowAndScroll:0];
+		SelfTestSpin(0.2);
+		CGFloat listHeight = NSHeight([notesTableView visibleRect]);
+		[NSApp sendEvent:pageDown];
+		SelfTestSpin(0.3);
+		SelfTestLog(@"list keys: list %.0f pt tall (about %.0f rows): Page Down from row 0 -> row %ld", listHeight, listHeight / stride,
+					(long)[notesTableView selectedRow]);
+	}
+	[window setFrame:originalFrame display:YES];
+	SelfTestSpin(0.3);
+	
 	[notesTableView selectRowAndScroll:[notesTableView numberOfRows] / 2];
 	[window display];
 	PrintSnapshotOfWindow(window, @"list-paging");

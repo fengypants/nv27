@@ -36,8 +36,8 @@ change them too when a shortcut changes.
 
 | ↑ ↓ | In the search field: move through the notes list |
 | ⌘↑ ⌘↓ | First or last note in the list |
-| ↖ ↘ | In the notes list: first or last note (fn← fn→ on a MacBook) |
-| ⇞ ⇟ | In the notes list: up or down a page (fn↑ fn↓ on a MacBook) |
+| fn← fn→ | In the notes list: first or last note (or Home, End) |
+| fn↑ fn↓ | In the notes list: up or down a page (or Page Up, Page Down) |
 | ⇧⌘N | Show the main window |
 
 ## Notes
