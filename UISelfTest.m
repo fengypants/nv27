@@ -431,7 +431,24 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 	[window makeFirstResponder:field];
 	SelfTestSpin(0.3);
 	[self _selfTestPostKey:NSDownArrowFunctionKey keyCode:125 flags:arrowFlags];
-	SelfTestLog(@"arrow from search: row 1 selected then deselected, then down arrow -> %@", [self _selfTestSelectionDescription]);
+	NSString *afterFirst = [self _selfTestSelectionDescription];
+	[self _selfTestPostKey:NSDownArrowFunctionKey keyCode:125 flags:arrowFlags];
+	SelfTestLog(@"arrow from search: row 1 selected then deselected, then down arrow -> %@, down arrow again -> %@", afterFirst,
+				[self _selfTestSelectionDescription]);
+	//2b: the same with nothing selected before
+	[self searchForString:@"zzzz no such note"];
+	SelfTestSpin(0.3);
+	[self searchForString:@""];
+	SelfTestSpin(0.3);
+	[notesTableView deselectAll:nil];
+	[window makeFirstResponder:field];
+	SelfTestSpin(0.3);
+	NSString *beforeArrow = [self _selfTestSelectionDescription];
+	[self _selfTestPostKey:NSDownArrowFunctionKey keyCode:125 flags:arrowFlags];
+	afterFirst = [self _selfTestSelectionDescription];
+	[self _selfTestPostKey:NSDownArrowFunctionKey keyCode:125 flags:arrowFlags];
+	SelfTestLog(@"arrow from search: after a search with no matches and clearing it (%@ selected), down arrow -> %@, again -> %@", beforeArrow,
+				afterFirst, [self _selfTestSelectionDescription]);
 	
 	//3: typing the start of a title selects that note; the down arrow then goes to the next one
 	[notesTableView deselectAll:nil];
