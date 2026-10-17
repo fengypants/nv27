@@ -380,8 +380,79 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 	[shortcutsWindow orderOut:nil];
 	[self _selfTestUpstreamFixes];
 	[self _selfTestListKeys];
+	[self _selfTestArrowFromSearch];
 	SelfTestLog(@"done");
 	exit(0);
+}
+
+//a key press delivered the way the keyboard's are (queued, so it's the window's current event when handled)
+- (void)_selfTestPostKey:(unichar)key keyCode:(unsigned short)keyCode flags:(NSEventModifierFlags)flags {
+	NSString *chars = [NSString stringWithCharacters:&key length:1];
+	[NSApp postEvent:[NSEvent keyEventWithType:NSEventTypeKeyDown location:NSZeroPoint modifierFlags:flags
+									 timestamp:[[NSProcessInfo processInfo] systemUptime] windowNumber:[window windowNumber] context:nil
+									characters:chars charactersIgnoringModifiers:chars isARepeat:NO keyCode:keyCode] atStart:NO];
+	[NSApp postEvent:[NSEvent keyEventWithType:NSEventTypeKeyUp location:NSZeroPoint modifierFlags:flags
+									 timestamp:[[NSProcessInfo processInfo] systemUptime] windowNumber:[window windowNumber] context:nil
+									characters:chars charactersIgnoringModifiers:chars isARepeat:NO keyCode:keyCode] atStart:NO];
+	SelfTestSpin(0.4);
+}
+
+- (NSString*)_selfTestSelectionDescription {
+	NSInteger row = [notesTableView selectedRow];
+	return row < 0 ? @"none" : [NSString stringWithFormat:@"row %ld \"%@\"", (long)row, titleOfNote([notationController noteObjectAtFilteredIndex:row])];
+}
+
+//the down arrow in the search field moves to the notes list: which note it lands on, and how the selection is drawn
+- (void)_selfTestArrowFromSearch {
+	selfTestStage = "down arrow from the search field";
+	const NSEventModifierFlags arrowFlags = NSEventModifierFlagFunction | NSEventModifierFlagNumericPad;
+	[window makeKeyAndOrderFront:nil];
+	[self searchForString:@""];
+	SelfTestSpin(0.5);
+	for (NSInteger i = 0; i < [notesTableView numberOfRows]; i++)
+		SelfTestLog(@"arrow from search: list row %ld \"%@\"", (long)i, titleOfNote([notationController noteObjectAtFilteredIndex:i]));
+	
+	//1: a note was selected, then Esc in the search field cleared the search
+	[notesTableView selectRowAndScroll:2];
+	[window makeFirstResponder:field];
+	SelfTestSpin(0.3);
+	[self _selfTestPostKey:0x1B keyCode:53 flags:0];
+	NSString *afterEsc = [self _selfTestSelectionDescription];
+	[self _selfTestPostKey:NSDownArrowFunctionKey keyCode:125 flags:arrowFlags];
+	SelfTestLog(@"arrow from search: row 2 selected, Esc -> %@ (search \"%@\"), then down arrow -> %@ (focus in search field=%d, list emphasized=%d)",
+				afterEsc, [field stringValue], [self _selfTestSelectionDescription], [notesTableView selectionIsEmphasized] && [window firstResponder] != notesTableView,
+				[notesTableView selectionIsEmphasized]);
+	[window display];
+	PrintSnapshotOfWindow(window, @"list-from-search");
+	
+	//2: row 1 selected, then the selection cleared some other way (here, deselectAll)
+	[notesTableView selectRowAndScroll:1];
+	[notesTableView deselectAll:nil];
+	[window makeFirstResponder:field];
+	SelfTestSpin(0.3);
+	[self _selfTestPostKey:NSDownArrowFunctionKey keyCode:125 flags:arrowFlags];
+	SelfTestLog(@"arrow from search: row 1 selected then deselected, then down arrow -> %@", [self _selfTestSelectionDescription]);
+	
+	//3: typing the start of a title selects that note; the down arrow then goes to the next one
+	[notesTableView deselectAll:nil];
+	[window makeFirstResponder:field];
+	NSString *firstTitle = titleOfNote([notationController noteObjectAtFilteredIndex:0]);
+	[[field currentEditor] insertText:[firstTitle substringToIndex:MIN((NSUInteger)4, [firstTitle length])]];
+	SelfTestSpin(0.5);
+	NSString *afterTyping = [self _selfTestSelectionDescription];
+	[self _selfTestPostKey:NSDownArrowFunctionKey keyCode:125 flags:arrowFlags];
+	SelfTestLog(@"arrow from search: typed \"%@\" -> %@, then down arrow -> %@", [field stringValue], afterTyping, [self _selfTestSelectionDescription]);
+	
+	//and the same selection with the note editor focused: gray
+	[self searchForString:@""];
+	SelfTestSpin(0.3);
+	[notesTableView selectRowAndScroll:0];
+	[window makeFirstResponder:textView];
+	SelfTestSpin(0.3);
+	SelfTestLog(@"arrow from search: editor focused, list emphasized=%d", [notesTableView selectionIsEmphasized]);
+	[window display];
+	PrintSnapshotOfWindow(window, @"list-editor-focus");
+	selfTestStage = "";
 }
 
 //the part of the Keyboard Shortcuts window around a given string, scrolled to the top of the window
