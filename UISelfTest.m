@@ -518,6 +518,22 @@ static NSString *SelfTestVisibleNewlines(NSString *text) {
 		[NSApp sendAction:NSSelectorFromString(action) to:textView from:nil];
 		SelfTestLog(@"markdown: %@ on \"word\" -> \"%@\"", action, [textView string]);
 	}
+	
+	//Tab and Shift-Tab make Markdown links after [text], but leave [[wiki links]] alone
+	struct { NSString *text; NSUInteger cursor; BOOL backtab; } linkCases[] = {
+		{@"see [nv27]", 10, NO}, {@"see [nv27]", 10, YES}, {@"see [[Note]]", 12, NO}, {@"see [[Note]]", 12, YES}, {@"see [[Note]] ", 13, NO},
+		{@"see [[Note]]", 9, NO}, {@"see [[Note]]", 9, YES}, {@"[1]", 3, NO}};
+	for (size_t i = 0; i < sizeof(linkCases) / sizeof(linkCases[0]); i++) {
+		[window makeFirstResponder:textView];
+		[textView setSelectedRange:NSMakeRange(0, [[textView string] length])];
+		[textView insertText:linkCases[i].text];
+		[textView setSelectedRange:NSMakeRange(linkCases[i].cursor, 0)];
+		if (linkCases[i].backtab) [textView insertBacktab:nil]; else [textView insertTab:nil];
+		SelfTestLog(@"markdown links: \"%@\" with the cursor at %lu, %@ -> \"%@\" (selected \"%@\")", linkCases[i].text, (unsigned long)linkCases[i].cursor,
+					linkCases[i].backtab ? @"Shift-Tab" : @"Tab", [textView string],
+					[[textView string] substringWithRange:[textView selectedRange]]);
+	}
+	[window makeFirstResponder:textView];
 	[notationController synchronizeNoteChanges:nil];
 	SelfTestSpin(0.3);
 	[notationController removeNote:note];

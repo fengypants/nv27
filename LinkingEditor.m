@@ -848,9 +848,20 @@ copyRTFType:
 		[super moveToBeginningOfLine:sender];
 }
 
+//inside a [[wiki link]] or just after one: Tab and Shift-Tab's Markdown-link helpers below took its brackets for a
+//Markdown link's, so Tab after [[Note]] gave [[Note]][]
+- (BOOL)_cursorIsInOrAfterWikiLink {
+	NSString *before = [self.activeParagraphBeforeCursor stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+	if ([before hasSuffix:@"]]"])
+		return YES;
+	NSRange opener = [before rangeOfString:@"[[" options:NSBackwardsSearch];
+	return opener.location != NSNotFound &&
+		[before rangeOfString:@"]]" options:0 range:NSMakeRange(NSMaxRange(opener), [before length] - NSMaxRange(opener))].location == NSNotFound;
+}
+
 - (void)insertTab:(id)sender {
 	//check prefs for tab behavior
-    if ([[NSUserDefaults standardUserDefaults]boolForKey:@"UsesMarkdownCompletions"]) {
+    if ([[NSUserDefaults standardUserDefaults]boolForKey:@"UsesMarkdownCompletions"] && ![self _cursorIsInOrAfterWikiLink]) {
         NSRange selectedRange=[self selectedRange];
         NSUInteger closer=[self cursorIsInsidePair:@"]"];   
         if ((closer!=NSNotFound)||([self cursorIsImmediatelyPastPair:@"]"])){ 
@@ -910,7 +921,7 @@ copyRTFType:
 
 - (void)insertBacktab:(id)sender {
 	//check temporary NVHiddenBulletIndentAttributeName here first
-    if ([[NSUserDefaults standardUserDefaults]boolForKey:@"UsesMarkdownCompletions"]) {
+    if ([[NSUserDefaults standardUserDefaults]boolForKey:@"UsesMarkdownCompletions"] && ![self _cursorIsInOrAfterWikiLink]) {
         NSRange selectedRange=[self selectedRange];
         NSUInteger closer=[self cursorIsInsidePair:@"]"];        
         if ((closer!=NSNotFound)||([self cursorIsImmediatelyPastPair:@"]"])){             
