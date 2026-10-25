@@ -511,7 +511,11 @@ copyRTFType:
 //font panel is disabled for the note-body, so styles must be applied manually:
 
 - (void)strikethroughNV:(id)sender {
-
+	//like bold and italic: Markdown when Markdown completion is on, so it's kept in a plain text note
+	if ([[NSUserDefaults standardUserDefaults]boolForKey:@"UsesMarkdownCompletions"]) {
+		[self changeMarkdownAttribute:@"~~"];
+		return;
+	}
 	[self applyStyleOfTrait:0 alternateAttributeName:NSStrikethroughStyleAttributeName 
 	alternateAttributeValue:[NSNumber numberWithInt:NSUnderlineStyleSingle]];
 	
@@ -1444,9 +1448,65 @@ static long (*GetGetScriptManagerVariablePointer())(short) {
 	return NO;	
 }
 
+//Return on a list item with nothing after its marker ("- ", "* ", "3. ", "2) ") ends the list: the marker is removed and
+//the line left blank, instead of starting another empty item. A bare "1." or "---" isn't a list item and is left alone.
+//(From nvALT 3.0.1; nv27 had only removed bullets it had added itself.)
+- (BOOL)_endListAtEmptyItem {
+	if (![prefsController autoFormatsListBullets])
+		return NO;
+	NSRange selected = [self selectedRange];
+	NSString *string = [self string];
+	if (selected.length || selected.location == NSNotFound || selected.location > [string length])
+		return NO;
+	
+	NSRange lineRange = [string lineRangeForRange:NSMakeRange(selected.location, 0)];
+	NSUInteger contentEnd = NSMaxRange(lineRange);
+	while (contentEnd > lineRange.location && [[NSCharacterSet newlineCharacterSet] characterIsMember:[string characterAtIndex:contentEnd - 1]])
+		contentEnd--;
+	NSRange contentRange = NSMakeRange(lineRange.location, contentEnd - lineRange.location);
+	if (!contentRange.length)
+		return NO;
+	
+	NSCharacterSet *whitespace = [NSCharacterSet whitespaceCharacterSet];
+	NSUInteger i = contentRange.location;
+	while (i < contentEnd && [whitespace characterIsMember:[string characterAtIndex:i]])
+		i++;
+	if (i >= contentEnd)
+		return NO;
+	
+	NSUInteger markerEnd = NSNotFound;
+	unichar marker = [string characterAtIndex:i];
+	if ([[NSCharacterSet listBulletsCharacterSet] characterIsMember:marker]) {
+		markerEnd = i + 1;
+	} else if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:marker]) {
+		NSUInteger digit = i;
+		while (digit < contentEnd && [[NSCharacterSet decimalDigitCharacterSet] characterIsMember:[string characterAtIndex:digit]])
+			digit++;
+		if (digit < contentEnd && ([string characterAtIndex:digit] == '.' || [string characterAtIndex:digit] == ')'))
+			markerEnd = digit + 1;
+	}
+	//a list item has whitespace after its marker, and here nothing else
+	if (markerEnd == NSNotFound || markerEnd >= contentEnd || ![whitespace characterIsMember:[string characterAtIndex:markerEnd]])
+		return NO;
+	if ([string rangeOfCharacterFromSet:[whitespace invertedSet] options:0 range:NSMakeRange(markerEnd, contentEnd - markerEnd)].location != NSNotFound ||
+		selected.location < markerEnd)
+		return NO;
+	
+	if (![self shouldChangeTextInRange:contentRange replacementString:@""])
+		return NO;
+	[self replaceCharactersInRange:contentRange withString:@""];
+	[self didChangeText];
+	[self setSelectedRange:NSMakeRange(contentRange.location, 0)];
+	[self scrollRangeToVisible:[self selectedRange]];
+	return YES;
+}
+
 - (void)insertNewline:(id)sender {
 	//reset custom styles after each line
 	[self setTypingAttributes:[prefsController noteBodyAttributes]];
+	
+	if ([self _endListAtEmptyItem])
+		return;
 	
 	[super insertNewline:sender];
 	

@@ -159,7 +159,7 @@ static void sendCallbacksForGlobalPrefs(GlobalPrefs* self, SEL selector, id orig
             [NSNumber numberWithBool:NO], ShowGridKey,
             [NSNumber numberWithBool:NO], AlternatingRowsKey,
             [NSNumber numberWithBool:NO], UseAutoPairing,
-            [NSNumber numberWithBool:NO], UsesMarkdownCompletions,
+            [NSNumber numberWithBool:YES], UsesMarkdownCompletions, //notes are plain text: ⌘B/⌘I/⌘Y add Markdown, which is kept
 
 			[NSArchiver archivedDataWithRootObject:
 			 [NSFont fontWithName:@"Helvetica" size:14.0f]], NoteBodyFontKey,

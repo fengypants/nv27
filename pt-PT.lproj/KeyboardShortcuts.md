@@ -67,7 +67,7 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 | ⌘] | Aumenta o recuo das linhas |
 | ⌘[ | Diminui o recuo das linhas |
 
-> O negrito, o itálico e o tachado só são guardados se as notas forem armazenadas em RTF ou HTML (Preferências › Notas).
+> Com o preenchimento automático de Markdown ativo (predefinição; ⇧⌘M), ⌘B, ⌘I e ⌘Y acrescentam Markdown à volta da seleção: dois asteriscos para negrito, um para itálico, dois tis para tachado. Desativado, formatam o texto, que só é guardado se as notas forem armazenadas em RTF ou HTML (Definições › Notas).
 
 ## Markdown
 

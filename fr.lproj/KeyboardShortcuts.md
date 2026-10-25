@@ -67,7 +67,7 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 | ⌘] | Décale à droite (augmente le retrait des lignes) |
 | ⌘[ | Décale à gauche (réduit le retrait des lignes) |
 
-> Le gras, l’italique et le barré ne sont enregistrés que si les notes sont stockées en RTF ou en HTML (Préférences › Notes).
+> Lorsque la complétion Markdown est activée (par défaut ; ⇧⌘M), ⌘B, ⌘I et ⌘Y entourent la sélection de Markdown : deux astérisques pour le gras, un pour l’italique, deux tildes pour le barré. Lorsqu’elle est désactivée, ils mettent le texte en forme, ce qui n’est enregistré que si les notes sont stockées en RTF ou en HTML (Réglages › Notes).
 
 ## Markdown
 
