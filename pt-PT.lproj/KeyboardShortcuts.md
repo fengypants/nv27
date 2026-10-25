@@ -67,7 +67,7 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 | ⌘] | Aumenta o recuo das linhas |
 | ⌘[ | Diminui o recuo das linhas |
 
-> Com o preenchimento automático de Markdown ativo (⇧⌘M), ⌘B, ⌘I e ⌘Y acrescentam Markdown à volta da seleção: dois asteriscos para negrito, um para itálico, dois tis para tachado. Desativado, formatam o texto, que só é guardado se as notas forem armazenadas em RTF ou HTML (Definições › Notas).
+> Com o preenchimento automático de Markdown ativo (⇧⌘M), ⌘B, ⌘I e ⌘Y acrescentam Markdown à volta da seleção: dois asteriscos para negrito, um para itálico, dois tis para tachado. Desativado, formatam o texto das notas armazenadas em RTF ou HTML (Definições › Notas). As notas em texto simples não conseguem guardar formatação, por isso aí não estão disponíveis.
 
 ## Markdown
 

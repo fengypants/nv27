@@ -20,6 +20,8 @@
 #import "AttributedPlainText.h"
 #import "NSString_NV.h"
 #import "ETClipView.h"
+#import "NoteObject.h"
+#import "NotationPrefs.h"
 //#import "NVTextFinderAdditions.h"
 
 
@@ -508,10 +510,25 @@ copyRTFType:
 
 //font panel is disabled for the note-body, so styles must be applied manually:
 
+//bold, italic and strikethrough styles are kept only in Rich Text and HTML note files: a plain text note's file drops
+//them (nv27's own database would keep them only until the file changes, e.g. edited elsewhere or synced from another
+//Mac). So in plain text notes they're unavailable, unless Markdown completion is on and they insert Markdown instead
+- (BOOL)_stylesWouldNotBeSaved {
+	if ([[NSUserDefaults standardUserDefaults] boolForKey:@"UsesMarkdownCompletions"])
+		return NO;
+	NoteObject *note = [(AppController*)[NSApp delegate] selectedNoteObject];
+	NSInteger format = note ? storageFormatOfNote(note) : [[prefsController notationPrefs] notesStorageFormat];
+	return format == PlainTextFormat;
+}
+
 - (void)strikethroughNV:(id)sender {
 	//like bold and italic: Markdown when Markdown completion is on, so it's kept in a plain text note
 	if ([[NSUserDefaults standardUserDefaults]boolForKey:@"UsesMarkdownCompletions"]) {
 		[self changeMarkdownAttribute:@"~~"];
+		return;
+	}
+	if ([self _stylesWouldNotBeSaved]) {
+		NSBeep();
 		return;
 	}
 	[self applyStyleOfTrait:0 alternateAttributeName:NSStrikethroughStyleAttributeName 
@@ -528,6 +545,8 @@ copyRTFType:
 - (void)bold:(id)sender {	
     if ([[NSUserDefaults standardUserDefaults]boolForKey:@"UsesMarkdownCompletions"]) {
         [self changeMarkdownAttribute:@"**"];
+    }else if ([self _stylesWouldNotBeSaved]) {
+        NSBeep();
     }else{
         [self applyStyleOfTrait:NSBoldFontMask alternateAttributeName:NSStrokeWidthAttributeName 
         alternateAttributeValue:[NSNumber numberWithFloat:(float)STROKE_WIDTH_FOR_BOLD]];
@@ -538,6 +557,8 @@ copyRTFType:
 - (void)italic:(id)sender {
     if ([[NSUserDefaults standardUserDefaults]boolForKey:@"UsesMarkdownCompletions"]) {
         [self changeMarkdownAttribute:@"*"];
+    }else if ([self _stylesWouldNotBeSaved]) {
+        NSBeep();
     }else{
         [self applyStyleOfTrait:NSItalicFontMask alternateAttributeName:NSObliquenessAttributeName 
         alternateAttributeValue:[NSNumber numberWithFloat:(float)OBLIQUENESS_FOR_ITALIC]];
@@ -1096,6 +1117,11 @@ copyRTFType:
 		action == @selector(bold:) ||
 		action == @selector(italic:) ||
 		action == @selector(strikethroughNV:)) {
+		
+		if (action != @selector(defaultStyle:) && [self _stylesWouldNotBeSaved]) {
+			[menuItem setState:NSOffState];
+			return NO;
+		}
 		
 		NSRange effectiveRange = NSMakeRange(0,0), range = [self selectedRange];
 		NSDictionary *attrs = nil;

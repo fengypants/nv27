@@ -485,8 +485,34 @@ static NSString *SelfTestVisibleNewlines(NSString *text) {
 	[window makeFirstResponder:textView];
 	SelfTestLog(@"lists: Markdown completion on by default=%d, list bullets on=%d", [[NSUserDefaults standardUserDefaults] boolForKey:@"UsesMarkdownCompletions"],
 				[prefsController autoFormatsListBullets]);
+	//with Markdown completion off, a plain text note can't keep bold, italic or strikethrough: those are unavailable
+	{
+		[textView setSelectedRange:NSMakeRange(0, [[textView string] length])];
+		[textView insertText:@"a word here"];
+		NSMutableArray *states = [NSMutableArray array];
+		for (NSString *action in [NSArray arrayWithObjects:@"bold:", @"italic:", @"strikethroughNV:", @"defaultStyle:", nil]) {
+			NSMenuItem *item = [[[NSMenuItem alloc] initWithTitle:action action:NSSelectorFromString(action) keyEquivalent:@""] autorelease];
+			[states addObject:[NSString stringWithFormat:@"%@ %@", action, [textView validateMenuItem:item] ? @"enabled" : @"disabled"]];
+		}
+		[textView setSelectedRange:NSMakeRange(2, 4)];
+		[textView bold:nil];
+		[textView italic:nil];
+		[textView strikethroughNV:nil];
+		NSDictionary *attrs = [[textView textStorage] attributesAtIndex:3 effectiveRange:NULL];
+		NSFont *font = [attrs objectForKey:NSFontAttributeName];
+		SelfTestLog(@"styles: plain text note (format %ld), Markdown completion off: %@; after bold, italic, strikethrough \"%@\" bold=%d italic=%d struck=%d",
+					(long)storageFormatOfNote(note), [states componentsJoinedByString:@", "], [textView string],
+					([[NSFontManager sharedFontManager] traitsOfFont:font] & NSBoldFontMask) != 0 || [attrs objectForKey:NSStrokeWidthAttributeName] != nil,
+					([[NSFontManager sharedFontManager] traitsOfFont:font] & NSItalicFontMask) != 0 || [attrs objectForKey:NSObliquenessAttributeName] != nil,
+					[attrs objectForKey:NSStrikethroughStyleAttributeName] != nil);
+	}
+	
 	//the Markdown checks below need it on, as ⇧⌘M would set it
 	[[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"UsesMarkdownCompletions"];
+	{
+		NSMenuItem *item = [[[NSMenuItem alloc] initWithTitle:@"bold" action:@selector(bold:) keyEquivalent:@""] autorelease];
+		SelfTestLog(@"styles: Markdown completion on: bold: %@", [textView validateMenuItem:item] ? @"enabled" : @"disabled");
+	}
 	
 	//each case: what's typed (Return as ⏎), then the note's text
 	NSArray *cases = [NSArray arrayWithObjects:@"- one⏎⏎after", @"* one⏎⏎after", @"1. one⏎⏎after", @"2) one⏎⏎after", @"  - indented⏎⏎after",

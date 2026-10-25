@@ -75,7 +75,7 @@ change them too when a shortcut changes.
 | ⌘] | Shift Right (indent lines) |
 | ⌘[ | Shift Left (outdent lines) |
 
-> With Markdown completion on (⇧⌘M), ⌘B, ⌘I and ⌘Y add Markdown around the selection: two asterisks for bold, one for italic, two tildes for strikethrough. With it off, they style the text, which is saved only when notes are stored as Rich Text or HTML (Settings › Notes).
+> With Markdown completion on (⇧⌘M), ⌘B, ⌘I and ⌘Y add Markdown around the selection: two asterisks for bold, one for italic, two tildes for strikethrough. With it off, they style the text in notes stored as Rich Text or HTML (Settings › Notes). Plain text notes can’t keep styles, so there they’re unavailable.
 
 ## Markdown
 
