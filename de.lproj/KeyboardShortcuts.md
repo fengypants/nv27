@@ -11,7 +11,7 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 | ⌘K | Vorige Notiz in der Liste wählen |
 | ⌘J | Nächste Notiz in der Liste wählen |
 | ⌘D | Auswahl der aktuellen Notiz aufheben und Suchtext wiederherstellen |
-| ⇧⌘V | Inhalt der Zwischenablage als neue Notiz einfügen |
+| ⇧⌘V | Inhalt der Zwischenablage als neue Notiz einfügen (im Suchfeld oder in der Notizliste) |
 | ⌘R | Ausgewählte Notiz umbenennen |
 | ⌘⌫ | Ausgewählte Notiz(en) löschen |
 | ⇧⌘T | Ausgewählte Notiz mit Etikett versehen |
@@ -51,6 +51,7 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 | Tab | In einer Notiz: einrücken oder zum nächsten Feld wechseln, je nach Einstellung „Tabulatortaste“ |
 | ⌥Tab | Einrücken |
 | ⌥⌘V | Kopierte URL als Markdown-Link einfügen |
+| ⇧⌘V | In einer Notiz: mit Fett, Kursiv und Durchgestrichen einsetzen (in Notizen aus reinem Text als Markdown) |
 | ⌘F | Suchen |
 | ⌥⌘F | Suchen und Ersetzen |
 | ⌥⌘E | Auswahl suchen |

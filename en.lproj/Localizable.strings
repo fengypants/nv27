@@ -689,3 +689,9 @@
 "Close brackets and quotes automatically" = "Close brackets and quotes automatically";
 "Typing ( [ { or \" also adds its closing character." = "Typing ( [ { or \" also adds its closing character.";
 "Right-to-left text" = "Right-to-left text";
+
+/* Edit menu: paste keeping bold, italic and strikethrough (as Markdown in plain text notes) */
+"Paste with Styles" = "Paste with Styles";
+
+/* Settings › Editing: help under Copy basic styles from other apps */
+"Applies to Rich Text and HTML notes; plain text notes get plain text. In a note, ⇧⌘V pastes bold, italic and strikethrough either way, as Markdown in plain text notes." = "Applies to Rich Text and HTML notes; plain text notes get plain text. In a note, ⇧⌘V pastes bold, italic and strikethrough either way, as Markdown in plain text notes.";

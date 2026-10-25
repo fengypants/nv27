@@ -215,6 +215,13 @@ static void _CopyItemWithSelectorFromMenu(NSMenu *destMenu, NSMenu *sourceMenu, 
 	[[NSApp delegate] addNotesFromPasteboard:[NSPasteboard generalPasteboard]];
 }
 
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
+	//Edit › Paste as New Note (⇧⌘V) gives way to Paste with Styles while a note is being edited
+	if ([menuItem action] == @selector(paste:) && [[[self window] firstResponder] isKindOfClass:[LinkingEditor class]])
+		return NO;
+	return [NSTableView instancesRespondToSelector:@selector(validateMenuItem:)] ? [super validateMenuItem:menuItem] : YES;
+}
+
 - (float)tableFontHeight {
 	return tableFontHeight;
 }

@@ -89,7 +89,9 @@
 	
 	//safari on 10.5 does not seem to provide a plain-text equivalent, so we must be able to dumb-down RTF data as well
 	//should fall-back to plain text if 1) user doesn't want styles and 2) plain text is actually available
-	BOOL shallUsePlainTextFallback = pbHasPlainText && ![prefsController pastePreservesStyle];
+	//new notes in a plain text notes folder can't keep styles either: use the plain text when there is some
+	BOOL plainTextNotes = [notationController currentNoteStorageFormat] == PlainTextFormat;
+	BOOL shallUsePlainTextFallback = pbHasPlainText && (![prefsController pastePreservesStyle] || plainTextNotes);
 	BOOL hasRTFData = NO;
 	
 	if ([types containsObject:NVPTFPboardType]) {
@@ -126,7 +128,7 @@
 	if ([newString length] > 0) {
 		[newString removeAttachments];
 		
-		if (hasRTFData && ![prefsController pastePreservesStyle]) //fallback scenario
+		if ((hasRTFData && ![prefsController pastePreservesStyle]) || plainTextNotes) //fallback scenario
 			newString = [[[NSMutableAttributedString alloc] initWithString:[newString string]] autorelease];
 		
 		NSUInteger bodyLoc = 0, prefixedSourceLength = 0;

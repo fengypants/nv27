@@ -513,4 +513,58 @@ static BOOL _StringWithRangeIsProbablyObjC(NSString *string, NSRange blockRange)
 
 
 
+
+//the basic styles of a run of text, as Markdown sees them
+static void BasicStylesOfAttributes(NSDictionary *attrs, BOOL *bold, BOOL *italic, BOOL *struck, NSURL **link) {
+	NSFont *font = [attrs objectForKey:NSFontAttributeName];
+	NSFontTraitMask traits = font ? [[NSFontManager sharedFontManager] traitsOfFont:font] : 0;
+	*bold = (traits & NSBoldFontMask) != 0 || [[attrs objectForKey:NSStrokeWidthAttributeName] floatValue] < 0.0f;
+	*italic = (traits & NSItalicFontMask) != 0 || [[attrs objectForKey:NSObliquenessAttributeName] floatValue] > 0.0f;
+	*struck = [[attrs objectForKey:NSStrikethroughStyleAttributeName] integerValue] != 0;
+	id linkValue = [attrs objectForKey:NSLinkAttributeName];
+	*link = [linkValue isKindOfClass:[NSURL class]] ? linkValue : [linkValue isKindOfClass:[NSString class]] ? [NSURL URLWithString:linkValue] : nil;
+}
+
+- (NSString*)markdownStringOfBasicStyles {
+	NSString *string = [self string];
+	NSMutableString *markdown = [NSMutableString stringWithCapacity:[string length]];
+	NSCharacterSet *whitespace = [NSCharacterSet whitespaceAndNewlineCharacterSet];
+	NSUInteger length = [string length], index = 0;
+	
+	while (index < length) {
+		//a run of the same styles, never across a line break (Markdown emphasis can't span lines)
+		BOOL bold, italic, struck; NSURL *link;
+		NSRange run;
+		BasicStylesOfAttributes([self attributesAtIndex:index effectiveRange:&run], &bold, &italic, &struck, &link);
+		NSUInteger end = NSMaxRange(run);
+		while (end < length) {
+			BOOL b, i, s; NSURL *l; NSRange next;
+			BasicStylesOfAttributes([self attributesAtIndex:end effectiveRange:&next], &b, &i, &s, &l);
+			if (b != bold || i != italic || s != struck || (l != link && ![l isEqual:link])) break;
+			end = NSMaxRange(next);
+		}
+		NSRange lineEnd = [string rangeOfCharacterFromSet:[NSCharacterSet newlineCharacterSet] options:0 range:NSMakeRange(index, end - index)];
+		if (lineEnd.location != NSNotFound) end = lineEnd.location == index ? index + 1 : lineEnd.location;
+		
+		NSString *text = [string substringWithRange:NSMakeRange(index, end - index)];
+		index = end;
+		NSString *core = [text stringByTrimmingCharactersInSet:whitespace];
+		if (![core length] || (!bold && !italic && !struck && !link)) {
+			[markdown appendString:text];
+			continue;
+		}
+		//markers hug the words: spaces at either end stay outside them
+		NSRange coreRange = [text rangeOfString:core];
+		NSString *marker = bold && italic ? @"***" : bold ? @"**" : italic ? @"*" : @"";
+		NSString *styled = [NSString stringWithFormat:@"%@%@%@", marker, core, marker];
+		if (struck) styled = [NSString stringWithFormat:@"~~%@~~", styled];
+		if (link && ![[link absoluteString] isEqualToString:core])
+			styled = [NSString stringWithFormat:@"[%@](%@)", styled, [link absoluteString]];
+		[markdown appendString:[text substringToIndex:coreRange.location]];
+		[markdown appendString:styled];
+		[markdown appendString:[text substringFromIndex:NSMaxRange(coreRange)]];
+	}
+	return markdown;
+}
+
 @end

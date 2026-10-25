@@ -19,7 +19,7 @@ change them too when a shortcut changes.
 | ⌘K | Select the previous note in the list |
 | ⌘J | Select the next note in the list |
 | ⌘D | Deselect the current note, restoring the search text |
-| ⇧⌘V | Paste the clipboard as a new note |
+| ⇧⌘V | Paste the clipboard as a new note (from the search field or notes list) |
 | ⌘R | Rename the selected note |
 | ⌘⌫ | Delete the selected note(s) |
 | ⇧⌘T | Tag the selected note |
@@ -59,6 +59,7 @@ change them too when a shortcut changes.
 | Tab | In a note: indent, or move to the next field, depending on the Tab Key setting |
 | ⌥Tab | Indent |
 | ⌥⌘V | Paste the copied URL as a Markdown link |
+| ⇧⌘V | In a note: paste with bold, italic and strikethrough (as Markdown in plain text notes) |
 | ⌘F | Find |
 | ⌥⌘F | Find and Replace |
 | ⌥⌘E | Use Selection for Find |

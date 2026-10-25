@@ -689,3 +689,9 @@
 "Close brackets and quotes automatically" = "自动补全括号和引号";
 "Typing ( [ { or \" also adds its closing character." = "输入 ( [ { 或 \" 时会同时添加对应的闭合字符。";
 "Right-to-left text" = "从右到左的文字";
+
+/* Edit menu: paste keeping bold, italic and strikethrough (as Markdown in plain text notes) */
+"Paste with Styles" = "粘贴并保留样式";
+
+/* Settings › Editing: help under Copy basic styles from other apps */
+"Applies to Rich Text and HTML notes; plain text notes get plain text. In a note, ⇧⌘V pastes bold, italic and strikethrough either way, as Markdown in plain text notes." = "适用于 RTF 和 HTML 笔记；纯文本笔记只粘贴纯文本。在笔记中，⇧⌘V 始终会粘贴粗体、斜体和删除线，在纯文本笔记中以 Markdown 形式粘贴。";

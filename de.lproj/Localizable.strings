@@ -701,3 +701,9 @@
 "Close brackets and quotes automatically" = "Klammern und Anführungszeichen automatisch schließen";
 "Typing ( [ { or \" also adds its closing character." = "Zu ( [ { oder \" wird das schließende Zeichen ergänzt.";
 "Right-to-left text" = "Text von rechts nach links";
+
+/* Edit menu: paste keeping bold, italic and strikethrough (as Markdown in plain text notes) */
+"Paste with Styles" = "Mit Stilen einsetzen";
+
+/* Settings › Editing: help under Copy basic styles from other apps */
+"Applies to Rich Text and HTML notes; plain text notes get plain text. In a note, ⇧⌘V pastes bold, italic and strikethrough either way, as Markdown in plain text notes." = "Gilt für RTF- und HTML-Notizen; Notizen aus reinem Text erhalten reinen Text. In einer Notiz fügt ⇧⌘V Fett, Kursiv und Durchgestrichen in jedem Fall ein, in Notizen aus reinem Text als Markdown.";

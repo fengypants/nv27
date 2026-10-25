@@ -507,6 +507,96 @@ static NSString *SelfTestVisibleNewlines(NSString *text) {
 					[attrs objectForKey:NSStrikethroughStyleAttributeName] != nil);
 	}
 	
+	//pasting styled text: plain into a plain text note; Paste with Styles (⇧⌘V) brings basic styles as Markdown there,
+	//and as styles in a Rich Text note
+	{
+		NSMutableAttributedString *clip = [[[NSMutableAttributedString alloc] initWithString:@"Hello bold and italic and struck and link."
+																				  attributes:@{NSFontAttributeName: [NSFont fontWithName:@"Helvetica" size:13]}] autorelease];
+		[clip addAttribute:NSFontAttributeName value:[NSFont fontWithName:@"Helvetica-Bold" size:13] range:NSMakeRange(6, 4)];
+		[clip addAttribute:NSFontAttributeName value:[NSFont fontWithName:@"Helvetica-Oblique" size:13] range:NSMakeRange(15, 6)];
+		[clip addAttribute:NSStrikethroughStyleAttributeName value:[NSNumber numberWithInt:NSUnderlineStyleSingle] range:NSMakeRange(26, 6)];
+		[clip addAttribute:NSLinkAttributeName value:[NSURL URLWithString:@"https://example.com/"] range:NSMakeRange(37, 4)];
+		NSData *rtf = [clip RTFFromRange:NSMakeRange(0, [clip length]) documentAttributes:@{NSDocumentTypeDocumentAttribute: NSRTFTextDocumentType}];
+		NSPasteboard *pboard = [NSPasteboard generalPasteboard];
+		void (^putClip)(void) = ^{
+			[pboard clearContents];
+			[pboard setData:rtf forType:NSPasteboardTypeRTF];
+			[pboard setString:[clip string] forType:NSPasteboardTypeString];
+		};
+		BOOL (^anyStyle)(void) = ^BOOL{
+			__block BOOL styled = NO;
+			[[textView textStorage] enumerateAttributesInRange:NSMakeRange(0, [[textView string] length]) options:0 usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop) {
+				NSFontTraitMask traits = [[NSFontManager sharedFontManager] traitsOfFont:[attrs objectForKey:NSFontAttributeName]];
+				if ((traits & (NSBoldFontMask|NSItalicFontMask)) || [attrs objectForKey:NSStrikethroughStyleAttributeName]) { styled = YES; *stop = YES; }
+			}];
+			return styled;
+		};
+		BOOL preserves = [prefsController pastePreservesStyle];
+		for (int setting = 0; setting < 2; setting++) {
+			[prefsController setPastePreservesStyle:setting sender:self];
+			[textView setSelectedRange:NSMakeRange(0, [[textView string] length])];
+			[textView insertText:@""];
+			putClip();
+			[textView paste:nil];
+			SelfTestLog(@"paste: plain text note, \"Copy basic styles\" %@: ⌘V -> \"%@\" styled=%d", setting ? @"on" : @"off", [textView string], anyStyle());
+		}
+		[prefsController setPastePreservesStyle:NO sender:self];
+		[textView setSelectedRange:NSMakeRange(0, [[textView string] length])];
+		[textView insertText:@""];
+		putClip();
+		[textView pasteWithStyles:nil];
+		SelfTestLog(@"paste: plain text note, Paste with Styles -> \"%@\" styled=%d", [textView string], anyStyle());
+		//the ⇧⌘V key in the note: Paste with Styles, not a new note
+		[textView setSelectedRange:NSMakeRange(0, [[textView string] length])];
+		[textView insertText:@""];
+		putClip();
+		NSInteger rowsBefore = [notesTableView numberOfRows];
+		[self _selfTestPostKey:'V' keyCode:9 flags:NSEventModifierFlagCommand | NSEventModifierFlagShift];
+		SelfTestLog(@"paste: ⇧⌘V in the note -> \"%@\", notes %ld -> %ld", [textView string], (long)rowsBefore, (long)[notesTableView numberOfRows]);
+		//which ⇧⌘V menu item is active where
+		NSMenuItem *styledItem = nil, *newNoteItem = nil;
+		for (NSMenuItem *topItem in [[NSApp mainMenu] itemArray])
+			for (NSMenuItem *item in [[topItem submenu] itemArray]) {
+				if ([item action] == @selector(pasteWithStyles:)) styledItem = item;
+				if ([item action] == @selector(paste:) && [item target] == notesTableView) newNoteItem = item;
+			}
+		[window makeFirstResponder:textView];
+		BOOL newNoteInEditor = [notesTableView validateMenuItem:newNoteItem], styledInEditor = [textView validateMenuItem:styledItem];
+		[window makeFirstResponder:notesTableView];
+		BOOL newNoteInList = [notesTableView validateMenuItem:newNoteItem];
+		[window makeFirstResponder:textView];
+		SelfTestLog(@"paste: menu \"%@\" (%@%@) enabled in note=%d; \"%@\" (%@%@) enabled in note=%d, in list=%d", [styledItem title],
+					([styledItem keyEquivalentModifierMask] & NSEventModifierFlagShift) || [[styledItem keyEquivalent] isEqualToString:@"V"] ? @"⇧⌘" : @"⌘",
+					[[styledItem keyEquivalent] uppercaseString], styledInEditor, [newNoteItem title],
+					[[newNoteItem keyEquivalent] isEqualToString:@"V"] ? @"⇧⌘" : @"⌘", [[newNoteItem keyEquivalent] uppercaseString], newNoteInEditor, newNoteInList);
+		
+		//a Rich Text note: ⌘V follows "Copy basic styles"; Paste with Styles keeps them either way
+		NSAttributedString *rtfBody = [[[NSAttributedString alloc] initWithString:@"" attributes:[prefsController noteBodyAttributes]] autorelease];
+		NoteObject *rtfNote = [[[NoteObject alloc] initWithNoteBody:rtfBody title:@"Rich Text paste test" delegate:notationController format:RTFTextFormat labels:nil] autorelease];
+		[notationController addNewNote:rtfNote];
+		[self searchForString:@""];
+		SelfTestSpin(0.3);
+		[notesTableView selectRowAndScroll:[self _selfTestRowOfNote:rtfNote]];
+		SelfTestSpin(0.3);
+		[window makeFirstResponder:textView];
+		for (int setting = 0; setting < 3; setting++) {
+			[prefsController setPastePreservesStyle:setting == 1 sender:self];
+			[textView setSelectedRange:NSMakeRange(0, [[textView string] length])];
+			[textView insertText:@""];
+			putClip();
+			if (setting < 2) [textView paste:nil]; else [textView pasteWithStyles:nil];
+			SelfTestLog(@"paste: Rich Text note (format %ld), %@ -> \"%@\" styled=%d", (long)storageFormatOfNote(rtfNote),
+						setting == 0 ? @"⌘V with Copy basic styles off" : setting == 1 ? @"⌘V with it on" : @"Paste with Styles with it off",
+						[textView string], anyStyle());
+		}
+		[prefsController setPastePreservesStyle:preserves sender:self];
+		[notationController removeNote:rtfNote];
+		SelfTestSpin(0.3);
+		[notesTableView selectRowAndScroll:[self _selfTestRowOfNote:note]];
+		SelfTestSpin(0.3);
+		[window makeFirstResponder:textView];
+	}
+	
 	//the Markdown checks below need it on, as ⇧⌘M would set it
 	[[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"UsesMarkdownCompletions"];
 	{

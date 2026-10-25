@@ -426,6 +426,11 @@ CGFloat _perceptualColorDifference(NSColor*a, NSColor*b) {
 }
 
 - (NSArray *)readablePasteboardTypes {
+	//a plain text note's file can't keep styles: paste and drop plain text there, even nv27's own styled copies
+	//(⇧⌘V, -pasteWithStyles:, turns basic styles into Markdown instead)
+	if ([self _noteIsPlainText])
+		return [NSArray arrayWithObjects:NSFilenamesPboardType, NSStringPboardType, nil];
+	
 	NSMutableArray *types = [NSMutableArray arrayWithObjects:NSFilenamesPboardType, NVPTFPboardType, NSStringPboardType, nil];
 	
 	if ([prefsController pastePreservesStyle]) {
@@ -434,6 +439,48 @@ CGFloat _perceptualColorDifference(NSColor*a, NSColor*b) {
 	}
 	
 	return types;
+}
+
+//Edit › Paste with Styles (⇧⌘V in a note): bold, italic and strikethrough come along whatever "Copy basic styles from
+//other apps" says; in a plain text note they arrive as Markdown, since its file can't keep styles
+- (IBAction)pasteWithStyles:(id)sender {
+	NSPasteboard *pboard = [NSPasteboard generalPasteboard];
+	NSArray *types = [pboard types];
+	NSMutableAttributedString *styled = nil;
+	if ([types containsObject:NVPTFPboardType])
+		styled = [[[NSMutableAttributedString alloc] initWithRTF:[pboard dataForType:NVPTFPboardType] documentAttributes:NULL] autorelease];
+	else if ([types containsObject:NSRTFPboardType])
+		styled = [[[NSMutableAttributedString alloc] initWithRTF:[pboard dataForType:NSRTFPboardType] documentAttributes:NULL] autorelease];
+	else if ([types containsObject:NSRTFDPboardType])
+		styled = [[[NSMutableAttributedString alloc] initWithRTFD:[pboard dataForType:NSRTFDPboardType] documentAttributes:NULL] autorelease];
+	else if ([types containsObject:NSHTMLPboardType])
+		styled = [[[NSMutableAttributedString alloc] initWithHTML:[pboard dataForType:NSHTMLPboardType] documentAttributes:NULL] autorelease];
+	
+	if (![styled length]) {
+		//nothing styled to paste: an ordinary paste
+		[self paste:sender];
+		return;
+	}
+	[styled removeAttachments];
+	NSRange selectedRange = [self rangeForUserTextChange];
+	
+	if ([self _noteIsPlainText]) {
+		NSString *markdown = [styled markdownStringOfBasicStyles];
+		if ([self shouldChangeTextInRange:selectedRange replacementString:markdown]) {
+			[self replaceCharactersInRange:selectedRange withString:markdown];
+			[self setTypingAttributes:[prefsController noteBodyAttributes]];
+			[self didChangeText];
+		}
+		return;
+	}
+	//as with "Copy basic styles from other apps": the note's font, keeping bold, italic and strikethrough
+	[styled removeAttribute:NSLinkAttributeName range:NSMakeRange(0, [styled length])];
+	[styled indentTextLists];
+	[styled restyleTextToFont:[prefsController noteBodyFont] usingBaseFont:nil];
+	if ([self shouldChangeTextInRange:selectedRange replacementString:[styled string]]) {
+		[self replaceCharactersInRange:selectedRange withRTF:[styled RTFFromRange:NSMakeRange(0, [styled length]) documentAttributes:nil]];
+		[self didChangeText];
+	}
 }
 
 - (BOOL)writeSelectionToPasteboard:(NSPasteboard *)pboard type:(NSString *)type {
@@ -513,12 +560,14 @@ copyRTFType:
 //bold, italic and strikethrough styles are kept only in Rich Text and HTML note files: a plain text note's file drops
 //them (nv27's own database would keep them only until the file changes, e.g. edited elsewhere or synced from another
 //Mac). So in plain text notes they're unavailable, unless Markdown completion is on and they insert Markdown instead
-- (BOOL)_stylesWouldNotBeSaved {
-	if ([[NSUserDefaults standardUserDefaults] boolForKey:@"UsesMarkdownCompletions"])
-		return NO;
+- (BOOL)_noteIsPlainText {
 	NoteObject *note = [(AppController*)[NSApp delegate] selectedNoteObject];
 	NSInteger format = note ? storageFormatOfNote(note) : [[prefsController notationPrefs] notesStorageFormat];
 	return format == PlainTextFormat;
+}
+
+- (BOOL)_stylesWouldNotBeSaved {
+	return ![[NSUserDefaults standardUserDefaults] boolForKey:@"UsesMarkdownCompletions"] && [self _noteIsPlainText];
 }
 
 - (void)strikethroughNV:(id)sender {
@@ -778,6 +827,12 @@ copyRTFType:
          [[NSNotificationCenter defaultCenter] postNotificationName:@"ModTimersShouldReset" object:nil];
     }
 	if (((modFlags & NSCommandKeyMask)>0)&&([[self window]firstResponder]==self)) {
+		//⇧⌘V in a note is Paste with Styles; elsewhere it's still Paste as New Note
+		if ((modFlags & (NSShiftKeyMask|NSControlKeyMask|NSAlternateKeyMask)) == NSShiftKeyMask &&
+			[[[anEvent charactersIgnoringModifiers] lowercaseString] isEqualToString:@"v"] && [self isEditable]) {
+			[self pasteWithStyles:nil];
+			return YES;
+		}
 		
 		unichar keyChar = [anEvent firstCharacterIgnoringModifiers];
 		if (keyChar == NSCarriageReturnCharacter || keyChar == NSNewlineCharacter || keyChar == NSEnterCharacter) {
@@ -1711,6 +1766,17 @@ static long (*GetGetScriptManagerVariablePointer())(short) {
 		theMenuItem = [[[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Insert Link",@"insert link menu item title") action:@selector(insertLink:) keyEquivalent:@"L"] autorelease];
         [theMenuItem setTarget:self];
         [editMenu addItem:theMenuItem];
+		
+		//Paste with Styles, after Paste and Paste as New Note: ⇧⌘V while a note is being edited (-performKeyEquivalent: takes
+		//it there first); elsewhere the menu finds Paste as New Note's ⇧⌘V first
+		NSInteger pasteIndex = -1;
+		for (NSMenuItem *item in [editMenu itemArray])
+			if ([item action] == @selector(paste:)) pasteIndex = [editMenu indexOfItem:item];
+		theMenuItem = [[[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Paste with Styles", @"Edit menu: paste keeping bold, italic and strikethrough (as Markdown in plain text notes)")
+												  action:@selector(pasteWithStyles:) keyEquivalent:@"V"] autorelease];
+		[theMenuItem setTarget:nil];
+		if (pasteIndex >= 0) [editMenu insertItem:theMenuItem atIndex:pasteIndex + 1];
+		else [editMenu addItem:theMenuItem];
         
     }
 

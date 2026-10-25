@@ -689,3 +689,9 @@
 "Close brackets and quotes automatically" = "Chiudi automaticamente parentesi e virgolette";
 "Typing ( [ { or \" also adds its closing character." = "Digitando ( [ { o \" viene aggiunto anche il carattere di chiusura.";
 "Right-to-left text" = "Testo da destra a sinistra";
+
+/* Edit menu: paste keeping bold, italic and strikethrough (as Markdown in plain text notes) */
+"Paste with Styles" = "Incolla con stili";
+
+/* Settings › Editing: help under Copy basic styles from other apps */
+"Applies to Rich Text and HTML notes; plain text notes get plain text. In a note, ⇧⌘V pastes bold, italic and strikethrough either way, as Markdown in plain text notes." = "Vale per le note RTF e HTML; le note in testo semplice ricevono testo semplice. In una nota, ⇧⌘V incolla grassetto, corsivo e barrato in ogni caso, come Markdown nelle note in testo semplice.";

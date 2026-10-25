@@ -11,7 +11,7 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 | ⌘K | Seleciona a nota anterior na lista |
 | ⌘J | Seleciona a nota seguinte na lista |
 | ⌘D | Desmarca a nota atual, repondo o texto da pesquisa |
-| ⇧⌘V | Cola o conteúdo da área de transferência como nova nota |
+| ⇧⌘V | Cola o conteúdo da área de transferência como nova nota (a partir do campo de pesquisa ou da lista de notas) |
 | ⌘R | Muda o nome da nota selecionada |
 | ⌘⌫ | Apaga a(s) nota(s) selecionada(s) |
 | ⇧⌘T | Etiqueta a nota selecionada |
@@ -51,6 +51,7 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 | Tab | Numa nota: aumenta o recuo ou passa ao campo seguinte, consoante a definição «Tecla Tab» |
 | ⌥Tab | Aumenta o recuo |
 | ⌥⌘V | Cola o URL copiado como ligação Markdown |
+| ⇧⌘V | Numa nota: cola com negrito, itálico e tachado (como Markdown nas notas em texto simples) |
 | ⌘F | Procurar |
 | ⌥⌘F | Procurar e substituir |
 | ⌥⌘E | Procurar utilizando o texto selecionado |

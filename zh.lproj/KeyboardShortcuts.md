@@ -11,7 +11,7 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 | ⌘K | 选择列表中的上一个笔记 |
 | ⌘J | 选择列表中的下一个笔记 |
 | ⌘D | 取消选择当前笔记，恢复搜索文本 |
-| ⇧⌘V | 将剪贴板内容粘贴为新笔记 |
+| ⇧⌘V | 将剪贴板内容粘贴为新笔记（在搜索栏或笔记列表中） |
 | ⌘R | 重命名所选笔记 |
 | ⌘⌫ | 删除所选笔记 |
 | ⇧⌘T | 为所选笔记添加标签 |
@@ -51,6 +51,7 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 | Tab | 在笔记中：缩进或移到下一个栏位，取决于“Tab 键”设置 |
 | ⌥Tab | 缩进 |
 | ⌥⌘V | 将拷贝的 URL 粘贴为 Markdown 链接 |
+| ⇧⌘V | 在笔记中：粘贴并保留粗体、斜体和删除线（纯文本笔记中为 Markdown） |
 | ⌘F | 查找 |
 | ⌥⌘F | 查找和替换 |
 | ⌥⌘E | 查找所选内容 |

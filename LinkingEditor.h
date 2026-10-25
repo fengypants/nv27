@@ -111,6 +111,7 @@
 - (IBAction)performFindPanelAction:(id)sender;
 - (void)updateTextColors;
 - (IBAction)insertLink:(id)sender;
+- (IBAction)pasteWithStyles:(id)sender;
 - (void)prepareTextFinder;
 - (void)prepareTextFinderPreLion;
 - (BOOL)textFinderIsVisible;
