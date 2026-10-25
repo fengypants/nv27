@@ -67,7 +67,7 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 | ⌘] | Aumenta il rientro delle righe |
 | ⌘[ | Riduce il rientro delle righe |
 
-> Con il completamento Markdown attivo (impostazione predefinita; ⇧⌘M), ⌘B, ⌘I e ⌘Y aggiungono Markdown attorno alla selezione: due asterischi per il grassetto, uno per il corsivo, due tilde per il barrato. Se è disattivato, formattano il testo, che viene salvato solo se le note sono archiviate come RTF o HTML (Impostazioni › Note).
+> Con il completamento Markdown attivo (⇧⌘M), ⌘B, ⌘I e ⌘Y aggiungono Markdown attorno alla selezione: due asterischi per il grassetto, uno per il corsivo, due tilde per il barrato. Se è disattivato, formattano il testo, che viene salvato solo se le note sono archiviate come RTF o HTML (Impostazioni › Note).
 
 ## Markdown
 

@@ -485,6 +485,8 @@ static NSString *SelfTestVisibleNewlines(NSString *text) {
 	[window makeFirstResponder:textView];
 	SelfTestLog(@"lists: Markdown completion on by default=%d, list bullets on=%d", [[NSUserDefaults standardUserDefaults] boolForKey:@"UsesMarkdownCompletions"],
 				[prefsController autoFormatsListBullets]);
+	//the Markdown checks below need it on, as ⇧⌘M would set it
+	[[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"UsesMarkdownCompletions"];
 	
 	//each case: what's typed (Return as ⏎), then the note's text
 	NSArray *cases = [NSArray arrayWithObjects:@"- one⏎⏎after", @"* one⏎⏎after", @"1. one⏎⏎after", @"2) one⏎⏎after", @"  - indented⏎⏎after",
@@ -534,6 +536,7 @@ static NSString *SelfTestVisibleNewlines(NSString *text) {
 					[[textView string] substringWithRange:[textView selectedRange]]);
 	}
 	[window makeFirstResponder:textView];
+	[[NSUserDefaults standardUserDefaults] removeObjectForKey:@"UsesMarkdownCompletions"];
 	[notationController synchronizeNoteChanges:nil];
 	SelfTestSpin(0.3);
 	[notationController removeNote:note];

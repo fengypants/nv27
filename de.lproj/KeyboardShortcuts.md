@@ -67,7 +67,7 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 | ⌘] | Rechts einrücken (Zeilen einrücken) |
 | ⌘[ | Links einrücken (Zeilen ausrücken) |
 
-> Bei eingeschalteter Markdown-Vervollständigung (Standard; ⇧⌘M) setzen ⌘B, ⌘I und ⌘Y Markdown um die Auswahl: zwei Sternchen für fett, eines für kursiv, zwei Tilden für durchgestrichen. Ist sie aus, wird der Text formatiert; das wird nur gesichert, wenn Notizen als RTF oder HTML gespeichert werden (Einstellungen › Notizen).
+> Bei eingeschalteter Markdown-Vervollständigung (⇧⌘M) setzen ⌘B, ⌘I und ⌘Y Markdown um die Auswahl: zwei Sternchen für fett, eines für kursiv, zwei Tilden für durchgestrichen. Ist sie aus, wird der Text formatiert; das wird nur gesichert, wenn Notizen als RTF oder HTML gespeichert werden (Einstellungen › Notizen).
 
 ## Markdown
 
