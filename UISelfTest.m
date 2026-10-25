@@ -560,6 +560,10 @@ static NSString *SelfTestVisibleNewlines(NSString *text) {
 				if ([item action] == @selector(pasteWithStyles:)) styledItem = item;
 				if ([item action] == @selector(paste:) && [item target] == notesTableView) newNoteItem = item;
 			}
+		for (NSMenuItem *topItem in [[NSApp mainMenu] itemArray])
+			for (NSMenuItem *item in [[topItem submenu] itemArray])
+				if ([item action] == @selector(pasteWithStyles:) || [item action] == @selector(paste:))
+					SelfTestLog(@"paste: menu %@ › \"%@\" key \"%@\" modifiers %#lx", [topItem title], [item title], [item keyEquivalent], (unsigned long)[item keyEquivalentModifierMask]);
 		[window makeFirstResponder:textView];
 		BOOL newNoteInEditor = [notesTableView validateMenuItem:newNoteItem], styledInEditor = [textView validateMenuItem:styledItem];
 		[window makeFirstResponder:notesTableView];
@@ -574,6 +578,8 @@ static NSString *SelfTestVisibleNewlines(NSString *text) {
 		NSAttributedString *rtfBody = [[[NSAttributedString alloc] initWithString:@"" attributes:[prefsController noteBodyAttributes]] autorelease];
 		NoteObject *rtfNote = [[[NoteObject alloc] initWithNoteBody:rtfBody title:@"Rich Text paste test" delegate:notationController format:RTFTextFormat labels:nil] autorelease];
 		[notationController addNewNote:rtfNote];
+		//new notes take the notes folder's format; make this one Rich Text, as a note in another folder could be
+		[rtfNote setValue:[NSNumber numberWithInt:RTFTextFormat] forKey:@"currentFormatID"];
 		[self searchForString:@""];
 		SelfTestSpin(0.3);
 		[notesTableView selectRowAndScroll:[self _selfTestRowOfNote:rtfNote]];
