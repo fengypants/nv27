@@ -521,12 +521,6 @@
 /* use-text-replacement command in the edit menu */
 "Use Automatic Text Replacement" = "Usa sostituzione automatica del testo";
 
-/* new-password command in the edit menu (shows generated passwords window) */
-"New Password..." = "Nuova parola d'ordine…";
-
-/* insert new password command in the edit menu */
-"Insert New Password" = "Inserisci nuova parola d'ordine";
-
 /* menu item in the View menu to turn on note-body previews in the Title column */
 "Show Note Previews in Title" = "Mostra anteprima note nel titolo";
 

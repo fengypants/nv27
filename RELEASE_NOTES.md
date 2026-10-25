@@ -1,5 +1,22 @@
 # nv27 release notes
 
+## 1.0.4
+
+Editing improvements, two of them from nvALT 3.0, Brett Terpstra's new release of nvALT. To update, quit nv27 and replace nv27.app in Applications with the one from **nv27-arm64.zip**; your notes and settings are kept.
+
+### Changed
+
+- **Markdown completion is on by default**, so ⌘B, ⌘I and ⌘Y put Markdown around the selection (two asterisks for bold, one for italic, two tildes for strikethrough). nv27 stores notes as plain text, which keeps Markdown but loses bold, italic and strikethrough styles. If you turned Markdown completion on or off yourself (⇧⌘M), your choice is kept. ⌘Y also adds Markdown now; it used to style the text even with Markdown completion on.
+- **"Preview using Marked" is now "Preview in Marked"**, as in Help › Keyboard Shortcuts, and it's translated in every language.
+
+### Fixed
+
+- **Return on an empty list item now ends the list.** On a line that's only a bullet or number ("- ", "* ", "3. "), Return removes it and leaves the line blank. nv27 used to remove only bullets it had added itself, so you had to delete typed ones by hand.
+
+### Removed
+
+- **The unused password generator.** Notational Velocity's "Insert New Password" command had already been switched off in nvALT, so it couldn't be used.
+
 ## 1.0.3
 
 Keyboard navigation in the notes list. To update, quit nv27 and replace nv27.app in Applications with the one from **nv27-arm64.zip**; your notes and settings are kept.

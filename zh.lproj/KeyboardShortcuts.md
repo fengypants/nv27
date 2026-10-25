@@ -67,7 +67,7 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 | ⌘] | 向右缩进（增加行缩进） |
 | ⌘[ | 向左缩进（减少行缩进） |
 
-> 只有当笔记以 RTF 或 HTML 格式存储时，才会保存粗体、斜体和删除线（偏好设置 › 笔记）。
+> Markdown 自动补全打开时（默认；⇧⌘M），⌘B、⌘I 和 ⌘Y 会在所选文本两侧加上 Markdown：两个星号表示粗体，一个星号表示斜体，两个波浪号表示删除线。关闭时则为文本设置样式，只有当笔记以 RTF 或 HTML 格式存储时才会保存（设置 › 笔记）。
 
 ## Markdown
 

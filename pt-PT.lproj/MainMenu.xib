@@ -563,7 +563,7 @@ CA
                                     <action selector="togglePreview:" target="213" id="1270"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Preview using Marked" keyEquivalent="m" id="1351">
+                            <menuItem title="Pré-visualizar no Marked" keyEquivalent="m" id="1351">
                                 <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
                                 <connections>
                                     <action selector="previewNoteWithMarked:" target="213" id="1352"/>
@@ -880,7 +880,7 @@ CA
                         <action selector="togglePreview:" target="213" id="1334"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Preview using Marked" keyEquivalent="m" id="De7-IN-E4D">
+                <menuItem title="Pré-visualizar no Marked" keyEquivalent="m" id="De7-IN-E4D">
                     <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
                     <connections>
                         <action selector="previewNoteWithMarked:" target="213" id="SSA-Ll-PCH"/>

@@ -381,6 +381,7 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 	[self _selfTestUpstreamFixes];
 	[self _selfTestListKeys];
 	[self _selfTestArrowFromSearch];
+	[self _selfTestListsAndMarkdown];
 	SelfTestLog(@"done");
 	exit(0);
 }
@@ -462,6 +463,65 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 	//3: typing in the list still goes to the search field
 	[self _selfTestPostKey:'h' keyCode:4 flags:0];
 	SelfTestLog(@"arrow from search: typing 'h' in the list -> search field \"%@\", %@", [field stringValue], [self _selfTestSelectionDescription]);
+	selfTestStage = "";
+}
+
+static NSString *SelfTestVisibleNewlines(NSString *text) {
+	return [text stringByReplacingOccurrencesOfString:@"\n" withString:@"⏎"];
+}
+
+//Return on an empty list item ends the list; ⌘B/⌘I/⌘Y add Markdown with Markdown completion on, the default
+- (void)_selfTestListsAndMarkdown {
+	selfTestStage = "lists and Markdown shortcuts";
+	NSAttributedString *body = [[[NSAttributedString alloc] initWithString:@"" attributes:[prefsController noteBodyAttributes]] autorelease];
+	NoteObject *note = [[[NoteObject alloc] initWithNoteBody:body title:@"List and Markdown test" delegate:notationController
+													  format:[notationController currentNoteStorageFormat] labels:nil] autorelease];
+	[notationController addNewNote:note];
+	[self searchForString:@""];
+	SelfTestSpin(0.3);
+	NSInteger row = [self _selfTestRowOfNote:note];
+	[notesTableView selectRowAndScroll:row];
+	SelfTestSpin(0.3);
+	[window makeFirstResponder:textView];
+	SelfTestLog(@"lists: Markdown completion on by default=%d, list bullets on=%d", [[NSUserDefaults standardUserDefaults] boolForKey:@"UsesMarkdownCompletions"],
+				[prefsController autoFormatsListBullets]);
+	
+	//each case: what's typed (Return as ⏎), then the note's text
+	NSArray *cases = [NSArray arrayWithObjects:@"- one⏎⏎after", @"* one⏎⏎after", @"1. one⏎⏎after", @"2) one⏎⏎after", @"  - indented⏎⏎after",
+					  @"- one⏎two⏎⏎after", @"---⏎after", @"1.⏎after", @"- ⏎after", nil];
+	for (NSString *typed in cases) {
+		[textView setSelectedRange:NSMakeRange(0, [[textView string] length])];
+		[textView insertText:@""];
+		NSArray *pieces = [typed componentsSeparatedByString:@"⏎"];
+		for (NSUInteger i = 0; i < [pieces count]; i++) {
+			if (i > 0) [textView insertNewline:nil];
+			if ([[pieces objectAtIndex:i] length]) [textView insertText:[pieces objectAtIndex:i]];
+		}
+		SelfTestLog(@"lists: typed \"%@\" -> \"%@\"", typed, SelfTestVisibleNewlines([textView string]));
+	}
+	//undo takes the ended list back
+	[textView setSelectedRange:NSMakeRange(0, [[textView string] length])];
+	[textView insertText:@"- one"];
+	[textView insertNewline:nil];
+	NSString *continued = [[[textView string] copy] autorelease];
+	[textView insertNewline:nil];
+	NSString *ended = [[[textView string] copy] autorelease];
+	[[textView undoManager] undo];
+	SelfTestLog(@"lists: \"%@\" then Return -> \"%@\", undo -> \"%@\"", SelfTestVisibleNewlines(continued), SelfTestVisibleNewlines(ended),
+				SelfTestVisibleNewlines([textView string]));
+	
+	//⌘B, ⌘I, ⌘Y on a selected word
+	for (NSString *action in [NSArray arrayWithObjects:@"bold:", @"italic:", @"strikethroughNV:", nil]) {
+		[textView setSelectedRange:NSMakeRange(0, [[textView string] length])];
+		[textView insertText:@"a word here"];
+		[textView setSelectedRange:NSMakeRange(2, 4)];
+		[NSApp sendAction:NSSelectorFromString(action) to:textView from:nil];
+		SelfTestLog(@"markdown: %@ on \"word\" -> \"%@\"", action, [textView string]);
+	}
+	[notationController synchronizeNoteChanges:nil];
+	SelfTestSpin(0.3);
+	[notationController removeNote:note];
+	SelfTestSpin(0.3);
 	selfTestStage = "";
 }
 

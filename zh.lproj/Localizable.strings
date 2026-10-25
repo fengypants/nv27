@@ -521,12 +521,6 @@
 /* use-text-replacement command in the edit menu */
 "Use Automatic Text Replacement" = "使用自动文本替换";
 
-/* new-password command in the edit menu (shows generated passwords window) */
-"New Password..." = "新密码…";
-
-/* insert new password command in the edit menu */
-"Insert New Password" = "插入新密码";
-
 /* menu item in the View menu to turn on note-body previews in the Title column */
 "Show Note Previews in Title" = "显示笔记预览";
 
