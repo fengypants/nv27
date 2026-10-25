@@ -19,7 +19,6 @@
 #import "NSCollection_utils.h"
 #import "AttributedPlainText.h"
 #import "NSString_NV.h"
-#import "NVPasswordGenerator.h"
 #import "ETClipView.h"
 //#import "NVTextFinderAdditions.h"
 
@@ -29,7 +28,6 @@
 #include <Carbon/Carbon.h>
 #endif
 
-#define PASSWORD_SUGGESTIONS 0
 
 #ifdef notyet
 static long (*GetGetScriptManagerVariablePointer())(short);
@@ -1657,7 +1655,7 @@ static long (*GetGetScriptManagerVariablePointer())(short) {
 	[self setMenu:theMenu];
     
 	
-    // Insert Password menus
+    // Edit menu additions
     static BOOL additionalEditItems = YES;
     
     if (additionalEditItems) {
@@ -1677,61 +1675,8 @@ static long (*GetGetScriptManagerVariablePointer())(short) {
         [theMenuItem setTarget:self];
         [editMenu addItem:theMenuItem];
         
-		[editMenu addItem:[NSMenuItem separatorItem]];
-        
-#if PASSWORD_SUGGESTIONS
-        theMenuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"New Password...", "new password command in the edit menu")
-												 action:@selector(showGeneratedPasswords:) keyEquivalent:@"\\"];
-        [theMenuItem setKeyEquivalentModifierMask:NSCommandKeyMask];
-        [theMenuItem setTarget:nil]; // First Responder being the current Link Editor
-        [editMenu addItem:theMenuItem];
-        [theMenuItem release];
-#endif
-        
-//        theMenuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Insert New Password", "insert new password command in the edit menu")
-//												 action:@selector(insertGeneratedPassword:) keyEquivalent:@"\\"];
-//#if PASSWORD_SUGGESTIONS
-//        [theMenuItem setAlternate:YES];
-//#endif
-//        [theMenuItem setKeyEquivalentModifierMask:NSCommandKeyMask|NSAlternateKeyMask];
-//        [theMenuItem setTarget:nil]; // First Responder being the current Link Editor
-//        [editMenu addItem:theMenuItem];
-//        [theMenuItem release];
     }
 
-}
-
-- (void)insertPassword:(NSString*)password
-{
-    [self insertText:password];
-    @try {
-    NSPasteboard *pb = [NSPasteboard generalPasteboard];
-    #if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
-    NSPasteboardItem *pbitem = [[[NSPasteboardItem alloc] init] autorelease];
-    [pbitem setData:[password dataUsingEncoding:NSUTF8StringEncoding] forType:@"public.plain-text"];
-    [pb writeObjects:[NSArray arrayWithObject:pbitem]];
-    #else
-    [pb declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
-    [pb setString:password forType:NSStringPboardType];
-    #endif
-    } @catch (NSException *e) {}
-}
-
-- (void)insertGeneratedPassword:(id)sender {
-    NSString *password = [NVPasswordGenerator strong];
-    [self insertPassword:password];
-}
-
-- (void)showGeneratedPasswords:(id)sender {
-    #ifdef notyet
-    NSArray *suggestedPasswords = [NVPasswordGenerator suggestions];
-    
-    // display modal overlay, get user selection and insert it
-    // Nice to have:
-    // keep stats on the user's selection and then use the most frequent choice in [insertGeneratedPassword] (instead of just [strong])
-    #else
-    [self insertGeneratedPassword:nil];
-    #endif
 }
 
 - (void)dealloc {

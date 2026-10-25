@@ -566,7 +566,7 @@ CA
                                     <action selector="togglePreview:" target="213" id="1276"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Preview using Marked" keyEquivalent="m" id="1346">
+                            <menuItem title="Vorschau in Marked" keyEquivalent="m" id="1346">
                                 <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
                                 <connections>
                                     <action selector="previewNoteWithMarked:" target="213" id="1347"/>
@@ -883,7 +883,7 @@ CA
                         <action selector="togglePreview:" target="213" id="1329"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Preview using Marked" keyEquivalent="m" id="7cC-Wp-Xdo">
+                <menuItem title="Vorschau in Marked" keyEquivalent="m" id="7cC-Wp-Xdo">
                     <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
                     <connections>
                         <action selector="previewNoteWithMarked:" target="213" id="RpD-c6-wrY"/>

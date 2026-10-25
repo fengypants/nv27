@@ -564,7 +564,7 @@ CA
                                     <action selector="togglePreview:" target="213" id="1245"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Preview using Marked" keyEquivalent="m" id="1439">
+                            <menuItem title="在 Marked 中预览" keyEquivalent="m" id="1439">
                                 <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
                                 <connections>
                                     <action selector="previewNoteWithMarked:" target="213" id="1440"/>
@@ -883,7 +883,7 @@ CA
                         <action selector="togglePreview:" target="213" id="1331"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Preview using Marked" keyEquivalent="m" id="brc-qs-OuT">
+                <menuItem title="在 Marked 中预览" keyEquivalent="m" id="brc-qs-OuT">
                     <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
                     <connections>
                         <action selector="previewNoteWithMarked:" target="213" id="oGv-W1-Si9"/>
