@@ -1192,6 +1192,15 @@ terminateApp:
 		if (command == @selector(deleteBackward:))
 			return NO;
 		
+		if (command == @selector(moveDown:) && [notesTableView numberOfRows] > 0) {
+			//the down arrow goes into the notes list, at its first note. Typing the start of a note's title selects that
+			//note, which needn't be first (notes mentioning the text elsewhere can sort above it); moving down from it,
+			//or going to it, looked like skipping the notes above
+			[notesTableView selectRowAndScroll:0];
+			[window makeFirstResponder:notesTableView];
+			return YES;
+		}
+		
 		if (command == @selector(moveDown:) || command == @selector(moveUp:) ||
 			//catch shift-up/down selection behavior
 			command == @selector(moveDownAndModifySelection:) ||

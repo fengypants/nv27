@@ -26,8 +26,10 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 
 ## Rechercher et créer des notes
 
-| ↑ ↓ | Dans le champ de recherche : parcourt la liste des notes |
+| ↓ | Dans le champ de recherche : passe à la première note de la liste |
 | ⌘↑ ⌘↓ | Première ou dernière note de la liste |
+| fn← fn→ | Dans la liste des notes : première ou dernière note (ou Home, End) |
+| fn↑ fn↓ | Dans la liste des notes : page précédente ou suivante (ou Page Up, Page Down) |
 | ⇧⌘N | Affiche la fenêtre principale |
 
 ## Notes

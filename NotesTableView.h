@@ -69,6 +69,7 @@ typedef struct _ViewLocationContext {
 - (double)distanceFromRow:(NSUInteger)aRow forVisibleArea:(NSRect)visibleRect;
 - (void)scrollRowToVisible:(NSInteger)rowIndex withVerticalOffset:(float)offset;
 - (void)selectRowAndScroll:(NSInteger)row;
+- (void)_selectRowAPageAway:(NSInteger)direction;
 
 - (float)tableFontHeight;
 

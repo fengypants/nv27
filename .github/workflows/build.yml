@@ -74,7 +74,7 @@ jobs:
           APP="build/DerivedData/Build/Products/Development/nv27.app"
           NV27_UI_SELFTEST=1 "$APP/Contents/MacOS/nv27" > selftest.log 2>&1 &
           PID=$!
-          for i in $(seq 1 60); do kill -0 $PID 2>/dev/null || break; sleep 1; done
+          for i in $(seq 1 150); do kill -0 $PID 2>/dev/null || break; sleep 1; done
           kill $PID 2>/dev/null || true
           grep "^SELFTEST " selftest.log || { echo "no self-test output"; tail -60 selftest.log; }
           echo "---- snapshot ($(grep -c "^SELFTEST-PNG" selftest.log) lines) ----"

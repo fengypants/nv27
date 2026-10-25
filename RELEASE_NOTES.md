@@ -1,5 +1,15 @@
 # nv27 release notes
 
+## 1.0.3
+
+Keyboard navigation in the notes list. To update, quit nv27 and replace nv27.app in Applications with the one from **nv27-arm64.zip**; your notes and settings are kept.
+
+### Changed
+
+- **Home and End** (fn← and fn→ on a MacBook) select the first and last note when the notes list has focus. **Page Up and Page Down** (fn↑ and fn↓) move the selection a page up or down. A page is however many notes fit in the list, so it follows the divider and window size. These keys used to send you to the search field.
+- **The down arrow in the search field goes to the first note in the list** and puts focus there, so the selection shows in your accent color instead of gray. It used to move the selection down a row from the note your typing had selected, which looked like skipping a note. To open the note your typing selected, press Return, as before.
+- Help › Keyboard Shortcuts lists these in every language.
+
 ## 1.0.2
 
 Reliability fixes, several of them from Notational Velocity 2.5.1, which nvALT and nv27 are based on. To update, quit nv27 and replace nv27.app in Applications with the one from **nv27-arm64.zip**; your notes and settings are kept.

@@ -352,6 +352,7 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 	SelfTestLog(@"keyboard shortcuts window: visible=%d title=\"%@\" characters=%lu", [shortcutsWindow isVisible], [shortcutsWindow title],
 				(unsigned long)[[shortcutsText string] length]);
 	PrintSnapshotOfWindow(shortcutsWindow, @"shortcuts");
+	[self _selfTestSnapshotShortcutsText:shortcutsText containing:@"fn↑" tag:@"shortcuts-paging"];
 	[shortcutsText scrollRangeToVisible:NSMakeRange([[shortcutsText string] length], 0)];
 	[shortcutsWindow display];
 	PrintSnapshotOfWindow(shortcutsWindow, @"shortcuts-end");
@@ -369,6 +370,8 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 		[shortcutsWindow display];
 		SelfTestLog(@"keyboard shortcuts %@: characters=%lu", localization, (unsigned long)[[shortcutsText string] length]);
 		PrintSnapshotOfWindow(shortcutsWindow, [@"shortcuts-" stringByAppendingString:localization]);
+		if ([localization isEqualToString:@"zh"])
+			[self _selfTestSnapshotShortcutsText:shortcutsText containing:@"fn↑" tag:@"shortcuts-zh-paging"];
 		[shortcutsText scrollRangeToVisible:NSMakeRange([[shortcutsText string] length], 0)];
 		[shortcutsWindow display];
 		PrintSnapshotOfWindow(shortcutsWindow, [NSString stringWithFormat:@"shortcuts-%@-end", localization]);
@@ -376,8 +379,103 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 	[shortcutsText release];
 	[shortcutsWindow orderOut:nil];
 	[self _selfTestUpstreamFixes];
+	[self _selfTestListKeys];
+	[self _selfTestArrowFromSearch];
 	SelfTestLog(@"done");
 	exit(0);
+}
+
+//a key press delivered the way the keyboard's are: queued, then taken off the queue and sent, so it's the app's
+//current event while it's handled
+- (void)_selfTestPostKey:(unichar)key keyCode:(unsigned short)keyCode flags:(NSEventModifierFlags)flags {
+	NSString *chars = [NSString stringWithCharacters:&key length:1];
+	[NSApp postEvent:[NSEvent keyEventWithType:NSEventTypeKeyDown location:NSZeroPoint modifierFlags:flags
+									 timestamp:[[NSProcessInfo processInfo] systemUptime] windowNumber:[window windowNumber] context:nil
+									characters:chars charactersIgnoringModifiers:chars isARepeat:NO keyCode:keyCode] atStart:NO];
+	NSEvent *event;
+	while ((event = [NSApp nextEventMatchingMask:NSEventMaskAny untilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]
+										   inMode:NSDefaultRunLoopMode dequeue:YES]))
+		[NSApp sendEvent:event];
+	SelfTestSpin(0.3);
+}
+
+- (NSString*)_selfTestSelectionDescription {
+	NSInteger row = [notesTableView selectedRow];
+	NSString *focus = [window firstResponder] == notesTableView ? @"list" : [field currentEditor] ? @"search field" : NSStringFromClass([[window firstResponder] class]);
+	return row < 0 ? [NSString stringWithFormat:@"none selected, focus in %@", focus] :
+		[NSString stringWithFormat:@"row %ld \"%@\", focus in %@", (long)row, titleOfNote([notationController noteObjectAtFilteredIndex:row]), focus];
+}
+
+//the down arrow in the search field goes into the notes list: to the note the search selected, or the first
+- (void)_selfTestArrowFromSearch {
+	selfTestStage = "down arrow from the search field";
+	const NSEventModifierFlags arrowFlags = NSEventModifierFlagFunction | NSEventModifierFlagNumericPad;
+	[window makeKeyAndOrderFront:nil];
+	[self searchForString:@""];
+	SelfTestSpin(0.5);
+	for (NSInteger i = 0; i < [notesTableView numberOfRows]; i++)
+		SelfTestLog(@"arrow from search: list row %ld \"%@\"", (long)i, titleOfNote([notationController noteObjectAtFilteredIndex:i]));
+	
+	//1: typing a note's whole title selects it; the down arrow goes to it in the list, then on to the next
+	[notesTableView deselectAll:nil];
+	[window makeFirstResponder:field];
+	NSString *firstTitle = titleOfNote([notationController noteObjectAtFilteredIndex:0]);
+	[[field currentEditor] insertText:firstTitle];
+	SelfTestSpin(0.5);
+	NSString *afterTyping = [self _selfTestSelectionDescription];
+	[self _selfTestPostKey:NSDownArrowFunctionKey keyCode:125 flags:arrowFlags];
+	NSString *afterFirst = [self _selfTestSelectionDescription];
+	[self _selfTestPostKey:NSDownArrowFunctionKey keyCode:125 flags:arrowFlags];
+	SelfTestLog(@"arrow from search: typed \"%@\" -> %@; down arrow -> %@; again -> %@", firstTitle, afterTyping, afterFirst,
+				[self _selfTestSelectionDescription]);
+	[window display];
+	PrintSnapshotOfWindow(window, @"list-from-search");
+	
+	//1b: typing the start of a title selects that note, which can sort below notes mentioning the text in their body
+	[self searchForString:@""];
+	SelfTestSpin(0.3);
+	[notesTableView deselectAll:nil];
+	[window makeFirstResponder:field];
+	[[field currentEditor] insertText:@"Exc"];
+	SelfTestSpin(0.5);
+	afterTyping = [self _selfTestSelectionDescription];
+	NSMutableArray *listed = [NSMutableArray array];
+	for (NSInteger i = 0; i < [notesTableView numberOfRows]; i++) [listed addObject:titleOfNote([notationController noteObjectAtFilteredIndex:i])];
+	[self _selfTestPostKey:NSDownArrowFunctionKey keyCode:125 flags:arrowFlags];
+	afterFirst = [self _selfTestSelectionDescription];
+	[self _selfTestPostKey:NSDownArrowFunctionKey keyCode:125 flags:arrowFlags];
+	SelfTestLog(@"arrow from search: typed \"Exc\" (list: %@) -> %@; down arrow -> %@; again -> %@", [listed componentsJoinedByString:@" | "],
+				afterTyping, afterFirst, [self _selfTestSelectionDescription]);
+	
+	//2: nothing selected: the down arrow goes to the first note
+	[self searchForString:@""];
+	SelfTestSpin(0.3);
+	[notesTableView deselectAll:nil];
+	[window makeFirstResponder:field];
+	SelfTestSpin(0.3);
+	NSString *before = [self _selfTestSelectionDescription];
+	[self _selfTestPostKey:NSDownArrowFunctionKey keyCode:125 flags:arrowFlags];
+	afterFirst = [self _selfTestSelectionDescription];
+	[self _selfTestPostKey:NSDownArrowFunctionKey keyCode:125 flags:arrowFlags];
+	SelfTestLog(@"arrow from search: %@; down arrow -> %@; again -> %@", before, afterFirst, [self _selfTestSelectionDescription]);
+	
+	//3: typing in the list still goes to the search field
+	[self _selfTestPostKey:'h' keyCode:4 flags:0];
+	SelfTestLog(@"arrow from search: typing 'h' in the list -> search field \"%@\", %@", [field stringValue], [self _selfTestSelectionDescription]);
+	selfTestStage = "";
+}
+
+//the part of the Keyboard Shortcuts window around a given string, scrolled to the top of the window
+- (void)_selfTestSnapshotShortcutsText:(NSTextView*)shortcutsText containing:(NSString*)needle tag:(NSString*)tag {
+	NSRange found = [[shortcutsText string] rangeOfString:needle];
+	SelfTestLog(@"keyboard shortcuts: \"%@\" found=%d", needle, found.location != NSNotFound);
+	if (found.location == NSNotFound) return;
+	NSRect glyphRect = [[shortcutsText layoutManager] boundingRectForGlyphRange:
+						[[shortcutsText layoutManager] glyphRangeForCharacterRange:found actualCharacterRange:NULL] inTextContainer:[shortcutsText textContainer]];
+	[shortcutsText scrollPoint:NSMakePoint(0, MAX((CGFloat)0, NSMinY(glyphRect) - 120))];
+	[[shortcutsText window] display];
+	PrintSnapshotOfWindow([shortcutsText window], tag);
+	[shortcutsText scrollRangeToVisible:NSMakeRange(0, 0)];
 }
 
 //checks for bugs fixed in Notational Velocity 2.5.1 and for the reports in its issue tracker that nv27 might share;
@@ -614,6 +712,79 @@ static void SelfTestSpin(NSTimeInterval seconds) {
 		SelfTestSpin(1.0);
 		SelfTestLog(@"upstream: tag panel closed with its close button twice: no crash");
 	}
+	selfTestStage = "";
+}
+
+//Home/End and Page Up/Page Down in the notes list move through the list (they used to go to the search field)
+- (void)_selfTestListKeys {
+	selfTestStage = "Home, End, Page Up, Page Down in the notes list";
+	NSMutableArray *added = [NSMutableArray array];
+	for (int i = 0; i < 30; i++) {
+		NSAttributedString *body = [[[NSAttributedString alloc] initWithString:@"paging" attributes:[prefsController noteBodyAttributes]] autorelease];
+		NoteObject *note = [[[NoteObject alloc] initWithNoteBody:body title:[NSString stringWithFormat:@"Paging test %02d", i] delegate:notationController
+														  format:[notationController currentNoteStorageFormat] labels:nil] autorelease];
+		[notationController addNewNote:note];
+		[added addObject:note];
+	}
+	[self searchForString:@""];
+	SelfTestSpin(0.5);
+	[window makeKeyAndOrderFront:nil];
+	[notesTableView selectRowAndScroll:3];
+	[window makeFirstResponder:notesTableView];
+	SelfTestSpin(0.3);
+	NSString *searchBefore = [[[field stringValue] copy] autorelease];
+	CGFloat stride = [notesTableView rowHeight] + [notesTableView intercellSpacing].height;
+	SelfTestLog(@"list keys: %ld notes, about %.0f rows fit in the list, selected row 3", (long)[notesTableView numberOfRows],
+				NSHeight([notesTableView visibleRect]) / stride);
+	
+	struct { unichar key; unsigned short keyCode; const char *name; } keys[] = {
+		{NSPageDownFunctionKey, 121, "Page Down"}, {NSPageDownFunctionKey, 121, "Page Down"}, {NSPageUpFunctionKey, 116, "Page Up"},
+		{NSEndFunctionKey, 119, "End"}, {NSPageDownFunctionKey, 121, "Page Down"}, {NSPageUpFunctionKey, 116, "Page Up"},
+		{NSHomeFunctionKey, 115, "Home"}, {NSPageUpFunctionKey, 116, "Page Up"}};
+	for (size_t i = 0; i < sizeof(keys) / sizeof(keys[0]); i++) {
+		NSString *chars = [NSString stringWithCharacters:&keys[i].key length:1];
+		NSEvent *event = [NSEvent keyEventWithType:NSEventTypeKeyDown location:NSZeroPoint modifierFlags:NSEventModifierFlagFunction
+										 timestamp:[[NSProcessInfo processInfo] systemUptime] windowNumber:[window windowNumber] context:nil
+										characters:chars charactersIgnoringModifiers:chars isARepeat:NO keyCode:keys[i].keyCode];
+		[NSApp sendEvent:event];
+		SelfTestSpin(0.3);
+		NSRange visibleRows = [notesTableView rowsInRect:[notesTableView visibleRect]];
+		SelfTestLog(@"list keys: %s -> selected row %ld (rows %lu-%lu showing), focus in list=%d, search field unchanged=%d", keys[i].name,
+					(long)[notesTableView selectedRow], (unsigned long)visibleRows.location, (unsigned long)NSMaxRange(visibleRows) - 1,
+					[window firstResponder] == notesTableView, [[field stringValue] isEqualToString:searchBefore]);
+	}
+	//a page is however many rows show when the key is pressed: give the list more room and page again
+	NSEvent *pageDown = [NSEvent keyEventWithType:NSEventTypeKeyDown location:NSZeroPoint modifierFlags:NSEventModifierFlagFunction
+										timestamp:[[NSProcessInfo processInfo] systemUptime] windowNumber:[window windowNumber] context:nil
+									   characters:[NSString stringWithFormat:@"%C", (unichar)NSPageDownFunctionKey]
+					  charactersIgnoringModifiers:[NSString stringWithFormat:@"%C", (unichar)NSPageDownFunctionKey] isARepeat:NO keyCode:121];
+	CGFloat originalDimension = [notesSubview dimension];
+	for (int taller = 0; taller < 2; taller++) {
+		if (taller) {
+			//drag the divider down: the list gets the note editor's room
+			[notesSubview setDimension:originalDimension + 150];
+			[splitView adjustSubviews];
+			[window display];
+			SelfTestSpin(0.5);
+		}
+		[notesTableView selectRowAndScroll:0];
+		SelfTestSpin(0.2);
+		CGFloat listHeight = NSHeight([notesTableView visibleRect]);
+		[NSApp sendEvent:pageDown];
+		SelfTestSpin(0.3);
+		SelfTestLog(@"list keys: list %.0f pt tall (about %.0f rows): Page Down from row 0 -> row %ld", listHeight, listHeight / stride,
+					(long)[notesTableView selectedRow]);
+	}
+	[notesSubview setDimension:originalDimension];
+	[splitView adjustSubviews];
+	SelfTestSpin(0.3);
+	
+	[notesTableView selectRowAndScroll:[notesTableView numberOfRows] / 2];
+	[window display];
+	PrintSnapshotOfWindow(window, @"list-paging");
+	
+	for (NoteObject *note in added) [notationController removeNote:note];
+	SelfTestSpin(0.5);
 	selfTestStage = "";
 }
 

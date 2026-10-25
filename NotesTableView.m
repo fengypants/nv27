@@ -870,6 +870,14 @@ static void _CopyItemWithSelectorFromMenu(NSMenu *destMenu, NSMenu *sourceMenu, 
 		//should be escape--just handle it normally to avoid re-forwarding flicker
 		[super keyDown:theEvent];
 		return;
+	} else if (keyChar == NSHomeFunctionKey || keyChar == NSEndFunctionKey) {
+		//Home/End (fn← fn→ on a laptop): first or last note, staying in the list rather than going to the search field
+		[self selectRowAndScroll:keyChar == NSHomeFunctionKey ? 0 : [self numberOfRows] - 1];
+		return;
+	} else if (keyChar == NSPageUpFunctionKey || keyChar == NSPageDownFunctionKey) {
+		//Page Up/Page Down (fn↑ fn↓): a list's worth of notes up or down
+		[self _selectRowAPageAway:keyChar == NSPageDownFunctionKey ? 1 : -1];
+		return;
 	}
 	
 	NSUInteger modifiers = [theEvent modifierFlags];
@@ -1008,6 +1016,31 @@ enum { kNext_Tag = 'j', kPrev_Tag = 'k' };
 	[super deselectAll:sender];
 	
 	[self scrollRowToVisible:0];
+}
+
+//select the note a page (one less than the rows that fit in the list) above or below the selected one,
+//keeping the selection's place in the list by scrolling the same distance
+- (void)_selectRowAPageAway:(NSInteger)direction {
+	NSInteger rowCount = [self numberOfRows];
+	if (!rowCount) return;
+	
+	NSRect visible = [self visibleRect];
+	CGFloat rowStride = [self rowHeight] + [self intercellSpacing].height;
+	NSInteger page = MAX((NSInteger)1, (NSInteger)floor(NSHeight(visible) / rowStride) - 1);
+	
+	NSInteger from = [self selectedRow];
+	if (from < 0) from = direction > 0 ? -1 : rowCount;
+	NSInteger to = MIN(MAX(from + direction * page, (NSInteger)0), rowCount - 1);
+	if (to == from) return;
+	
+	NSClipView *clipView = (NSClipView*)[self superview];
+	if ([clipView isKindOfClass:[NSClipView class]]) {
+		NSPoint origin = visible.origin;
+		origin.y = MIN(MAX(origin.y + (to - from) * rowStride, (CGFloat)0), MAX((CGFloat)0, NSHeight([self bounds]) - NSHeight(visible)));
+		[clipView scrollToPoint:[clipView constrainBoundsRect:(NSRect){origin, visible.size}].origin];
+		[[self enclosingScrollView] reflectScrolledClipView:clipView];
+	}
+	[self selectRowAndScroll:to];
 }
 
 - (void)selectRowAndScroll:(NSInteger)row {
