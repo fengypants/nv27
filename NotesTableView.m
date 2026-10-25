@@ -125,6 +125,7 @@ static void _CopyItemWithSelectorFromMenu(NSMenu *destMenu, NSMenu *sourceMenu, 
 }
 
 - (void)dealloc {
+	[pasteAsNewNoteTitle release];
 	[loadStatusAttributes release];
     [allColumns release];
 	[allColsDict release];
@@ -211,14 +212,31 @@ static void _CopyItemWithSelectorFromMenu(NSMenu *destMenu, NSMenu *sourceMenu, 
 	return [[NSApp delegate] addNotesFromPasteboard:[sender draggingPasteboard]];
 }
 
+//Edit › Paste as New Note (⇧⌘V) becomes Paste with Styles while a note is being edited: one menu item, since macOS
+//drops a key equivalent that another item in the menu already has
+- (LinkingEditor*)_noteEditorWithFocus {
+	NSResponder *responder = [[self window] firstResponder];
+	return [responder isKindOfClass:[LinkingEditor class]] ? (LinkingEditor*)responder : nil;
+}
+
 - (void)paste:(id)sender {
+	LinkingEditor *editor = [sender isKindOfClass:[NSMenuItem class]] ? [self _noteEditorWithFocus] : nil;
+	if (editor) {
+		[editor pasteWithStyles:sender];
+		return;
+	}
 	[[NSApp delegate] addNotesFromPasteboard:[NSPasteboard generalPasteboard]];
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
-	//Edit › Paste as New Note (⇧⌘V) gives way to Paste with Styles while a note is being edited
-	if ([menuItem action] == @selector(paste:) && [[[self window] firstResponder] isKindOfClass:[LinkingEditor class]])
-		return NO;
+	if ([menuItem action] == @selector(paste:) && [menuItem target] == self) {
+		NSString *stylesTitle = NSLocalizedString(@"Paste with Styles", @"Edit menu: paste keeping bold, italic and strikethrough (as Markdown in plain text notes)");
+		if (!pasteAsNewNoteTitle && ![[menuItem title] isEqualToString:stylesTitle])
+			pasteAsNewNoteTitle = [[menuItem title] copy];
+		LinkingEditor *editor = [self _noteEditorWithFocus];
+		[menuItem setTitle:editor ? stylesTitle : (pasteAsNewNoteTitle ? pasteAsNewNoteTitle : [menuItem title])];
+		return editor ? [editor isEditable] : YES;
+	}
 	return [NSTableView instancesRespondToSelector:@selector(validateMenuItem:)] ? [super validateMenuItem:menuItem] : YES;
 }
 

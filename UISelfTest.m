@@ -553,26 +553,28 @@ static NSString *SelfTestVisibleNewlines(NSString *text) {
 		NSInteger rowsBefore = [notesTableView numberOfRows];
 		[self _selfTestPostKey:'V' keyCode:9 flags:NSEventModifierFlagCommand | NSEventModifierFlagShift];
 		SelfTestLog(@"paste: ⇧⌘V in the note -> \"%@\", notes %ld -> %ld", [textView string], (long)rowsBefore, (long)[notesTableView numberOfRows]);
-		//which ⇧⌘V menu item is active where
-		NSMenuItem *styledItem = nil, *newNoteItem = nil;
-		for (NSMenuItem *topItem in [[NSApp mainMenu] itemArray])
-			for (NSMenuItem *item in [[topItem submenu] itemArray]) {
-				if ([item action] == @selector(pasteWithStyles:)) styledItem = item;
-				if ([item action] == @selector(paste:) && [item target] == notesTableView) newNoteItem = item;
-			}
+		//the one ⇧⌘V menu item: Paste with Styles while a note is being edited, Paste as New Note elsewhere
+		NSMenuItem *shiftPasteItem = nil;
 		for (NSMenuItem *topItem in [[NSApp mainMenu] itemArray])
 			for (NSMenuItem *item in [[topItem submenu] itemArray])
-				if ([item action] == @selector(pasteWithStyles:) || [item action] == @selector(paste:))
-					SelfTestLog(@"paste: menu %@ › \"%@\" key \"%@\" modifiers %#lx", [topItem title], [item title], [item keyEquivalent], (unsigned long)[item keyEquivalentModifierMask]);
+				if ([item action] == @selector(paste:) && [item target] == notesTableView) shiftPasteItem = item;
 		[window makeFirstResponder:textView];
-		BOOL newNoteInEditor = [notesTableView validateMenuItem:newNoteItem], styledInEditor = [textView validateMenuItem:styledItem];
+		BOOL enabledInNote = [notesTableView validateMenuItem:shiftPasteItem];
+		NSString *titleInNote = [[[shiftPasteItem title] copy] autorelease];
 		[window makeFirstResponder:notesTableView];
-		BOOL newNoteInList = [notesTableView validateMenuItem:newNoteItem];
+		BOOL enabledInList = [notesTableView validateMenuItem:shiftPasteItem];
+		NSString *titleInList = [[[shiftPasteItem title] copy] autorelease];
 		[window makeFirstResponder:textView];
-		SelfTestLog(@"paste: menu \"%@\" (%@%@) enabled in note=%d; \"%@\" (%@%@) enabled in note=%d, in list=%d", [styledItem title],
-					([styledItem keyEquivalentModifierMask] & NSEventModifierFlagShift) || [[styledItem keyEquivalent] isEqualToString:@"V"] ? @"⇧⌘" : @"⌘",
-					[[styledItem keyEquivalent] uppercaseString], styledInEditor, [newNoteItem title],
-					[[newNoteItem keyEquivalent] isEqualToString:@"V"] ? @"⇧⌘" : @"⌘", [[newNoteItem keyEquivalent] uppercaseString], newNoteInEditor, newNoteInList);
+		SelfTestLog(@"paste: ⇧⌘V menu item (key \"%@\"): in a note \"%@\" enabled=%d; in the list \"%@\" enabled=%d", [shiftPasteItem keyEquivalent],
+					titleInNote, enabledInNote, titleInList, enabledInList);
+		//choosing it from the menu while editing pastes with styles
+		[notesTableView validateMenuItem:shiftPasteItem];
+		[textView setSelectedRange:NSMakeRange(0, [[textView string] length])];
+		[textView insertText:@""];
+		putClip();
+		rowsBefore = [notesTableView numberOfRows];
+		[NSApp sendAction:[shiftPasteItem action] to:[shiftPasteItem target] from:shiftPasteItem];
+		SelfTestLog(@"paste: choosing it from the menu in the note -> \"%@\", notes %ld -> %ld", [textView string], (long)rowsBefore, (long)[notesTableView numberOfRows]);
 		
 		//a Rich Text note: ⌘V follows "Copy basic styles"; Paste with Styles keeps them either way
 		NSAttributedString *rtfBody = [[[NSAttributedString alloc] initWithString:@"" attributes:[prefsController noteBodyAttributes]] autorelease];

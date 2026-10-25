@@ -1766,17 +1766,7 @@ static long (*GetGetScriptManagerVariablePointer())(short) {
 		theMenuItem = [[[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Insert Link",@"insert link menu item title") action:@selector(insertLink:) keyEquivalent:@"L"] autorelease];
         [theMenuItem setTarget:self];
         [editMenu addItem:theMenuItem];
-		
-		//Paste with Styles, after Paste and Paste as New Note: ⇧⌘V while a note is being edited (-performKeyEquivalent: takes
-		//it there first); elsewhere the menu finds Paste as New Note's ⇧⌘V first
-		NSInteger pasteIndex = -1;
-		for (NSMenuItem *item in [editMenu itemArray])
-			if ([item action] == @selector(paste:)) pasteIndex = [editMenu indexOfItem:item];
-		theMenuItem = [[[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Paste with Styles", @"Edit menu: paste keeping bold, italic and strikethrough (as Markdown in plain text notes)")
-												  action:@selector(pasteWithStyles:) keyEquivalent:@"V"] autorelease];
-		[theMenuItem setTarget:nil];
-		if (pasteIndex >= 0) [editMenu insertItem:theMenuItem atIndex:pasteIndex + 1];
-		else [editMenu addItem:theMenuItem];
+
         
     }
 
