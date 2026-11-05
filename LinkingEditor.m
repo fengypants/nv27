@@ -560,6 +560,21 @@ copyRTFType:
 //bold, italic and strikethrough styles are kept only in Rich Text and HTML note files: a plain text note's file drops
 //them (nv27's own database would keep them only until the file changes, e.g. edited elsewhere or synced from another
 //Mac). So in plain text notes they're unavailable, unless Markdown completion is on and they insert Markdown instead
+//after the editor's text is replaced with another note's: AppKit redraws only the glyphs that still exist, so a
+//shorter note (opened from the list or a [[link]]) could leave the end of the previous one on screen. Redraw it all.
+//(From nvALT 3.0.22.)
+- (void)redisplayAfterNoteChange {
+	NSLayoutManager *layout = [self layoutManager];
+	NSUInteger length = [[self string] length];
+	if (layout && length)
+		[layout invalidateDisplayForCharacterRange:NSMakeRange(0, length)];
+	NSRect visible = [self visibleRect];
+	if (NSIsEmptyRect(visible))
+		visible = [self bounds];
+	[self setNeedsDisplayInRect:visible avoidAdditionalLayout:NO];
+	[[[self enclosingScrollView] contentView] setNeedsDisplay:YES];
+}
+
 - (BOOL)_noteIsPlainText {
 	NoteObject *note = [(AppController*)[NSApp delegate] selectedNoteObject];
 	NSInteger format = note ? storageFormatOfNote(note) : [[prefsController notationPrefs] notesStorageFormat];

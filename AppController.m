@@ -1586,6 +1586,7 @@ terminateApp:
 				[field setStringValue:typedString];
 			}
 			[textView setString:@""];
+			[textView redisplayAfterNoteChange];
 		}
 		//[self _expandToolbar];
         [self setDualFieldIsVisible:YES];
@@ -1692,6 +1693,7 @@ terminateApp:
 		//select and scroll
 		[textView setAutomaticallySelectedRange:noteSelectionRange];
 		[textView scrollRangeToVisible:noteSelectionRange];
+		[textView redisplayAfterNoteChange];
 		
 		//NSString *words = noteIndex != [notationController preferredSelectedNoteIndex] ? typedString : nil;
 		//[textView setFutureSelectionRange:noteSelectionRange highlightingWords:words];
@@ -2045,6 +2047,7 @@ terminateApp:
 	if (aNoteObject == currentNote) {
 		NSArray *selRanges=[textView selectedRanges];
 		[[textView textStorage] setAttributedString:[aNoteObject contentString]];
+		[textView redisplayAfterNoteChange];
         if (![selRanges isEqualToArray:[textView selectedRanges]]) {
             NSRange testEnd=[[selRanges lastObject] rangeValue];
             NSUInteger test=testEnd.location+testEnd.length;
