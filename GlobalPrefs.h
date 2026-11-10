@@ -192,6 +192,8 @@ BOOL ColorsEqualWith8BitChannels(NSColor *c1, NSColor *c2);
 - (BOOL)rtl;
 - (BOOL)showWordCount;
 - (void)setShowWordCount:(BOOL)value;
+- (BOOL)showCharacterCount;
+- (void)setShowCharacterCount:(BOOL)value;
 - (void)setShowGrid:(BOOL)value sender:(id)sender;
 - (BOOL)showGrid;
 - (void)setAlternatingRows:(BOOL)value sender:(id)sender;

@@ -97,7 +97,8 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 | ⌥⌘2 | Jeu de couleurs Low Contrast |
 | ⌥⌘3 | Jeu de couleurs de l’utilisateur (User Scheme) |
 | ⌃⌥⌘1 – ⌃⌥⌘4 | Trier par titre, étiquettes, date de modification ou date d’ajout ; appuyez à nouveau pour inverser l’ordre |
-| ⇧⌘K | Affiche ou masque le nombre de mots |
+| ⇧⌘K | Affiche ou masque le nombre de mots ; si du texte est sélectionné, seule la sélection est comptée |
+| ⌥⇧⌘K | Affiche ou masque le nombre de caractères (espaces compris, sauts de ligne non compris) |
 | ⌥⌘P | Affiche ou masque l’aperçu des notes dans la liste |
 
 ## Partout

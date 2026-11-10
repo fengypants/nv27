@@ -23,6 +23,7 @@
 #import "NotationPrefs.h"
 #import "AttributedPlainText.h"
 #import "TagEditingManager.h"
+#import "WordCountToken.h"
 #import <objc/runtime.h>
 #include <stdio.h>
 #include <errno.h>
@@ -382,7 +383,7 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 	[self _selfTestListKeys];
 	[self _selfTestArrowFromSearch];
 	[self _selfTestSortShortcuts];
-	[self _selfTestWordCountPreview];
+	[self _selfTestCounts];
 	[self _selfTestListsAndMarkdown];
 	SelfTestLog(@"done");
 	exit(0);
@@ -562,51 +563,94 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 	selfTestStage = "";
 }
 
-//a preview of the word count label with a character count added ("212 words · 1,204 characters"), next to today's;
-//only the label's text and width are set here, the app itself is unchanged
-- (void)_selfTestWordCountPreview {
-	selfTestStage = "word count preview";
+//⇧⌘K and ⌥⇧⌘K show the word and character counts, together in one label; with text selected they count the selection
+- (NSString*)_selfTestCountsDescription {
+	NSString *wordTitle = nil, *characterTitle = nil;
+	for (NSMenuItem *item in [[NSApp mainMenu] itemArray]) {
+		for (NSMenuItem *option in [[item submenu] itemArray]) {
+			if ([option action] == @selector(toggleWordCount:)) { [self validateMenuItem:option]; wordTitle = [option title]; }
+			if ([option action] == @selector(toggleCharacterCount:)) { [self validateMenuItem:option]; characterTitle = [option title]; }
+		}
+	}
+	id tokens = [wordCounter objectValue];
+	return [NSString stringWithFormat:@"label %@ \"%@\" (%lu token%@, width %.0f); menu: %@ / %@", [wordCounter isHidden] ? @"hidden" : @"shown",
+			[wordCounter stringValue], (unsigned long)([tokens isKindOfClass:[NSArray class]] ? [tokens count] : 1),
+			[tokens isKindOfClass:[NSArray class]] && [tokens count] == 1 ? @"" : @"s", NSWidth([wordCounter frame]), wordTitle, characterTitle];
+}
+
+- (void)_selfTestCounts {
+	selfTestStage = "word and character counts";
+	const unsigned short kKeyCode = 40;
+	BOOL savedWordsHidden = [prefsController showWordCount], savedCharacters = [prefsController showCharacterCount];
 	[window makeKeyAndOrderFront:nil];
 	[self searchForString:@""];
 	SelfTestSpin(0.3);
 	[notesTableView selectRowAndScroll:0];
 	[window makeFirstResponder:textView];
+	[self hideCounts:nil];
 	SelfTestSpin(0.3);
-	BOOL wasHidden = [prefsController showWordCount];
-	if (wasHidden) [self toggleWordCount:nil];
-	SelfTestSpin(0.3);
-	NSRect originalFrame = [wordCounter frame];
-	[window display];
-	SelfTestLog(@"word count preview: now \"%@\", label frame %@", [wordCounter stringValue], NSStringFromRect(originalFrame));
-	PrintSnapshotOfWindow(window, @"wordcount-now");
+	SelfTestLog(@"counts: both off -> %@", [self _selfTestCountsDescription]);
+	[self _selfTestPostKey:'K' keyCode:kKeyCode flags:NSEventModifierFlagShift | NSEventModifierFlagCommand];
+	SelfTestLog(@"counts: shift-cmd-K -> %@", [self _selfTestCountsDescription]);
+	[self _selfTestPostKey:'K' keyCode:kKeyCode flags:NSEventModifierFlagOption | NSEventModifierFlagShift | NSEventModifierFlagCommand];
+	SelfTestLog(@"counts: opt-shift-cmd-K -> %@", [self _selfTestCountsDescription]);
 	
-	NSString *text = [textView string];
-	__block NSUInteger characters = 0;
-	[text enumerateSubstringsInRange:NSMakeRange(0, [text length]) options:NSStringEnumerationByComposedCharacterSequences | NSStringEnumerationSubstringNotRequired
-						  usingBlock:^(NSString *substring, NSRange range, NSRange enclosing, BOOL *stop) { characters++; }];
-	NSNumberFormatter *formatter = [[[NSNumberFormatter alloc] init] autorelease];
-	[formatter setNumberStyle:NSNumberFormatterDecimalStyle];
-	[wordCounter setStringValue:[NSString stringWithFormat:@"%@ words · %@ characters",
-								 [formatter stringFromNumber:[NSNumber numberWithUnsignedInteger:[[[textView textStorage] words] count]]],
-								 [formatter stringFromNumber:[NSNumber numberWithUnsignedInteger:characters]]]];
-	CGFloat needed = ceil([[wordCounter cell] cellSize].width) + 4.0;
-	NSRect wider = originalFrame;
-	if (needed > NSWidth(wider)) { wider.origin.x = NSMaxX(originalFrame) - needed; wider.size.width = needed; }
-	[wordCounter setFrame:wider];
-	[[wordCounter superview] setNeedsDisplay:YES];
+	//a selection: the first three words, then the first paragraph, then two ranges at once
+	[textView setSelectedRange:NSMakeRange(0, [@"Always begin typing" length])];
+	SelfTestSpin(0.2);
+	SelfTestLog(@"counts: \"Always begin typing\" selected -> %@", [self _selfTestCountsDescription]);
 	[window display];
-	SelfTestLog(@"word count preview: option 1 \"%@\", label frame %@", [wordCounter stringValue], NSStringFromRect(wider));
-	PrintSnapshotOfWindow(window, @"wordcount-option1");
+	PrintSnapshotOfWindow(window, @"counts-selection");
+	NSRange firstParagraph = [[textView string] paragraphRangeForRange:NSMakeRange(0, 0)];
+	[textView setSelectedRange:firstParagraph];
+	SelfTestSpin(0.2);
+	SelfTestLog(@"counts: first paragraph selected (%lu characters with its line break) -> %@", (unsigned long)firstParagraph.length,
+				[self _selfTestCountsDescription]);
+	[textView setSelectedRanges:[NSArray arrayWithObjects:[NSValue valueWithRange:NSMakeRange(0, 6)], [NSValue valueWithRange:NSMakeRange(7, 5)], nil]];
+	SelfTestSpin(0.2);
+	SelfTestLog(@"counts: \"Always\" and \"begin\" selected -> %@", [self _selfTestCountsDescription]);
+	[textView setSelectedRange:NSMakeRange(0, 0)];
+	SelfTestSpin(0.2);
+	SelfTestLog(@"counts: nothing selected -> %@", [self _selfTestCountsDescription]);
 	[NSApp setAppearance:[NSAppearance appearanceNamed:NSAppearanceNameDarkAqua]];
 	[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1.0]];
 	[window display];
-	PrintSnapshotOfWindow(window, @"wordcount-option1-dark");
+	PrintSnapshotOfWindow(window, @"counts-dark");
 	[NSApp setAppearance:nil];
 	[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1.0]];
 	
-	[wordCounter setFrame:originalFrame];
-	if (wasHidden) [self toggleWordCount:nil];
-	[window display];
+	//counts in the thousands keep their separator in one token; an emoji and an accented letter are one character each
+	NSString *longText = [[@"" stringByPaddingToLength:1500 withString:@"word " startingAtIndex:0] stringByAppendingString:@"\ncafe\u0301 \U0001F600"];
+	NSAttributedString *body = [[[NSAttributedString alloc] initWithString:longText attributes:[prefsController noteBodyAttributes]] autorelease];
+	NoteObject *note = [[[NoteObject alloc] initWithNoteBody:body title:@"Counting test" delegate:notationController
+													  format:[notationController currentNoteStorageFormat] labels:nil] autorelease];
+	[notationController addNewNote:note];
+	[self searchForString:@"Counting test"];
+	SelfTestSpin(0.5);
+	[window makeFirstResponder:textView];
+	[textView setSelectedRange:NSMakeRange(0, 0)];
+	SelfTestSpin(0.2);
+	SelfTestLog(@"counts: 300 words and \"café 😀\" on a second line -> %@", [self _selfTestCountsDescription]);
+	[textView setSelectedRange:NSMakeRange(1501, [longText length] - 1501)];
+	SelfTestSpin(0.2);
+	SelfTestLog(@"counts: \"café 😀\" selected -> %@", [self _selfTestCountsDescription]);
+	[self searchForString:@""];
+	SelfTestSpin(0.3);
+	[notationController removeNote:note];
+	SelfTestSpin(0.3);
+	[notesTableView selectRowAndScroll:0];
+	[window makeFirstResponder:textView];
+	SelfTestSpin(0.2);
+	
+	[self _selfTestPostKey:'K' keyCode:kKeyCode flags:NSEventModifierFlagShift | NSEventModifierFlagCommand];
+	SelfTestLog(@"counts: shift-cmd-K again -> %@", [self _selfTestCountsDescription]);
+	[self _selfTestPostKey:'K' keyCode:kKeyCode flags:NSEventModifierFlagShift | NSEventModifierFlagCommand];
+	[wordCounter mouseDown:nil];
+	SelfTestSpin(0.2);
+	SelfTestLog(@"counts: shift-cmd-K, then a click on the label -> %@", [self _selfTestCountsDescription]);
+	
+	if (!savedWordsHidden) [self toggleWordCount:nil];
+	if (savedCharacters) [self toggleCharacterCount:nil];
 	selfTestStage = "";
 }
 

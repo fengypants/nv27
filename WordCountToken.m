@@ -20,6 +20,8 @@
 
 - (void)awakeFromNib{
 	[self refusesFirstResponder];
+	//one token for the whole label: a count such as "1,204" must not split at its comma
+	[self setTokenizingCharacterSet:[NSCharacterSet characterSetWithCharactersInString:@"\n"]];
 	//theGrad =  [[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.2f alpha:0.28f] endingColor:[NSColor colorWithCalibratedWhite:0.74f alpha:0.18f]] retain];
 	
 	//[self setTxtColor:[[NSApp delegate] foregrndColor]];
@@ -28,7 +30,7 @@
 }
 
 - (void)mouseDown:(NSEvent *)theEvent{
-	[[NSApp delegate] toggleWordCount:self];
+	[[NSApp delegate] hideCounts:self];
 }
 /*
 - (void)drawRect:(NSRect)dirtyRect {

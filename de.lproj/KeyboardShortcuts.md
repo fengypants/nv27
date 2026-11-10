@@ -97,7 +97,8 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 | ⌥⌘2 | Farbschema „Niedriger Kontrast“ |
 | ⌥⌘3 | Nutzer-Farbschema |
 | ⌃⌥⌘1 – ⌃⌥⌘4 | Sortieren nach Titel, Etikett, geändert am oder zugefügt am; erneut drücken kehrt die Reihenfolge um |
-| ⇧⌘K | Wortanzahl ein- oder ausblenden |
+| ⇧⌘K | Wortanzahl ein- oder ausblenden; ist Text ausgewählt, wird nur die Auswahl gezählt |
+| ⌥⇧⌘K | Zeichenanzahl ein- oder ausblenden (Leerzeichen zählen mit, Zeilenumbrüche nicht) |
 | ⌥⌘P | Notizvorschau in der Liste ein- oder ausblenden |
 
 ## Überall

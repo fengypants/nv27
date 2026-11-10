@@ -434,6 +434,12 @@ CA
                                     <action selector="toggleWordCount:" target="213" id="1290"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Zeichenanzahl anzeigen" keyEquivalent="K" id="nvC-Cc-Cnt">
+                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                <connections>
+                                    <action selector="toggleCharacterCount:" target="213" id="nvC-Cc-Act"/>
+                                </connections>
+                            </menuItem>
                             <menuItem title="Notizvorschau in Liste anzeigen" keyEquivalent="p" id="1062">
                                 <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                 <connections>

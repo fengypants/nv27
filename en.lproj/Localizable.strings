@@ -695,3 +695,13 @@
 
 /* Settings › Editing: help under Copy basic styles from other apps */
 "Applies to Rich Text and HTML notes; plain text notes get plain text. In a note, ⇧⌘V pastes bold, italic and strikethrough either way, as Markdown in plain text notes." = "Applies to Rich Text and HTML notes; plain text notes get plain text. In a note, ⇧⌘V pastes bold, italic and strikethrough either way, as Markdown in plain text notes.";
+
+/* word and character counts */
+"Show Word Count" = "Show Word Count";
+"Hide Word Count" = "Hide Word Count";
+"Show Character Count" = "Show Character Count";
+"Hide Character Count" = "Hide Character Count";
+"1 word" = "1 word";
+"%@ words" = "%@ words";
+"1 character" = "1 character";
+"%@ characters" = "%@ characters";

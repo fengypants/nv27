@@ -694,3 +694,13 @@
 
 /* Settings › Editing: help under Copy basic styles from other apps */
 "Applies to Rich Text and HTML notes; plain text notes get plain text. In a note, ⇧⌘V pastes bold, italic and strikethrough either way, as Markdown in plain text notes." = "S’applique aux notes RTF et HTML ; les notes en texte brut reçoivent du texte brut. Dans une note, ⇧⌘V colle le gras, l’italique et le barré dans tous les cas, en Markdown dans les notes en texte brut.";
+
+/* word and character counts */
+"Show Word Count" = "Afficher le nombre de mots";
+"Hide Word Count" = "Masquer le nombre de mots";
+"Show Character Count" = "Afficher le nombre de caractères";
+"Hide Character Count" = "Masquer le nombre de caractères";
+"1 word" = "1 mot";
+"%@ words" = "%@ mots";
+"1 character" = "1 caractère";
+"%@ characters" = "%@ caractères";

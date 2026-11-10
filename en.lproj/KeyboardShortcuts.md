@@ -105,7 +105,8 @@ change them too when a shortcut changes.
 | ⌥⌘2 | Low Contrast color scheme |
 | ⌥⌘3 | User color scheme |
 | ⌃⌥⌘1 – ⌃⌥⌘4 | Sort by Title, Tags, Date Modified or Date Added; press again to reverse the order |
-| ⇧⌘K | Show or hide the word count |
+| ⇧⌘K | Show or hide the word count; with text selected, the counts are for the selection |
+| ⌥⇧⌘K | Show or hide the character count (spaces count, line breaks don’t) |
 | ⌥⌘P | Show or hide note previews in the list |
 
 ## Anywhere

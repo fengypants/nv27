@@ -97,7 +97,8 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 | ⌥⌘2 | Schema colori Low Contrast |
 | ⌥⌘3 | Schema colori dell’utente (User Scheme) |
 | ⌃⌥⌘1 – ⌃⌥⌘4 | Ordina per titolo, etichette, data modifica o data inserimento; premi di nuovo per invertire l’ordine |
-| ⇧⌘K | Mostra o nasconde il conteggio delle parole |
+| ⇧⌘K | Mostra o nasconde il conteggio delle parole; con del testo selezionato, conta solo la selezione |
+| ⌥⇧⌘K | Mostra o nasconde il conteggio dei caratteri (spazi inclusi, a capo esclusi) |
 | ⌥⌘P | Mostra o nasconde l’anteprima delle note nell’elenco |
 
 ## Ovunque

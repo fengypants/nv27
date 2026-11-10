@@ -707,3 +707,11 @@
 
 /* Settings › Editing: help under Copy basic styles from other apps */
 "Applies to Rich Text and HTML notes; plain text notes get plain text. In a note, ⇧⌘V pastes bold, italic and strikethrough either way, as Markdown in plain text notes." = "Gilt für RTF- und HTML-Notizen; Notizen aus reinem Text erhalten reinen Text. In einer Notiz fügt ⇧⌘V Fett, Kursiv und Durchgestrichen in jedem Fall ein, in Notizen aus reinem Text als Markdown.";
+
+/* word and character counts */
+"Show Character Count" = "Zeichenanzahl anzeigen";
+"Hide Character Count" = "Zeichenanzahl ausblenden";
+"1 word" = "1 Wort";
+"%@ words" = "%@ Wörter";
+"1 character" = "1 Zeichen";
+"%@ characters" = "%@ Zeichen";

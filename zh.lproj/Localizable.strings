@@ -695,3 +695,13 @@
 
 /* Settings › Editing: help under Copy basic styles from other apps */
 "Applies to Rich Text and HTML notes; plain text notes get plain text. In a note, ⇧⌘V pastes bold, italic and strikethrough either way, as Markdown in plain text notes." = "适用于 RTF 和 HTML 笔记；纯文本笔记只粘贴纯文本。在笔记中，⇧⌘V 始终会粘贴粗体、斜体和删除线，在纯文本笔记中以 Markdown 形式粘贴。";
+
+/* word and character counts */
+"Show Word Count" = "显示字数统计";
+"Hide Word Count" = "隐藏字数统计";
+"Show Character Count" = "显示字符数统计";
+"Hide Character Count" = "隐藏字符数统计";
+"1 word" = "1 个词";
+"%@ words" = "%@ 个词";
+"1 character" = "1 个字符";
+"%@ characters" = "%@ 个字符";

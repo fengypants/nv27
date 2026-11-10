@@ -68,6 +68,7 @@
 NSWindow *normalWindow;
 NSInteger ModFlagger;
 NSInteger popped;
+static BOOL countsShowSelection = NO; //the word and character counts are for selected text
 BOOL splitViewAwoke;
 
 
@@ -369,7 +370,7 @@ void outletObjectAwoke(id sender) {
         [statBarMenu insertItem:theMenuItem atIndex:14];
         [theMenuItem release];
     }
-    [wordCounter setHidden:[prefsController showWordCount]];
+    [wordCounter setHidden:![self countsAreShown]];
 
 	//
 	[NSApp setServicesProvider:self];
@@ -642,6 +643,10 @@ terminateApp:
         //shows or hides part of the window, so the title changes (as View > Show/Hide Sidebar does) rather than a checkmark
         [menuItem setTitle:[prefsController showWordCount] ? NSLocalizedString(@"Show Word Count", @"menu item title for showing the word count") :
          NSLocalizedString(@"Hide Word Count", @"menu item title for hiding the word count")];
+        [menuItem setState:NSControlStateValueOff];
+	} else if (selector == @selector(toggleCharacterCount:)) {
+        [menuItem setTitle:[prefsController showCharacterCount] ? NSLocalizedString(@"Hide Character Count", @"menu item title for hiding the character count") :
+         NSLocalizedString(@"Show Character Count", @"menu item title for showing the character count")];
         [menuItem setState:NSControlStateValueOff];
 	} else if (selector == @selector(toggleCollapse:)) {
         if ([notesSubview isCollapsed]) {
@@ -1644,7 +1649,7 @@ terminateApp:
 	//BOOL enable = /*numberSelected != 1;*/ state;
     
 	[self postTextUpdate];
-    [self updateWordCount:![prefsController showWordCount]];
+    [self updateWordCount:![wordCounter isHidden]];
 	[textView setHidden:state];
 	[editorStatusView setHidden:!state];
 	
@@ -1688,7 +1693,7 @@ terminateApp:
 		//restore string
 		[[textView textStorage] setAttributedString:[note contentString]];
 		[self postTextUpdate];
-		[self updateWordCount:(![prefsController showWordCount])];
+		[self updateWordCount:![wordCounter isHidden]];
 		//[textView setAutomaticallySelectedRange:NSMakeRange(0,0)];
 		
 		//highlight terms--delay this, too
@@ -1723,7 +1728,7 @@ terminateApp:
 	if (textObject == textView) {
 		[currentNote setContentString:[textView textStorage]];
 		[self postTextUpdate];
-		[self updateWordCount:(![prefsController showWordCount])];
+		[self updateWordCount:![wordCounter isHidden]];
         if (IsLionOrLater) {
             [[NSNotificationCenter defaultCenter] postNotificationName:@"TextFindContextShouldUpdate" object:self];
         }
@@ -2067,7 +2072,7 @@ terminateApp:
             }
         }
 		[self postTextUpdate];
-		[self updateWordCount:(![prefsController showWordCount])];
+		[self updateWordCount:![wordCounter isHidden]];
 	}
 }
 
@@ -3036,29 +3041,88 @@ static NSColor *SchemeColor(NSInteger scheme, BOOL background, BOOL dark) {
     
 #pragma mark control/opt key hold down to pop word count/preview window
     
-    - (void)updateWordCount:(BOOL)doIt{
-        if (doIt) {            
-            NSUInteger theCount = [[[textView textStorage] words] count];
-
-            if (theCount > 0) {
-                [wordCounter setStringValue:[[NSString stringWithFormat:@"%lu", (unsigned long)theCount] stringByAppendingString:@" words"]];
-            }else {
-                [wordCounter setStringValue:@""];
+    //the label shows the word count, the character count or both (just the words while it pops up with the Option key)
+    - (BOOL)countsAreShown {
+        return ![prefsController showWordCount] || [prefsController showCharacterCount];
+    }
+    
+    static NSString *CountString(NSUInteger count, NSString *one, NSString *many) {
+        return count == 1 ? one : [NSString stringWithFormat:many,
+                                   [NSNumberFormatter localizedStringFromNumber:[NSNumber numberWithUnsignedInteger:count] numberStyle:NSNumberFormatterDecimalStyle]];
+    }
+    
+    - (NSString*)countsString {
+        NSString *text = [textView string];
+        if (![text length]) return @"";
+        BOOL showsCharacters = [prefsController showCharacterCount];
+        BOOL showsWords = ![prefsController showWordCount] || !showsCharacters;
+        
+        //with text selected, count just the selection (all of it, when several ranges are selected)
+        NSMutableArray *ranges = [NSMutableArray array];
+        for (NSValue *value in [textView selectedRanges]) {
+            if ([value rangeValue].length && NSMaxRange([value rangeValue]) <= [text length]) [ranges addObject:value];
+        }
+        countsShowSelection = [ranges count] > 0;
+        if (!countsShowSelection) [ranges addObject:[NSValue valueWithRange:NSMakeRange(0, [text length])]];
+        
+        __block NSUInteger words = 0, characters = 0;
+        for (NSValue *value in ranges) {
+            if (showsWords) {
+                [text enumerateSubstringsInRange:[value rangeValue] options:NSStringEnumerationByWords | NSStringEnumerationSubstringNotRequired
+                                      usingBlock:^(NSString *substring, NSRange range, NSRange enclosingRange, BOOL *stop) { words++; }];
+            }
+            if (showsCharacters) {
+                //characters as you see them (an emoji or an accented letter is one), spaces included, line breaks not
+                [text enumerateSubstringsInRange:[value rangeValue] options:NSStringEnumerationByComposedCharacterSequences | NSStringEnumerationSubstringNotRequired
+                                      usingBlock:^(NSString *substring, NSRange range, NSRange enclosingRange, BOOL *stop) {
+                    unichar c = [text characterAtIndex:range.location];
+                    if (c != '\n' && c != '\r' && c != 0x2028 && c != 0x2029) characters++;
+                }];
             }
         }
+        NSMutableArray *parts = [NSMutableArray array];
+        if (showsWords) [parts addObject:CountString(words, NSLocalizedString(@"1 word", @"word count of one"),
+                                                     NSLocalizedString(@"%@ words", @"word count; %@ is the number")];
+        if (showsCharacters) [parts addObject:CountString(characters, NSLocalizedString(@"1 character", @"character count of one"),
+                                                          NSLocalizedString(@"%@ characters", @"character count; %@ is the number")];
+        return [parts componentsJoinedByString:@" · "];
+    }
+    
+    - (void)updateWordCount:(BOOL)doIt{
+        if (doIt) {
+            [wordCounter setStringValue:[self countsString]];
+            //as wide as its text, so it covers as little of the search field as it can; its right edge stays put
+            NSRect frame = [wordCounter frame];
+            CGFloat width = [[wordCounter stringValue] length] ? ceil([[wordCounter cell] cellSize].width) + 4.0 : 0.0;
+            if (width != NSWidth(frame)) {
+                [[wordCounter superview] setNeedsDisplayInRect:frame];
+                frame.origin.x = NSMaxX(frame) - width;
+                frame.size.width = width;
+                [wordCounter setFrame:frame];
+                [[wordCounter superview] setNeedsDisplayInRect:frame];
+            }
+        }
+    }
+    
+    - (void)textViewDidChangeSelection:(NSNotification *)aNotification {
+        //recount when text is selected, and once more when it no longer is
+        if ([aNotification object] != textView || [wordCounter isHidden]) return;
+        BOOL hasSelection = NO;
+        for (NSValue *value in [textView selectedRanges]) if ([value rangeValue].length) hasSelection = YES;
+        if (hasSelection || countsShowSelection) [self updateWordCount:YES];
     }
     
     - (void)popWordCount:(BOOL)showIt{
         NSUInteger curEv=[[NSApp currentEvent] type];
         if ((curEv==NSFlagsChanged)||(curEv==NSMouseMoved)||(curEv==NSMouseEntered)||(curEv==NSMouseExited)||(curEv==NSScrollWheel)){
             if (showIt) {
-                if (([wordCounter isHidden])&&([prefsController showWordCount])) {
+                if (([wordCounter isHidden])&&(![self countsAreShown])) {
                     [self updateWordCount:YES];
                     [wordCounter setHidden:NO];
                     popped=1;
                 }
             }else {
-                if ((![wordCounter isHidden])&&([prefsController showWordCount])) {
+                if ((![wordCounter isHidden])&&(![self countsAreShown])) {
                     [wordCounter setHidden:YES];
                     [wordCounter setStringValue:@""];
                     popped=0;
@@ -3067,11 +3131,8 @@ static NSColor *SchemeColor(NSInteger scheme, BOOL background, BOOL dark) {
         }
     }
     
-    - (IBAction)toggleWordCount:(id)sender{
-        //the ShowWordCount default is YES while the word count is hidden (it then only pops up while a modifier key is held)
-        BOOL show = [prefsController showWordCount];
-        [prefsController setShowWordCount:!show];
-        if (show) {
+    - (void)_showOrHideCounts {
+        if ([self countsAreShown]) {
             [self updateWordCount:YES];
             [wordCounter setHidden:NO];
             popped=1;
@@ -3080,6 +3141,24 @@ static NSColor *SchemeColor(NSInteger scheme, BOOL background, BOOL dark) {
             [wordCounter setStringValue:@""];
             popped=0;
         }
+    }
+    
+    - (IBAction)toggleWordCount:(id)sender{
+        //the ShowWordCount default is YES while the word count is hidden (it then only pops up while a modifier key is held)
+        [prefsController setShowWordCount:![prefsController showWordCount]];
+        [self _showOrHideCounts];
+    }
+    
+    - (IBAction)toggleCharacterCount:(id)sender {
+        [prefsController setShowCharacterCount:![prefsController showCharacterCount]];
+        [self _showOrHideCounts];
+    }
+    
+    //clicking the counts hides them
+    - (IBAction)hideCounts:(id)sender {
+        [prefsController setShowWordCount:YES];
+        [prefsController setShowCharacterCount:NO];
+        [self _showOrHideCounts];
     }
     
     - (void)flagsChanged:(NSEvent *)theEvent{

@@ -83,6 +83,7 @@ static NSString *ShowGridKey = @"ShowGrid";
 static NSString *AlternatingRowsKey = @"AlternatingRows";
 static NSString *RTLKey = @"rtl";
 static NSString *ShowWordCount = @"ShowWordCount";
+static NSString *ShowCharacterCount = @"ShowCharacterCount";
 static NSString *markupPreviewMode = @"markupPreviewMode";
 static NSString *UseAutoPairing = @"UseAutoPairing";
 static NSString *UsesMarkdownCompletions = @"UsesMarkdownCompletions";
@@ -155,6 +156,7 @@ static void sendCallbacksForGlobalPrefs(GlobalPrefs* self, SEL selector, id orig
             [NSNumber numberWithBool:YES],ShowDockIcon,
 			[NSNumber numberWithBool:NO], RTLKey,
             [NSNumber numberWithBool:YES], ShowWordCount,
+            [NSNumber numberWithBool:NO], ShowCharacterCount,
             [NSNumber numberWithInt:MultiMarkdownPreview], markupPreviewMode,
             [NSNumber numberWithBool:NO], ShowGridKey,
             [NSNumber numberWithBool:NO], AlternatingRowsKey,
@@ -441,6 +443,15 @@ static void sendCallbacksForGlobalPrefs(GlobalPrefs* self, SEL selector, id orig
 
 - (void)setShowWordCount:(BOOL)value{
 	[defaults setBool:value forKey:ShowWordCount];
+}
+
+//unlike ShowWordCount, YES means shown
+- (BOOL)showCharacterCount {
+	return [defaults boolForKey:ShowCharacterCount];
+}
+
+- (void)setShowCharacterCount:(BOOL)value {
+	[defaults setBool:value forKey:ShowCharacterCount];
 }
 
 
