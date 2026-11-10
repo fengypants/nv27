@@ -432,6 +432,22 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 	SelfTestLog(@"arrow from search: selection drawn in the accent color: with the search field focused=%d", [notesTableView selectionIsEmphasized]);
 	[window display];
 	PrintSnapshotOfWindow(window, @"list-from-search");
+	//the same in Dark Mode, with a wider window so more columns show
+	{
+		NSRect frame = [window frame];
+		[window setFrame:NSMakeRect(NSMinX(frame), NSMinY(frame), 900, NSHeight(frame)) display:YES];
+		[NSApp setAppearance:[NSAppearance appearanceNamed:NSAppearanceNameDarkAqua]];
+		SelfTestSpin(1.0);
+		NSMutableArray *columns = [NSMutableArray array];
+		for (NSTableColumn *column in [notesTableView tableColumns])
+			[columns addObject:[NSString stringWithFormat:@"%@ (%@)", [column identifier], NSStringFromClass([[column dataCell] class])]];
+		SelfTestLog(@"arrow from search: Dark Mode, columns %@, first responder %@", [columns componentsJoinedByString:@", "], ResponderName([window firstResponder]));
+		[window display];
+		PrintSnapshotOfWindow(window, @"list-from-search-dark");
+		[NSApp setAppearance:nil];
+		[window setFrame:frame display:YES];
+		SelfTestSpin(0.5);
+	}
 	
 	//1b: typing the start of a title selects that note, which can sort below notes mentioning the text in their body
 	[self searchForString:@""];
