@@ -429,6 +429,7 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 	[self _selfTestPostKey:NSDownArrowFunctionKey keyCode:125 flags:arrowFlags];
 	SelfTestLog(@"arrow from search: typed \"%@\" -> %@; down arrow -> %@; again -> %@", firstTitle, afterTyping, afterFirst,
 				[self _selfTestSelectionDescription]);
+	SelfTestLog(@"arrow from search: selection drawn in the accent color: with the search field focused=%d", [notesTableView selectionIsEmphasized]);
 	[window display];
 	PrintSnapshotOfWindow(window, @"list-from-search");
 	
@@ -463,6 +464,14 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 	//3: typing in the list still goes to the search field
 	[self _selfTestPostKey:'h' keyCode:4 flags:0];
 	SelfTestLog(@"arrow from search: typing 'h' in the list -> search field \"%@\", %@", [field stringValue], [self _selfTestSelectionDescription]);
+	[self searchForString:@""];
+	SelfTestSpin(0.3);
+	[notesTableView selectRowAndScroll:0];
+	[window makeFirstResponder:textView];
+	SelfTestSpin(0.3);
+	SelfTestLog(@"arrow from search: selection drawn in the accent color: with the editor focused=%d", [notesTableView selectionIsEmphasized]);
+	[window display];
+	PrintSnapshotOfWindow(window, @"list-editor-focus");
 	selfTestStage = "";
 }
 
