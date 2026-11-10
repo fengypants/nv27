@@ -3082,9 +3082,9 @@ static NSColor *SchemeColor(NSInteger scheme, BOOL background, BOOL dark) {
         }
         NSMutableArray *parts = [NSMutableArray array];
         if (showsWords) [parts addObject:CountString(words, NSLocalizedString(@"1 word", @"word count of one"),
-                                                     NSLocalizedString(@"%@ words", @"word count; %@ is the number")];
+                                                     NSLocalizedString(@"%@ words", @"word count; %@ is the number"))];
         if (showsCharacters) [parts addObject:CountString(characters, NSLocalizedString(@"1 character", @"character count of one"),
-                                                          NSLocalizedString(@"%@ characters", @"character count; %@ is the number")];
+                                                          NSLocalizedString(@"%@ characters", @"character count; %@ is the number"))];
         return [parts componentsJoinedByString:@" · "];
     }
     
