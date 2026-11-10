@@ -1485,8 +1485,9 @@ terminateApp:
 		[self performSelector:@selector(setTableAllowsMultipleSelection) withObject:nil afterDelay:0];
 	}
     
-	if ([window firstResponder] != notesTableView) {
+	if ([window firstResponder] != notesTableView && (type == NSLeftMouseDragged || type == NSLeftMouseDown)) {
 		//occasionally changing multiple selection ability in-between selecting multiple items causes total deselection
+		//(only for mouse selections: the arrow keys in the search field change the selection too, and focus stays there)
 		[window makeFirstResponder:notesTableView];
 	}
 	

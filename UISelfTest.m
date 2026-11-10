@@ -459,7 +459,13 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 	[self _selfTestPostKey:NSDownArrowFunctionKey keyCode:125 flags:arrowFlags];
 	afterFirst = [self _selfTestSelectionDescription];
 	[self _selfTestPostKey:NSDownArrowFunctionKey keyCode:125 flags:arrowFlags];
-	SelfTestLog(@"arrow from search: %@; down arrow -> %@; again -> %@", before, afterFirst, [self _selfTestSelectionDescription]);
+	NSString *afterSecond = [self _selfTestSelectionDescription];
+	[self _selfTestPostKey:NSDownArrowFunctionKey keyCode:125 flags:arrowFlags];
+	NSString *afterThird = [self _selfTestSelectionDescription];
+	[self _selfTestPostKey:NSUpArrowFunctionKey keyCode:126 flags:arrowFlags];
+	SelfTestLog(@"arrow from search: %@; down arrow -> %@; again -> %@; again -> %@; up arrow -> %@", before, afterFirst, afterSecond, afterThird,
+				[self _selfTestSelectionDescription]);
+	[window makeFirstResponder:notesTableView];
 	
 	//3: typing in the list still goes to the search field
 	[self _selfTestPostKey:'h' keyCode:4 flags:0];
