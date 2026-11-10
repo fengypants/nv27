@@ -34,7 +34,7 @@ change them too when a shortcut changes.
 
 ## Searching and creating notes
 
-| ↑ ↓ | In the search field: move through the notes list; ↓ also moves into the list |
+| ↑ ↓ | In the search field: move up or down a note and into the notes list |
 | ⌘↑ ⌘↓ | First or last note in the list |
 | fn← fn→ | In the notes list: first or last note (or Home, End) |
 | fn↑ fn↓ | In the notes list: up or down a page (or Page Up, Page Down) |
