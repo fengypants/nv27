@@ -697,6 +697,7 @@ static NSArray *FormHelpFields(NSView *pane) {
 	
 	NSMutableArray *rows = [NSMutableArray array];
 	[rows addObject:FormRow(NSLocalizedString(@"Styled text:", nil), styledTextButton, 0, FormAlignBaseline)];
+	[rows addObject:FormRow(nil, FormIndented(FormHelp(nil, NSLocalizedString(@"Applies to Rich Text and HTML notes; plain text notes get plain text. In a note, ⇧⌘V pastes bold, italic and strikethrough either way, as Markdown in plain text notes.", @"Settings › Editing: help under Copy basic styles from other apps"))), 0, FormAlignBaseline)];
 	[rows addObject:FormRow(NSLocalizedString(@"Spelling:", nil), checkSpellingButton, 0, FormAlignBaseline)];
 	[rows addObject:FormRow(NSLocalizedString(@"Tab key:", nil), tabKeyRadioMatrix, 12, FormAlignTop)];
 	if ([helpFields count]) [rows addObject:FormRow(nil, FormIndented(FormHelp([helpFields objectAtIndex:0], nil)), 0, FormAlignBaseline)];

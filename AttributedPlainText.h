@@ -55,6 +55,7 @@ extern NSString *NVHiddenBulletIndentAttributeName;
 - (NSDictionary*)attributesByRange;
 #endif
 
-+ (NSAttributedString*)timeDelayStringWithNumberOfSeconds:(double)seconds;
 
+//bold, italic, strikethrough and links as Markdown (for pasting styled text into a plain text note)
+- (NSString*)markdownStringOfBasicStyles;
 @end

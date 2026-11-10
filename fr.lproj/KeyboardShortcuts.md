@@ -11,7 +11,7 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 | ⌘K | Sélectionne la note précédente dans la liste |
 | ⌘J | Sélectionne la note suivante dans la liste |
 | ⌘D | Désélectionne la note active et restaure le texte recherché |
-| ⇧⌘V | Colle le contenu du presse-papiers dans une nouvelle note |
+| ⇧⌘V | Colle le contenu du presse-papiers dans une nouvelle note (depuis le champ de recherche ou la liste des notes) |
 | ⌘R | Renomme la note sélectionnée |
 | ⌘⌫ | Supprime la ou les notes sélectionnées |
 | ⇧⌘T | Étiquette la note sélectionnée |
@@ -51,6 +51,7 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 | Tab | Dans une note : indente ou passe au champ suivant, selon le réglage « Tabulation » |
 | ⌥Tab | Indente |
 | ⌥⌘V | Colle l’URL copiée sous forme de lien Markdown |
+| ⇧⌘V | Dans une note : colle avec le gras, l’italique et le barré (en Markdown dans les notes en texte brut) |
 | ⌘F | Rechercher |
 | ⌥⌘F | Rechercher et remplacer |
 | ⌥⌘E | Chercher à partir de la sélection |
@@ -67,7 +68,7 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 | ⌘] | Décale à droite (augmente le retrait des lignes) |
 | ⌘[ | Décale à gauche (réduit le retrait des lignes) |
 
-> Lorsque la complétion Markdown est activée (par défaut ; ⇧⌘M), ⌘B, ⌘I et ⌘Y entourent la sélection de Markdown : deux astérisques pour le gras, un pour l’italique, deux tildes pour le barré. Lorsqu’elle est désactivée, ils mettent le texte en forme, ce qui n’est enregistré que si les notes sont stockées en RTF ou en HTML (Réglages › Notes).
+> Lorsque la complétion Markdown est activée (⇧⌘M), ⌘B, ⌘I et ⌘Y entourent la sélection de Markdown : deux astérisques pour le gras, un pour l’italique, deux tildes pour le barré. Lorsqu’elle est désactivée, ils mettent en forme le texte des notes stockées en RTF ou en HTML (Réglages › Notes). Les notes en texte brut ne peuvent pas conserver de mise en forme : ils y sont indisponibles.
 
 ## Markdown
 

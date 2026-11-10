@@ -11,7 +11,7 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 | ⌘K | Seleziona la nota precedente nell’elenco |
 | ⌘J | Seleziona la nota successiva nell’elenco |
 | ⌘D | Deseleziona la nota corrente, ripristinando il testo della ricerca |
-| ⇧⌘V | Incolla il contenuto degli appunti come nuova nota |
+| ⇧⌘V | Incolla il contenuto degli appunti come nuova nota (dal campo di ricerca o dall’elenco delle note) |
 | ⌘R | Rinomina la nota selezionata |
 | ⌘⌫ | Elimina la nota o le note selezionate |
 | ⇧⌘T | Etichetta la nota selezionata |
@@ -51,6 +51,7 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 | Tab | In una nota: aumenta il rientro o passa al campo successivo, secondo l’impostazione «Tasto Tab» |
 | ⌥Tab | Aumenta il rientro |
 | ⌥⌘V | Incolla l’URL copiato come link Markdown |
+| ⇧⌘V | In una nota: incolla con grassetto, corsivo e barrato (come Markdown nelle note in testo semplice) |
 | ⌘F | Trova |
 | ⌥⌘F | Trova e sostituisci |
 | ⌥⌘E | Usa selezione per ricerca |
@@ -67,7 +68,7 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 | ⌘] | Aumenta il rientro delle righe |
 | ⌘[ | Riduce il rientro delle righe |
 
-> Con il completamento Markdown attivo (impostazione predefinita; ⇧⌘M), ⌘B, ⌘I e ⌘Y aggiungono Markdown attorno alla selezione: due asterischi per il grassetto, uno per il corsivo, due tilde per il barrato. Se è disattivato, formattano il testo, che viene salvato solo se le note sono archiviate come RTF o HTML (Impostazioni › Note).
+> Con il completamento Markdown attivo (⇧⌘M), ⌘B, ⌘I e ⌘Y aggiungono Markdown attorno alla selezione: due asterischi per il grassetto, uno per il corsivo, due tilde per il barrato. Se è disattivato, formattano il testo nelle note archiviate come RTF o HTML (Impostazioni › Note). Le note in testo semplice non possono conservare la formattazione, quindi lì non sono disponibili.
 
 ## Markdown
 

@@ -20,6 +20,8 @@
 #import "AttributedPlainText.h"
 #import "NSString_NV.h"
 #import "ETClipView.h"
+#import "NoteObject.h"
+#import "NotationPrefs.h"
 //#import "NVTextFinderAdditions.h"
 
 
@@ -424,6 +426,11 @@ CGFloat _perceptualColorDifference(NSColor*a, NSColor*b) {
 }
 
 - (NSArray *)readablePasteboardTypes {
+	//a plain text note's file can't keep styles: paste and drop plain text there, even nv27's own styled copies
+	//(⇧⌘V, -pasteWithStyles:, turns basic styles into Markdown instead)
+	if ([self _noteIsPlainText])
+		return [NSArray arrayWithObjects:NSFilenamesPboardType, NSStringPboardType, nil];
+	
 	NSMutableArray *types = [NSMutableArray arrayWithObjects:NSFilenamesPboardType, NVPTFPboardType, NSStringPboardType, nil];
 	
 	if ([prefsController pastePreservesStyle]) {
@@ -432,6 +439,48 @@ CGFloat _perceptualColorDifference(NSColor*a, NSColor*b) {
 	}
 	
 	return types;
+}
+
+//Edit › Paste with Styles (⇧⌘V in a note): bold, italic and strikethrough come along whatever "Copy basic styles from
+//other apps" says; in a plain text note they arrive as Markdown, since its file can't keep styles
+- (IBAction)pasteWithStyles:(id)sender {
+	NSPasteboard *pboard = [NSPasteboard generalPasteboard];
+	NSArray *types = [pboard types];
+	NSMutableAttributedString *styled = nil;
+	if ([types containsObject:NVPTFPboardType])
+		styled = [[[NSMutableAttributedString alloc] initWithRTF:[pboard dataForType:NVPTFPboardType] documentAttributes:NULL] autorelease];
+	else if ([types containsObject:NSRTFPboardType])
+		styled = [[[NSMutableAttributedString alloc] initWithRTF:[pboard dataForType:NSRTFPboardType] documentAttributes:NULL] autorelease];
+	else if ([types containsObject:NSRTFDPboardType])
+		styled = [[[NSMutableAttributedString alloc] initWithRTFD:[pboard dataForType:NSRTFDPboardType] documentAttributes:NULL] autorelease];
+	else if ([types containsObject:NSHTMLPboardType])
+		styled = [[[NSMutableAttributedString alloc] initWithHTML:[pboard dataForType:NSHTMLPboardType] documentAttributes:NULL] autorelease];
+	
+	if (![styled length]) {
+		//nothing styled to paste: an ordinary paste
+		[self paste:sender];
+		return;
+	}
+	[styled removeAttachments];
+	NSRange selectedRange = [self rangeForUserTextChange];
+	
+	if ([self _noteIsPlainText]) {
+		NSString *markdown = [styled markdownStringOfBasicStyles];
+		if ([self shouldChangeTextInRange:selectedRange replacementString:markdown]) {
+			[self replaceCharactersInRange:selectedRange withString:markdown];
+			[self setTypingAttributes:[prefsController noteBodyAttributes]];
+			[self didChangeText];
+		}
+		return;
+	}
+	//as with "Copy basic styles from other apps": the note's font, keeping bold, italic and strikethrough
+	[styled removeAttribute:NSLinkAttributeName range:NSMakeRange(0, [styled length])];
+	[styled indentTextLists];
+	[styled restyleTextToFont:[prefsController noteBodyFont] usingBaseFont:nil];
+	if ([self shouldChangeTextInRange:selectedRange replacementString:[styled string]]) {
+		[self replaceCharactersInRange:selectedRange withRTF:[styled RTFFromRange:NSMakeRange(0, [styled length]) documentAttributes:nil]];
+		[self didChangeText];
+	}
 }
 
 - (BOOL)writeSelectionToPasteboard:(NSPasteboard *)pboard type:(NSString *)type {
@@ -508,10 +557,42 @@ copyRTFType:
 
 //font panel is disabled for the note-body, so styles must be applied manually:
 
+//bold, italic and strikethrough styles are kept only in Rich Text and HTML note files: a plain text note's file drops
+//them (nv27's own database would keep them only until the file changes, e.g. edited elsewhere or synced from another
+//Mac). So in plain text notes they're unavailable, unless Markdown completion is on and they insert Markdown instead
+//after the editor's text is replaced with another note's: AppKit redraws only the glyphs that still exist, so a
+//shorter note (opened from the list or a [[link]]) could leave the end of the previous one on screen. Redraw it all.
+//(From nvALT 3.0.22.)
+- (void)redisplayAfterNoteChange {
+	NSLayoutManager *layout = [self layoutManager];
+	NSUInteger length = [[self string] length];
+	if (layout && length)
+		[layout invalidateDisplayForCharacterRange:NSMakeRange(0, length)];
+	NSRect visible = [self visibleRect];
+	if (NSIsEmptyRect(visible))
+		visible = [self bounds];
+	[self setNeedsDisplayInRect:visible avoidAdditionalLayout:NO];
+	[[[self enclosingScrollView] contentView] setNeedsDisplay:YES];
+}
+
+- (BOOL)_noteIsPlainText {
+	NoteObject *note = [(AppController*)[NSApp delegate] selectedNoteObject];
+	NSInteger format = note ? storageFormatOfNote(note) : [[prefsController notationPrefs] notesStorageFormat];
+	return format == PlainTextFormat;
+}
+
+- (BOOL)_stylesWouldNotBeSaved {
+	return ![[NSUserDefaults standardUserDefaults] boolForKey:@"UsesMarkdownCompletions"] && [self _noteIsPlainText];
+}
+
 - (void)strikethroughNV:(id)sender {
 	//like bold and italic: Markdown when Markdown completion is on, so it's kept in a plain text note
 	if ([[NSUserDefaults standardUserDefaults]boolForKey:@"UsesMarkdownCompletions"]) {
 		[self changeMarkdownAttribute:@"~~"];
+		return;
+	}
+	if ([self _stylesWouldNotBeSaved]) {
+		NSBeep();
 		return;
 	}
 	[self applyStyleOfTrait:0 alternateAttributeName:NSStrikethroughStyleAttributeName 
@@ -528,6 +609,8 @@ copyRTFType:
 - (void)bold:(id)sender {	
     if ([[NSUserDefaults standardUserDefaults]boolForKey:@"UsesMarkdownCompletions"]) {
         [self changeMarkdownAttribute:@"**"];
+    }else if ([self _stylesWouldNotBeSaved]) {
+        NSBeep();
     }else{
         [self applyStyleOfTrait:NSBoldFontMask alternateAttributeName:NSStrokeWidthAttributeName 
         alternateAttributeValue:[NSNumber numberWithFloat:(float)STROKE_WIDTH_FOR_BOLD]];
@@ -538,6 +621,8 @@ copyRTFType:
 - (void)italic:(id)sender {
     if ([[NSUserDefaults standardUserDefaults]boolForKey:@"UsesMarkdownCompletions"]) {
         [self changeMarkdownAttribute:@"*"];
+    }else if ([self _stylesWouldNotBeSaved]) {
+        NSBeep();
     }else{
         [self applyStyleOfTrait:NSItalicFontMask alternateAttributeName:NSObliquenessAttributeName 
         alternateAttributeValue:[NSNumber numberWithFloat:(float)OBLIQUENESS_FOR_ITALIC]];
@@ -757,6 +842,12 @@ copyRTFType:
          [[NSNotificationCenter defaultCenter] postNotificationName:@"ModTimersShouldReset" object:nil];
     }
 	if (((modFlags & NSCommandKeyMask)>0)&&([[self window]firstResponder]==self)) {
+		//⇧⌘V in a note is Paste with Styles; elsewhere it's still Paste as New Note
+		if ((modFlags & (NSShiftKeyMask|NSControlKeyMask|NSAlternateKeyMask)) == NSShiftKeyMask &&
+			[[[anEvent charactersIgnoringModifiers] lowercaseString] isEqualToString:@"v"] && [self isEditable]) {
+			[self pasteWithStyles:nil];
+			return YES;
+		}
 		
 		unichar keyChar = [anEvent firstCharacterIgnoringModifiers];
 		if (keyChar == NSCarriageReturnCharacter || keyChar == NSNewlineCharacter || keyChar == NSEnterCharacter) {
@@ -848,9 +939,20 @@ copyRTFType:
 		[super moveToBeginningOfLine:sender];
 }
 
+//inside a [[wiki link]] or just after one: Tab and Shift-Tab's Markdown-link helpers below took its brackets for a
+//Markdown link's, so Tab after [[Note]] gave [[Note]][]
+- (BOOL)_cursorIsInOrAfterWikiLink {
+	NSString *before = [self.activeParagraphBeforeCursor stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+	if ([before hasSuffix:@"]]"])
+		return YES;
+	NSRange opener = [before rangeOfString:@"[[" options:NSBackwardsSearch];
+	return opener.location != NSNotFound &&
+		[before rangeOfString:@"]]" options:0 range:NSMakeRange(NSMaxRange(opener), [before length] - NSMaxRange(opener))].location == NSNotFound;
+}
+
 - (void)insertTab:(id)sender {
 	//check prefs for tab behavior
-    if ([[NSUserDefaults standardUserDefaults]boolForKey:@"UsesMarkdownCompletions"]) {
+    if ([[NSUserDefaults standardUserDefaults]boolForKey:@"UsesMarkdownCompletions"] && ![self _cursorIsInOrAfterWikiLink]) {
         NSRange selectedRange=[self selectedRange];
         NSUInteger closer=[self cursorIsInsidePair:@"]"];   
         if ((closer!=NSNotFound)||([self cursorIsImmediatelyPastPair:@"]"])){ 
@@ -910,7 +1012,7 @@ copyRTFType:
 
 - (void)insertBacktab:(id)sender {
 	//check temporary NVHiddenBulletIndentAttributeName here first
-    if ([[NSUserDefaults standardUserDefaults]boolForKey:@"UsesMarkdownCompletions"]) {
+    if ([[NSUserDefaults standardUserDefaults]boolForKey:@"UsesMarkdownCompletions"] && ![self _cursorIsInOrAfterWikiLink]) {
         NSRange selectedRange=[self selectedRange];
         NSUInteger closer=[self cursorIsInsidePair:@"]"];        
         if ((closer!=NSNotFound)||([self cursorIsImmediatelyPastPair:@"]"])){             
@@ -1085,6 +1187,11 @@ copyRTFType:
 		action == @selector(bold:) ||
 		action == @selector(italic:) ||
 		action == @selector(strikethroughNV:)) {
+		
+		if (action != @selector(defaultStyle:) && [self _stylesWouldNotBeSaved]) {
+			[menuItem setState:NSOffState];
+			return NO;
+		}
 		
 		NSRange effectiveRange = NSMakeRange(0,0), range = [self selectedRange];
 		NSDictionary *attrs = nil;
@@ -1674,6 +1781,7 @@ static long (*GetGetScriptManagerVariablePointer())(short) {
 		theMenuItem = [[[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Insert Link",@"insert link menu item title") action:@selector(insertLink:) keyEquivalent:@"L"] autorelease];
         [theMenuItem setTarget:self];
         [editMenu addItem:theMenuItem];
+
         
     }
 

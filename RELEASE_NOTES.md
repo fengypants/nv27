@@ -1,5 +1,24 @@
 # nv27 release notes
 
+## 1.0.5
+
+Pasting and styling that match how notes are saved, and a long-standing display fix. To update, quit nv27 and replace nv27.app in Applications with the one from **nv27-arm64.zip**; your notes and settings are kept.
+
+### Changed
+
+- **Markdown completion is off by default again**, as in nvALT. ⌘B, ⌘I and ⌘Y style the text unless you turn it on (⇧⌘M). If you turned it on or off yourself, your choice is kept.
+- **Bold, italic and strikethrough are unavailable in plain text notes** while Markdown completion is off. A plain text note's file can't keep styles: they stayed only inside nv27 and were lost when the file changed elsewhere. In Rich Text and HTML notes they work as before; with Markdown completion on they add Markdown. Plain Text Style (⌘T) still removes styles.
+- **Pasting into a plain text note gives plain text**, even with "Copy basic styles from other apps" on, and for text copied from another nv27 note. Rich Text and HTML notes follow that setting as before. Paste as New Note gives plain text when your notes folder stores plain text.
+
+### New
+
+- **Paste with Styles (⇧⌘V while editing a note)** pastes bold, italic and strikethrough whatever the setting says: as styles in Rich Text and HTML notes, and as Markdown in plain text notes (two asterisks for bold, one for italic, two tildes for strikethrough, and links as Markdown links). In the search field or notes list, ⇧⌘V is still Paste as New Note.
+
+### Fixed
+
+- **Opening a shorter note no longer leaves the end of the previous note on screen.** (From nvALT 3.0.22.)
+- **Tab right after a [[wiki link]]** no longer adds Markdown link brackets when Markdown completion is on.
+
 ## 1.0.4
 
 Editing improvements, two of them from nvALT 3.0, Brett Terpstra's new release of nvALT. To update, quit nv27 and replace nv27.app in Applications with the one from **nv27-arm64.zip**; your notes and settings are kept.

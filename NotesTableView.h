@@ -40,6 +40,7 @@ typedef struct _ViewLocationContext {
 	BOOL viewMenusValid;
 	BOOL hadHighlightInForeground, hadHighlightInBackground;
 	BOOL shouldUseSecondaryHighlightColor, isActiveStyle;
+	NSString *pasteAsNewNoteTitle;
 	BOOL lastEventActivatedTagEdit, wasDeleting, isAutocompleting;
 	
 	id labelsListSource;

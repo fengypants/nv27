@@ -485,6 +485,132 @@ static NSString *SelfTestVisibleNewlines(NSString *text) {
 	[window makeFirstResponder:textView];
 	SelfTestLog(@"lists: Markdown completion on by default=%d, list bullets on=%d", [[NSUserDefaults standardUserDefaults] boolForKey:@"UsesMarkdownCompletions"],
 				[prefsController autoFormatsListBullets]);
+	//with Markdown completion off, a plain text note can't keep bold, italic or strikethrough: those are unavailable
+	{
+		[textView setSelectedRange:NSMakeRange(0, [[textView string] length])];
+		[textView insertText:@"a word here"];
+		NSMutableArray *states = [NSMutableArray array];
+		for (NSString *action in [NSArray arrayWithObjects:@"bold:", @"italic:", @"strikethroughNV:", @"defaultStyle:", nil]) {
+			NSMenuItem *item = [[[NSMenuItem alloc] initWithTitle:action action:NSSelectorFromString(action) keyEquivalent:@""] autorelease];
+			[states addObject:[NSString stringWithFormat:@"%@ %@", action, [textView validateMenuItem:item] ? @"enabled" : @"disabled"]];
+		}
+		[textView setSelectedRange:NSMakeRange(2, 4)];
+		[textView bold:nil];
+		[textView italic:nil];
+		[textView strikethroughNV:nil];
+		NSDictionary *attrs = [[textView textStorage] attributesAtIndex:3 effectiveRange:NULL];
+		NSFont *font = [attrs objectForKey:NSFontAttributeName];
+		SelfTestLog(@"styles: plain text note (format %ld), Markdown completion off: %@; after bold, italic, strikethrough \"%@\" bold=%d italic=%d struck=%d",
+					(long)storageFormatOfNote(note), [states componentsJoinedByString:@", "], [textView string],
+					([[NSFontManager sharedFontManager] traitsOfFont:font] & NSBoldFontMask) != 0 || [attrs objectForKey:NSStrokeWidthAttributeName] != nil,
+					([[NSFontManager sharedFontManager] traitsOfFont:font] & NSItalicFontMask) != 0 || [attrs objectForKey:NSObliquenessAttributeName] != nil,
+					[attrs objectForKey:NSStrikethroughStyleAttributeName] != nil);
+	}
+	
+	//pasting styled text: plain into a plain text note; Paste with Styles (⇧⌘V) brings basic styles as Markdown there,
+	//and as styles in a Rich Text note
+	{
+		NSMutableAttributedString *clip = [[[NSMutableAttributedString alloc] initWithString:@"Hello bold and italic and struck and link."
+																				  attributes:@{NSFontAttributeName: [NSFont fontWithName:@"Helvetica" size:13]}] autorelease];
+		[clip addAttribute:NSFontAttributeName value:[NSFont fontWithName:@"Helvetica-Bold" size:13] range:NSMakeRange(6, 4)];
+		[clip addAttribute:NSFontAttributeName value:[NSFont fontWithName:@"Helvetica-Oblique" size:13] range:NSMakeRange(15, 6)];
+		[clip addAttribute:NSStrikethroughStyleAttributeName value:[NSNumber numberWithInt:NSUnderlineStyleSingle] range:NSMakeRange(26, 6)];
+		[clip addAttribute:NSLinkAttributeName value:[NSURL URLWithString:@"https://example.com/"] range:NSMakeRange(37, 4)];
+		NSData *rtf = [clip RTFFromRange:NSMakeRange(0, [clip length]) documentAttributes:@{NSDocumentTypeDocumentAttribute: NSRTFTextDocumentType}];
+		NSPasteboard *pboard = [NSPasteboard generalPasteboard];
+		void (^putClip)(void) = ^{
+			[pboard clearContents];
+			[pboard setData:rtf forType:NSPasteboardTypeRTF];
+			[pboard setString:[clip string] forType:NSPasteboardTypeString];
+		};
+		BOOL (^anyStyle)(void) = ^BOOL{
+			__block BOOL styled = NO;
+			[[textView textStorage] enumerateAttributesInRange:NSMakeRange(0, [[textView string] length]) options:0 usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop) {
+				NSFontTraitMask traits = [[NSFontManager sharedFontManager] traitsOfFont:[attrs objectForKey:NSFontAttributeName]];
+				if ((traits & (NSBoldFontMask|NSItalicFontMask)) || [attrs objectForKey:NSStrikethroughStyleAttributeName]) { styled = YES; *stop = YES; }
+			}];
+			return styled;
+		};
+		BOOL preserves = [prefsController pastePreservesStyle];
+		for (int setting = 0; setting < 2; setting++) {
+			[prefsController setPastePreservesStyle:setting sender:self];
+			[textView setSelectedRange:NSMakeRange(0, [[textView string] length])];
+			[textView insertText:@""];
+			putClip();
+			[textView paste:nil];
+			SelfTestLog(@"paste: plain text note, \"Copy basic styles\" %@: ⌘V -> \"%@\" styled=%d", setting ? @"on" : @"off", [textView string], anyStyle());
+		}
+		[prefsController setPastePreservesStyle:NO sender:self];
+		[textView setSelectedRange:NSMakeRange(0, [[textView string] length])];
+		[textView insertText:@""];
+		putClip();
+		[textView pasteWithStyles:nil];
+		SelfTestLog(@"paste: plain text note, Paste with Styles -> \"%@\" styled=%d", [textView string], anyStyle());
+		//the ⇧⌘V key in the note: Paste with Styles, not a new note
+		[textView setSelectedRange:NSMakeRange(0, [[textView string] length])];
+		[textView insertText:@""];
+		putClip();
+		NSInteger rowsBefore = [notesTableView numberOfRows];
+		[self _selfTestPostKey:'V' keyCode:9 flags:NSEventModifierFlagCommand | NSEventModifierFlagShift];
+		SelfTestLog(@"paste: ⇧⌘V in the note -> \"%@\", notes %ld -> %ld", [textView string], (long)rowsBefore, (long)[notesTableView numberOfRows]);
+		//the one ⇧⌘V menu item: Paste with Styles while a note is being edited, Paste as New Note elsewhere
+		NSMenuItem *shiftPasteItem = nil;
+		for (NSMenuItem *topItem in [[NSApp mainMenu] itemArray])
+			for (NSMenuItem *item in [[topItem submenu] itemArray])
+				if ([item action] == @selector(paste:) && [item target] == notesTableView) shiftPasteItem = item;
+		[window makeFirstResponder:textView];
+		BOOL enabledInNote = [notesTableView validateMenuItem:shiftPasteItem];
+		NSString *titleInNote = [[[shiftPasteItem title] copy] autorelease];
+		[window makeFirstResponder:notesTableView];
+		BOOL enabledInList = [notesTableView validateMenuItem:shiftPasteItem];
+		NSString *titleInList = [[[shiftPasteItem title] copy] autorelease];
+		[window makeFirstResponder:textView];
+		SelfTestLog(@"paste: ⇧⌘V menu item (key \"%@\"): in a note \"%@\" enabled=%d; in the list \"%@\" enabled=%d", [shiftPasteItem keyEquivalent],
+					titleInNote, enabledInNote, titleInList, enabledInList);
+		//choosing it from the menu while editing pastes with styles
+		[notesTableView validateMenuItem:shiftPasteItem];
+		[textView setSelectedRange:NSMakeRange(0, [[textView string] length])];
+		[textView insertText:@""];
+		putClip();
+		rowsBefore = [notesTableView numberOfRows];
+		[NSApp sendAction:[shiftPasteItem action] to:[shiftPasteItem target] from:shiftPasteItem];
+		SelfTestLog(@"paste: choosing it from the menu in the note -> \"%@\", notes %ld -> %ld", [textView string], (long)rowsBefore, (long)[notesTableView numberOfRows]);
+		
+		//a Rich Text note: ⌘V follows "Copy basic styles"; Paste with Styles keeps them either way
+		NSAttributedString *rtfBody = [[[NSAttributedString alloc] initWithString:@"" attributes:[prefsController noteBodyAttributes]] autorelease];
+		NoteObject *rtfNote = [[[NoteObject alloc] initWithNoteBody:rtfBody title:@"Rich Text paste test" delegate:notationController format:RTFTextFormat labels:nil] autorelease];
+		[notationController addNewNote:rtfNote];
+		//new notes take the notes folder's format; make this one Rich Text, as a note in another folder could be
+		[rtfNote setValue:[NSNumber numberWithInt:RTFTextFormat] forKey:@"currentFormatID"];
+		[self searchForString:@""];
+		SelfTestSpin(0.3);
+		[notesTableView selectRowAndScroll:[self _selfTestRowOfNote:rtfNote]];
+		SelfTestSpin(0.3);
+		[window makeFirstResponder:textView];
+		for (int setting = 0; setting < 3; setting++) {
+			[prefsController setPastePreservesStyle:setting == 1 sender:self];
+			[textView setSelectedRange:NSMakeRange(0, [[textView string] length])];
+			[textView insertText:@""];
+			putClip();
+			if (setting < 2) [textView paste:nil]; else [textView pasteWithStyles:nil];
+			SelfTestLog(@"paste: Rich Text note (format %ld), %@ -> \"%@\" styled=%d", (long)storageFormatOfNote(rtfNote),
+						setting == 0 ? @"⌘V with Copy basic styles off" : setting == 1 ? @"⌘V with it on" : @"Paste with Styles with it off",
+						[textView string], anyStyle());
+		}
+		[prefsController setPastePreservesStyle:preserves sender:self];
+		[notationController removeNote:rtfNote];
+		SelfTestSpin(0.3);
+		[notesTableView selectRowAndScroll:[self _selfTestRowOfNote:note]];
+		SelfTestSpin(0.3);
+		[window makeFirstResponder:textView];
+	}
+	
+	//the Markdown checks below need it on, as ⇧⌘M would set it
+	[[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"UsesMarkdownCompletions"];
+	{
+		NSMenuItem *item = [[[NSMenuItem alloc] initWithTitle:@"bold" action:@selector(bold:) keyEquivalent:@""] autorelease];
+		SelfTestLog(@"styles: Markdown completion on: bold: %@", [textView validateMenuItem:item] ? @"enabled" : @"disabled");
+	}
 	
 	//each case: what's typed (Return as ⏎), then the note's text
 	NSArray *cases = [NSArray arrayWithObjects:@"- one⏎⏎after", @"* one⏎⏎after", @"1. one⏎⏎after", @"2) one⏎⏎after", @"  - indented⏎⏎after",
@@ -518,6 +644,23 @@ static NSString *SelfTestVisibleNewlines(NSString *text) {
 		[NSApp sendAction:NSSelectorFromString(action) to:textView from:nil];
 		SelfTestLog(@"markdown: %@ on \"word\" -> \"%@\"", action, [textView string]);
 	}
+	
+	//Tab and Shift-Tab make Markdown links after [text], but leave [[wiki links]] alone
+	struct { NSString *text; NSUInteger cursor; BOOL backtab; } linkCases[] = {
+		{@"see [nv27]", 10, NO}, {@"see [nv27]", 10, YES}, {@"see [[Note]]", 12, NO}, {@"see [[Note]]", 12, YES}, {@"see [[Note]] ", 13, NO},
+		{@"see [[Note]]", 9, NO}, {@"see [[Note]]", 9, YES}, {@"[1]", 3, NO}};
+	for (size_t i = 0; i < sizeof(linkCases) / sizeof(linkCases[0]); i++) {
+		[window makeFirstResponder:textView];
+		[textView setSelectedRange:NSMakeRange(0, [[textView string] length])];
+		[textView insertText:linkCases[i].text];
+		[textView setSelectedRange:NSMakeRange(linkCases[i].cursor, 0)];
+		if (linkCases[i].backtab) [textView insertBacktab:nil]; else [textView insertTab:nil];
+		SelfTestLog(@"markdown links: \"%@\" with the cursor at %lu, %@ -> \"%@\" (selected \"%@\")", linkCases[i].text, (unsigned long)linkCases[i].cursor,
+					linkCases[i].backtab ? @"Shift-Tab" : @"Tab", [textView string],
+					[[textView string] substringWithRange:[textView selectedRange]]);
+	}
+	[window makeFirstResponder:textView];
+	[[NSUserDefaults standardUserDefaults] removeObjectForKey:@"UsesMarkdownCompletions"];
 	[notationController synchronizeNoteChanges:nil];
 	SelfTestSpin(0.3);
 	[notationController removeNote:note];
