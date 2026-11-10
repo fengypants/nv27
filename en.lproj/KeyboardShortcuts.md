@@ -104,6 +104,7 @@ change them too when a shortcut changes.
 | ⌥⌘1 | B/W color scheme |
 | ⌥⌘2 | Low Contrast color scheme |
 | ⌥⌘3 | User color scheme |
+| ⌃⌥⌘1 – ⌃⌥⌘4 | Sort by Title, Tags, Date Modified or Date Added; press again to reverse the order |
 | ⇧⌘K | Show or hide the word count |
 | ⌥⌘P | Show or hide note previews in the list |
 

@@ -596,10 +596,13 @@ static void _CopyItemWithSelectorFromMenu(NSMenu *destMenu, NSMenu *sourceMenu, 
     }else{
     sortArrow=[NSImage imageNamed:@"NSAscendingSortIndicator"];
     }
+	NSUInteger columnNumber = 0;
     while ((theColumn = [theEnumerator nextObject]) != nil) {
+		//⌃⌥⌘1 to ⌃⌥⌘4 in menu order, as in Finder's Sort By; choosing the current sort again reverses it
 		NSMenuItem *theMenuItem = [[[NSMenuItem alloc] initWithTitle:[[theColumn headerCell] stringValue] 
 															  action:@selector(setStatusForSortedColumn:) 
-													   keyEquivalent:@""] autorelease];
+													   keyEquivalent:[NSString stringWithFormat:@"%lu", (unsigned long)++columnNumber]] autorelease];
+		[theMenuItem setKeyEquivalentModifierMask:NSEventModifierFlagControl | NSEventModifierFlagOption | NSEventModifierFlagCommand];
 		[theMenuItem setTarget:self];
 		[theMenuItem setRepresentedObject:theColumn];
 		[theMenuItem setState:[[theColumn identifier] isEqualToString:sortKey]];

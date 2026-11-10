@@ -94,6 +94,7 @@ typedef struct _ViewLocationContext {
 - (void)setSortDirection:(BOOL)direction inTableColumn:(NSTableColumn*)tableColumn;
 - (NSMenu *)defaultNoteCommandsMenuWithTarget:(id)target;
 - (NSMenu *)menuForColumnSorting;
+- (void)menuNeedsUpdate:(NSMenu *)menu;
 - (NSMenu *)menuForColumnConfiguration:(NSTableColumn *)inSelectedColumn;
 - (NoteAttributeColumn*)noteAttributeColumnForIdentifier:(NSString*)identifier;
 

@@ -96,6 +96,7 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 | ⌥⌘1 | B/W 配色方案 |
 | ⌥⌘2 | Low Contrast 配色方案 |
 | ⌥⌘3 | 用户配色方案（User Scheme） |
+| ⌃⌥⌘1 – ⌃⌥⌘4 | 按标题、标签、修改日期或添加日期排列；再按一次可反转顺序 |
 | ⇧⌘K | 显示或隐藏字数统计 |
 | ⌥⌘P | 在列表中显示或隐藏笔记预览 |
 

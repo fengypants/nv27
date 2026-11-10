@@ -381,6 +381,7 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 	[self _selfTestUpstreamFixes];
 	[self _selfTestListKeys];
 	[self _selfTestArrowFromSearch];
+	[self _selfTestSortShortcuts];
 	[self _selfTestListsAndMarkdown];
 	SelfTestLog(@"done");
 	exit(0);
@@ -497,6 +498,66 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 	SelfTestSpin(0.3);
 	[window display];
 	PrintSnapshotOfWindow(window, @"list-editor-focus");
+	selfTestStage = "";
+}
+
+//⌃⌥⌘1 to ⌃⌥⌘4 choose Sort By's options in menu order; pressing the current one again reverses the order
+- (NSString*)_selfTestSortDescription {
+	NSMutableArray *titles = [NSMutableArray array];
+	for (NSInteger i = 0; i < MIN(3, [notesTableView numberOfRows]); i++) [titles addObject:titleOfNote([notationController noteObjectAtFilteredIndex:i])];
+	return [NSString stringWithFormat:@"%@%@ (first: %@)", [prefsController sortedTableColumnKey], [prefsController tableIsReverseSorted] ? @" reversed" : @"",
+			[titles componentsJoinedByString:@" | "]];
+}
+
+- (void)_selfTestSortShortcuts {
+	selfTestStage = "Sort By shortcuts";
+	const NSEventModifierFlags sortFlags = NSEventModifierFlagControl | NSEventModifierFlagOption | NSEventModifierFlagCommand;
+	const unsigned short digitKeyCodes[] = { 18, 19, 20, 21 };
+	NSArray *columnKeys = [NSArray arrayWithObjects:NoteTitleColumnString, NoteLabelsColumnString, NoteDateModifiedColumnString, NoteDateCreatedColumnString, nil];
+	NSString *originalKey = [[[prefsController sortedTableColumnKey] copy] autorelease];
+	BOOL originalReversed = [prefsController tableIsReverseSorted];
+	
+	for (NSMenuItem *item in [[NSApp mainMenu] itemArray]) {
+		NSMenuItem *sortItem = [[item submenu] itemWithTag:98];
+		if (!sortItem) continue;
+		NSMutableArray *items = [NSMutableArray array];
+		for (NSMenuItem *option in [[sortItem submenu] itemArray])
+			[items addObject:[NSString stringWithFormat:@"%@ = %@%@", [option title],
+							  ([option keyEquivalentModifierMask] == sortFlags) ? @"ctrl-opt-cmd-" : @"other modifiers ", [option keyEquivalent]]];
+		SelfTestLog(@"sort shortcuts: Sort By menu before it is opened: %@", [items componentsJoinedByString:@", "]);
+	}
+	
+	[window makeKeyAndOrderFront:nil];
+	[self searchForString:@""];
+	SelfTestSpin(0.3);
+	[window makeFirstResponder:notesTableView];
+	SelfTestLog(@"sort shortcuts: at start %@", [self _selfTestSortDescription]);
+	for (NSUInteger i = 0; i < 4; i++) {
+		unichar digit = (unichar)('1' + i);
+		[self _selfTestPostKey:digit keyCode:digitKeyCodes[i] flags:sortFlags];
+		NSString *first = [self _selfTestSortDescription];
+		[self _selfTestPostKey:digit keyCode:digitKeyCodes[i] flags:sortFlags];
+		SelfTestLog(@"sort shortcuts: ctrl-opt-cmd-%C -> %@; again -> %@", digit, first, [self _selfTestSortDescription]);
+	}
+	
+	//the shortcuts work from the search field and the editor too
+	[window makeFirstResponder:field];
+	[self _selfTestPostKey:'1' keyCode:18 flags:sortFlags];
+	SelfTestLog(@"sort shortcuts: ctrl-opt-cmd-1 in the search field -> %@", [self _selfTestSortDescription]);
+	[notesTableView selectRowAndScroll:0];
+	[window makeFirstResponder:textView];
+	[self _selfTestPostKey:'3' keyCode:20 flags:sortFlags];
+	SelfTestLog(@"sort shortcuts: ctrl-opt-cmd-3 in the editor -> %@, editor still has focus: %@", [self _selfTestSortDescription],
+				[window firstResponder] == textView ? @"yes" : @"no");
+	
+	//put the sort back as it was
+	NSUInteger originalIndex = [columnKeys indexOfObject:originalKey];
+	if (originalIndex != NSNotFound) {
+		[self _selfTestPostKey:(unichar)('1' + originalIndex) keyCode:digitKeyCodes[originalIndex] flags:sortFlags];
+		if ([prefsController tableIsReverseSorted] != originalReversed)
+			[self _selfTestPostKey:(unichar)('1' + originalIndex) keyCode:digitKeyCodes[originalIndex] flags:sortFlags];
+	}
+	SelfTestLog(@"sort shortcuts: restored -> %@", [self _selfTestSortDescription]);
 	selfTestStage = "";
 }
 

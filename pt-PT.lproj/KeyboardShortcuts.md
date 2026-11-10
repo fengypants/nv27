@@ -96,6 +96,7 @@ Translation of en.lproj/KeyboardShortcuts.md (see the notes there): the same row
 | ⌥⌘1 | Esquema de cores B/W |
 | ⌥⌘2 | Esquema de cores Low Contrast |
 | ⌥⌘3 | Esquema de cores do utilizador (User Scheme) |
+| ⌃⌥⌘1 – ⌃⌥⌘4 | Organizar por título, etiquetas, data de modificação ou data de criação; prima de novo para inverter a ordem |
 | ⇧⌘K | Mostra ou oculta a contagem de palavras |
 | ⌥⌘P | Mostra ou oculta a pré-visualização das notas na lista |
 

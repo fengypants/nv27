@@ -396,6 +396,12 @@ void outletObjectAwoke(id sender) {
 	//on tiger dualfield is often not ready to add tracking tracks until this point:
 	
 	[field setTrackingRect];
+	
+	//build the View menu's Columns and Sort By submenus now, so Sort By's shortcuts work before the menu is first opened
+	for (NSMenuItem *item in [[NSApp mainMenu] itemArray]) {
+		if ([[item submenu] delegate] == (id)notesTableView) [notesTableView menuNeedsUpdate:[item submenu]];
+	}
+	
     NSDate *before = [NSDate date];
 	prefsWindowController = [[PrefsWindowController alloc] init];
 	
