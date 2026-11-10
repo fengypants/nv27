@@ -2363,8 +2363,7 @@ terminateApp:
 - (void)tableView:(NSTableView *)aTableView willDisplayCell:(id)aCell forTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)rowIndex {
     if (aTableView==notesTableView) {
         if ([aCell isHighlighted]) {
-            //white on the accent-colored selection: the list or the search field has focus (see -selectionIsEmphasized)
-            if ([notesTableView selectionIsEmphasized]||(isEditing&&([notesTableView editedRow]==rowIndex))) {
+            if (([window firstResponder]==notesTableView)||(isEditing&&([notesTableView editedRow]==rowIndex))) {//([notesTableView rowHeight]>30.0)||
                 [aCell setTextColor:[NSColor whiteColor]];
                 return;
             }
