@@ -1,0 +1,60 @@
+name: Release 1.0.5
+
+# one-off: publish nv27 1.0.5 as the v1.0.5 release, tagged at master's 1.0.5 merge commit (60c0994, PR #7), with the
+# app CI built from that commit (run 42736024808) and the "## 1.0.5" section of RELEASE_NOTES.md as its notes;
+# marked as the latest release, which the README's download link points to
+on:
+  push:
+    paths:
+      - .github/workflows/release-1.0.5.yml
+
+permissions:
+  actions: read
+  contents: write
+
+env:
+  RELEASE_SHA: 60c0994415aa5058341896b31b3ce553ef546810
+  BUILD_RUN: 42736024808
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get the app built from the release commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          test "$(gh run view "$BUILD_RUN" --json headSha --jq .headSha)" = "$RELEASE_SHA"
+          gh run download "$BUILD_RUN" --name nv27-arm64 --dir app
+          ls -la app
+          python3 - <<'EOF'
+          import plistlib, zipfile
+          with zipfile.ZipFile('app/nv27-arm64.zip') as z:
+              info = plistlib.loads(z.read('nv27.app/Contents/Info.plist'))
+          version = (info['CFBundleShortVersionString'], info['CFBundleVersion'])
+          print('app version', version)
+          assert version == ('1.0.5', '6'), version
+          EOF
+
+      - name: Release notes from RELEASE_NOTES.md
+        run: |
+          git show "$RELEASE_SHA:RELEASE_NOTES.md" | awk '/^## 1\.0\.5$/ {on=1; next} on && /^## / {exit} on' \
+            | sed 's#(README.markdown)#(https://github.com/fengypants/nv27/blob/v1.0.5/README.markdown)#' > notes.md
+          test -s notes.md
+          cat notes.md
+
+      - name: Publish v1.0.5
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release create v1.0.5 app/nv27-arm64.zip \
+            --target "$RELEASE_SHA" \
+            --title "nv27 1.0.5" \
+            --notes-file notes.md \
+            --latest
+          gh release view v1.0.5
