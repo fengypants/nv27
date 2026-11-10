@@ -449,6 +449,15 @@ static void PrintSnapshotOfWindow(NSWindow *aWindow, NSString *tag) {
 	SelfTestLog(@"arrow from search: typed \"Exc\" (list: %@) -> %@; down arrow -> %@; again -> %@", [listed componentsJoinedByString:@" | "],
 				afterTyping, afterFirst, [self _selfTestSelectionDescription]);
 	
+	//1c: ↑ in the search field moves the selection up and keeps focus there
+	[self searchForString:@""];
+	SelfTestSpin(0.3);
+	[notesTableView selectRowAndScroll:2];
+	[window makeFirstResponder:field];
+	SelfTestSpin(0.3);
+	[self _selfTestPostKey:NSUpArrowFunctionKey keyCode:126 flags:arrowFlags];
+	SelfTestLog(@"arrow from search: row 2 selected, up arrow in the search field -> %@", [self _selfTestSelectionDescription]);
+	
 	//2: nothing selected: the down arrow goes to the first note
 	[self searchForString:@""];
 	SelfTestSpin(0.3);

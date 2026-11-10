@@ -1192,6 +1192,15 @@ terminateApp:
 		if (command == @selector(deleteBackward:))
 			return NO;
 		
+		if (command == @selector(moveDown:) && [notesTableView numberOfRows] > 0) {
+			//↓ goes into the notes list: one row on from the selected note (typing a title's start selects that note,
+			//shown in the accent color), or the first note when none is; the list then has focus for ↑ ↓ and the rest
+			NSInteger row = [notesTableView selectedRow];
+			[notesTableView selectRowAndScroll:row < 0 ? 0 : MIN(row + 1, [notesTableView numberOfRows] - 1)];
+			[window makeFirstResponder:notesTableView];
+			return YES;
+		}
+		
 		if (command == @selector(moveDown:) || command == @selector(moveUp:) ||
 			//catch shift-up/down selection behavior
 			command == @selector(moveDownAndModifySelection:) ||
